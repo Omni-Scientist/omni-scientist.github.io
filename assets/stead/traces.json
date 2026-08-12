@@ -1,0 +1,18 @@
+{
+ "noise": {
+  "file": "seis_0001.npy",
+  "network": "AG",
+  "station": "LCAR",
+  "channel": "HH",
+  "label": "noise",
+  "png": "trace_noise.png"
+ },
+ "earthquake": {
+  "file": "seis_0000.npy",
+  "network": "NN",
+  "station": "COLR",
+  "channel": "HH",
+  "label": "earthquake",
+  "png": "trace_earthquake.png"
+ }
+}

@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" font-family="Noto Sans, Helvetica, Arial, sans-serif">
+<rect width="640" height="400" fill="#ffffff"/>
+<defs>
+<pattern id="h-green" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#488C3E" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-blue" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#3C78AA" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-pink" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#BE5064" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-purple" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#8C5FB9" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-teal" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2DAFA0" stroke-width="1.6" opacity="0.34"/></pattern>
+</defs>
+<text x="320.0" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#333333">Only the coincidence term finds them</text>
+<text x="320.0" y="50" text-anchor="middle" font-size="12" fill="#7C858F">fraction of 750 noise-labelled traces flagged, at a 1% false-alarm rate</text>
+<line x1="74" x2="614" y1="324.0" y2="324.0" stroke="#E3E6EA" stroke-width="1"/>
+<text x="64" y="328.0" text-anchor="end" font-size="12" fill="#7C858F">0.0</text>
+<line x1="74" x2="614" y1="231.1" y2="231.1" stroke="#E3E6EA" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="64" y="235.1" text-anchor="end" font-size="12" fill="#7C858F">0.1</text>
+<line x1="74" x2="614" y1="138.3" y2="138.3" stroke="#E3E6EA" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="64" y="142.3" text-anchor="end" font-size="12" fill="#7C858F">0.2</text>
+<line x1="74" x2="74" y1="324" y2="64" stroke="#9AA3AD" stroke-width="1"/>
+<text x="20" y="194.0" text-anchor="middle" font-size="12.5" fill="#7C858F" transform="rotate(-90 20 194.0)">fraction flagged</text>
+<rect x="125.0" y="122.2" width="78.0" height="201.8" rx="3" fill="#FCD8DE" stroke="#BE5064" stroke-width="1.8"/>
+<rect x="125.0" y="122.2" width="78.0" height="201.8" rx="3" fill="url(#h-pink)"/>
+<text x="164.0" y="113.2" text-anchor="middle" font-size="16" font-weight="700" fill="#BE5064">21.7%</text>
+<text x="164.0" y="345.0" text-anchor="middle" font-size="13" fill="#333333">Full score</text>
+<text x="164.0" y="360.0" text-anchor="middle" font-size="11" fill="#7C858F">amp x rect x plan x coinc</text>
+<rect x="305.0" y="305.4" width="78.0" height="18.6" rx="3" fill="#CDE6F8" stroke="#3C78AA" stroke-width="1.8"/>
+<rect x="305.0" y="305.4" width="78.0" height="18.6" rx="3" fill="url(#h-blue)"/>
+<text x="344.0" y="296.4" text-anchor="middle" font-size="16" font-weight="700" fill="#3C78AA">2.0%</text>
+<text x="344.0" y="345.0" text-anchor="middle" font-size="13" fill="#333333">Minus</text>
+<text x="344.0" y="360.0" text-anchor="middle" font-size="13" fill="#333333">coincidence</text>
+<rect x="485.0" y="305.4" width="78.0" height="18.6" rx="3" fill="#D0EECB" stroke="#488C3E" stroke-width="1.8"/>
+<rect x="485.0" y="305.4" width="78.0" height="18.6" rx="3" fill="url(#h-green)"/>
+<text x="524.0" y="296.4" text-anchor="middle" font-size="16" font-weight="700" fill="#488C3E">2.0%</text>
+<text x="524.0" y="345.0" text-anchor="middle" font-size="13" fill="#333333">Amplitude</text>
+<text x="524.0" y="360.0" text-anchor="middle" font-size="13" fill="#333333">only</text>
+</svg>

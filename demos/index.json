@@ -1,0 +1,68 @@
+[
+ {
+  "run": "stead_seismic",
+  "field": "Seismology",
+  "modality": "signal",
+  "dataset": "STEAD -- 1,500 three-component broadband seismograms",
+  "title": "Coherent Polarized Signals in a Substantial Fraction of Sampled Noise-Labeled STEAD Traces",
+  "question": "Within the STEAD three-component traces labeled 'noise' (no cataloged source), what fraction exhibit statistically anomalous, cross-component-coherent transient energy bursts -- with polarization and STA/LTA signatures resembling a genuine body-wave arrival rather than incoherent stationary background -- and does this prevalence differ systematically by channel/instrument type (BH/EH/HH/HN/SH) or network?",
+  "verdict": "mixed",
+  "counts": {
+   "steps": 80,
+   "perceive": 9,
+   "images": 9,
+   "search": 10,
+   "refs": 33,
+   "code": 36,
+   "reject": 3,
+   "sections": 7,
+   "figures": 7,
+   "figures_made": 26
+  },
+  "poster": "stead_seismic/poster.svg"
+ },
+ {
+  "run": "galaxy_xsurvey",
+  "field": "Astronomy",
+  "modality": "image",
+  "dataset": "DECaLS + SDSS -- 210 images of 105 shared galaxies",
+  "title": "Consistent Morphological Classifications from a General-Purpose Vision-Language Model Across Deep and Shallow Imaging of the Same Galaxies",
+  "question": "For the same galaxies imaged by both DECaLS (deep) and SDSS (shallow), does a general-purpose VLM's morphological classification accuracy drop specifically for SDSS relative to DECaLS, and -- among true spiral/edge_on galaxies -- do SDSS errors disproportionately collapse toward the featureless 'smooth' label compared to DECaLS errors on the identical objects?",
+  "verdict": "supported",
+  "counts": {
+   "steps": 42,
+   "perceive": 3,
+   "images": 12,
+   "search": 5,
+   "refs": 24,
+   "code": 11,
+   "reject": 3,
+   "sections": 7,
+   "figures": 5,
+   "figures_made": 8
+  },
+  "poster": "galaxy_xsurvey/poster.svg"
+ },
+ {
+  "run": "birdaudio",
+  "field": "Bioacoustics",
+  "modality": "audio",
+  "dataset": "freefield1010 -- 2,000 ten-second field recordings",
+  "title": "Reduced Discriminability of a Mid/High-Band Acoustic Bird-Presence Classifier Under Increasing Background Noise in freefield1010",
+  "question": "Within the freefield1010 benchmark, is the acoustic separability of the hasbird label (using simple, non-deep spectro-temporal features) uniform across recordings, or does it degrade systematically in clips with heavier low-frequency background masking energy (e.g., wind/traffic rumble), independent of the label itself?",
+  "verdict": "supported",
+  "counts": {
+   "steps": 85,
+   "perceive": 7,
+   "images": 7,
+   "search": 10,
+   "refs": 36,
+   "code": 25,
+   "reject": 6,
+   "sections": 5,
+   "figures": 4,
+   "figures_made": 6
+  },
+  "poster": "birdaudio/poster.svg"
+ }
+]

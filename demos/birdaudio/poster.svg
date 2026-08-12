@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" width="640" height="400" font-family="Noto Sans, Helvetica, Arial, sans-serif">
+<rect width="640" height="400" fill="#ffffff"/>
+<defs>
+<pattern id="h-green" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#488C3E" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-blue" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#3C78AA" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-pink" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#BE5064" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-purple" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#8C5FB9" stroke-width="1.6" opacity="0.34"/></pattern>
+<pattern id="h-teal" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#2DAFA0" stroke-width="1.6" opacity="0.34"/></pattern>
+</defs>
+<text x="320.0" y="30" text-anchor="middle" font-size="17" font-weight="700" fill="#333333">Noisier recordings, weaker label</text>
+<text x="320.0" y="50" text-anchor="middle" font-size="12" fill="#7C858F">out-of-fold AUC by low-frequency masking tertile, n = 2,000 clips</text>
+<line x1="74" x2="614" y1="324.0" y2="324.0" stroke="#E3E6EA" stroke-width="1"/>
+<text x="64" y="328.0" text-anchor="end" font-size="12" fill="#7C858F">0.00</text>
+<line x1="74" x2="614" y1="247.5" y2="247.5" stroke="#E3E6EA" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="64" y="251.5" text-anchor="end" font-size="12" fill="#7C858F">0.25</text>
+<line x1="74" x2="614" y1="171.1" y2="171.1" stroke="#E3E6EA" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="64" y="175.1" text-anchor="end" font-size="12" fill="#7C858F">0.50</text>
+<line x1="74" x2="614" y1="94.6" y2="94.6" stroke="#E3E6EA" stroke-width="1" stroke-dasharray="4 4"/>
+<text x="64" y="98.6" text-anchor="end" font-size="12" fill="#7C858F">0.75</text>
+<line x1="74" x2="74" y1="324" y2="64" stroke="#9AA3AD" stroke-width="1"/>
+<text x="20" y="194.0" text-anchor="middle" font-size="12.5" fill="#7C858F" transform="rotate(-90 20 194.0)">out-of-fold AUC</text>
+<rect x="125.0" y="99.9" width="78.0" height="224.1" rx="3" fill="#D0EECB" stroke="#488C3E" stroke-width="1.8"/>
+<rect x="125.0" y="99.9" width="78.0" height="224.1" rx="3" fill="url(#h-green)"/>
+<text x="164.0" y="90.9" text-anchor="middle" font-size="16" font-weight="700" fill="#488C3E">0.733</text>
+<text x="164.0" y="345.0" text-anchor="middle" font-size="13" fill="#333333">Quietest</text>
+<text x="164.0" y="360.0" text-anchor="middle" font-size="13" fill="#333333">third</text>
+<text x="164.0" y="375.0" text-anchor="middle" font-size="11" fill="#7C858F">n=667</text>
+<rect x="305.0" y="128.8" width="78.0" height="195.2" rx="3" fill="#CDE6F8" stroke="#3C78AA" stroke-width="1.8"/>
+<rect x="305.0" y="128.8" width="78.0" height="195.2" rx="3" fill="url(#h-blue)"/>
+<text x="344.0" y="119.8" text-anchor="middle" font-size="16" font-weight="700" fill="#3C78AA">0.638</text>
+<text x="344.0" y="345.0" text-anchor="middle" font-size="13" fill="#333333">Middle</text>
+<text x="344.0" y="360.0" text-anchor="middle" font-size="13" fill="#333333">third</text>
+<text x="344.0" y="375.0" text-anchor="middle" font-size="11" fill="#7C858F">n=666</text>
+<rect x="485.0" y="146.8" width="78.0" height="177.2" rx="3" fill="#FCD8DE" stroke="#BE5064" stroke-width="1.8"/>
+<rect x="485.0" y="146.8" width="78.0" height="177.2" rx="3" fill="url(#h-pink)"/>
+<text x="524.0" y="137.8" text-anchor="middle" font-size="16" font-weight="700" fill="#BE5064">0.579</text>
+<text x="524.0" y="345.0" text-anchor="middle" font-size="13" fill="#333333">Noisiest</text>
+<text x="524.0" y="360.0" text-anchor="middle" font-size="13" fill="#333333">third</text>
+<text x="524.0" y="375.0" text-anchor="middle" font-size="11" fill="#7C858F">n=667</text>
+<line x1="74" x2="614" y1="171.1" y2="171.1" stroke="#8A929B" stroke-width="1.5" stroke-dasharray="7 5"/>
+<text x="610" y="164.1" text-anchor="end" font-size="11.5" fill="#8A929B">chance</text>
+</svg>

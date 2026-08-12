@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One noise trace in five is not noise &middot; OmniScientist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&family=Caveat:wght@600&display=swap">
+<link rel="stylesheet" href="../assets/cloth.css">
+<link rel="stylesheet" href="finding.css">
+<script src="chart.js" defer></script>
+<style>
+  :root { --accent: var(--omni-sci); --accent-soft: rgba(24,72,120,.09); }
+</style>
+</head>
+<body class="cloth">
+
+<div class="top">
+  <a class="back" href="../index.html">&larr; <span class="mark">OmniScientist</span></a>
+</div>
+
+<div class="wrap">
+<article class="sheet">
+
+  <div class="eyebrow">
+    <span class="pill">Seismology &middot; signal</span>
+    <span class="pill soft">750 noise-labelled traces</span>
+    <span class="pill soft">3-component broadband</span>
+    <span class="pill soft">verdict: mixed</span>
+  </div>
+
+  <h1>One noise trace in five is not noise</h1>
+  <p class="stand">A catalogue says these 750 seismograms contain nothing. The system looked at the
+    raw waveforms and found real arrivals sitting in a fifth of them.</p>
+
+  <div class="bignum">
+    <div class="n bad">21.7%</div>
+    <div class="say"><b>163 of 750</b> traces that STEAD labels <em>noise</em> carry coherent,
+      polarised, cross-component transient bursts that are statistically indistinguishable from
+      genuine body-wave arrivals. 95% CI 18.8&ndash;24.9%; a station-cluster bootstrap, which
+      allows for several traces coming from the same station, gives 17.9&ndash;25.8%.
+      The system had guessed 5&ndash;15% before it looked.</div>
+  </div>
+
+  <h2><span class="step">1</span>The detector never sees a label</h2>
+  <p>The score is built from four ingredients measured on the raw three-component waveform:
+    <b>STA/LTA amplitude</b> (is there a burst?), <b>rectilinearity</b> and <b>planarity</b>
+    (does the ground move along a line or in a plane, the way a body wave makes it move, rather than
+    wandering?), and <b>cross-channel onset coincidence</b> (do the three components start moving at
+    the same instant?). No labels enter anywhere.</p>
+  <p>The threshold is not chosen by eye either. It is calibrated to a <b>1% false-alarm rate</b>
+    against IAAFT surrogates, synthetic traces built to match each real trace's amplitude
+    distribution and power spectrum while destroying its phase structure. Measured on those nulls
+    the realised false-alarm rate is <span class="num">1.07%</span>, so the calibration holds.</p>
+  <figure>
+    <img class="raw" src="stead/fig_main_score_distributions.png" alt="Anomaly-score histograms and ECDFs for noise traces, surrogate nulls and labelled earthquakes">
+    <figcaption>Score distributions for noise-labelled traces, the matched surrogate null, and
+      labelled earthquakes. The noise population has a tail the null does not.</figcaption>
+  </figure>
+
+  <h2><span class="step">2</span>It is the coincidence term doing the work</h2>
+  <p>Amplitude alone finds almost nothing. A naive amplitude-only STA/LTA detector at the same 1%
+    false-alarm rate flags just <span class="num">2.0%</span> of the same traces, an order of
+    magnitude less. And when the <b>coincidence term alone</b> is ablated out of the full score,
+    prevalence collapses straight back to <span class="num">2.0%</span>.</p>
+  <p>That single ablation is the load-bearing result: what separates these traces from background is
+    not that they are loud, it is that <b>three components start moving together</b>. Contrasts
+    between flagged and unflagged traces on onset spread, rectilinearity and planarity all land at
+    p&nbsp;&lt;&nbsp;10<sup>&minus;16</sup>.</p>
+  <div class="two">
+    <figure><div class="chart" id="c-abl"></div>
+      <figcaption>Take one ingredient out at a time. Only the coincidence term matters, and
+        without it the detector also stops finding real earthquakes.</figcaption></figure>
+    <figure><div class="chart" id="c-post"></div>
+      <figcaption>Where flagged traces sit inside the labelled-earthquake score distribution:
+        median percentile <b>77</b>.</figcaption></figure>
+  </div>
+  <figure><div class="chart" id="c-mech"></div>
+    <figcaption>Median rectilinearity and planarity, flagged against unflagged. Both are
+      dimensionless and share this axis; onset spread is kept off it because it is measured in
+      samples &mdash; there the medians are <b>21</b> against <b>2,304</b>, a hundredfold gap
+      (p&nbsp;=&nbsp;1.3&times;10<sup>&minus;84</sup>).</figcaption></figure>
+
+  <h2><span class="step">3</span>Its own hypothesis was wrong, and it said so</h2>
+  <p>Before running, the system pre-registered a guess: that short-period and accelerometer channels
+    (HN, EH, SH) would be the contaminated ones. <b>That was refuted.</b> Prevalence is
+    <em>lowest</em> on HN accelerometers at <span class="num">2.4%</span> and highest on the
+    broadband channels, <span class="num">29.1%</span> for HH and <span class="num">32.8%</span>
+    for BH.</p>
+  <p>Channel code is not the operative variable at all. Prevalence runs from <b>0% to 65% across
+    networks</b> (&chi;&sup2; p&nbsp;=&nbsp;3.5&times;10<sup>&minus;14</sup>), a stronger split than
+    channel type gives. The right reading is that this is a <b>site-specific noise environment</b>
+    effect, not an instrument-class effect. This is why the run's own verdict is recorded as
+    <em>mixed</em> rather than supported: the headline prevalence held, the mechanism guess did not.</p>
+  <div class="two">
+    <figure><div class="chart" id="c-chan"></div>
+      <figcaption>By instrument type. The pre-registered prediction is inverted.</figcaption></figure>
+    <figure><div class="chart" id="c-net"></div>
+      <figcaption>By network. Site identity separates the data far more sharply.</figcaption></figure>
+  </div>
+
+  <h2><span class="step">4</span>Does it survive being poked?</h2>
+  <p>The prevalence is stable across false-alarm rates from 0.1% to 5%, across <b>three independent
+    null models</b>, and across <b>four STA/LTA window settings</b>. The station-cluster bootstrap
+    confirms it is not an artefact of a handful of chatty stations.</p>
+  <figure><div class="chart" id="c-far"></div>
+    <figcaption>Prevalence against the false-alarm rate you demand, for three independent nulls.</figcaption></figure>
+
+  <h2><span class="step">5</span>Every number on this page</h2>
+  <table>
+    <tbody>
+      <tr class="hi"><td>Noise-labelled traces flagged as coherent arrivals</td><td class="n">21.7% (163/750)</td></tr>
+      <tr><td>95% confidence interval</td><td class="n">18.8 &ndash; 24.9%</td></tr>
+      <tr><td>Station-cluster bootstrap CI</td><td class="n">17.9 &ndash; 25.8%</td></tr>
+      <tr><td>Realised false-alarm rate on the null</td><td class="n">1.07%</td></tr>
+      <tr><td>Amplitude-only baseline, same false-alarm rate</td><td class="n">2.0%</td></tr>
+      <tr><td>Full score with the coincidence term removed</td><td class="n">2.0%</td></tr>
+      <tr><td>Prevalence on HN accelerometer channels</td><td class="n">2.4%</td></tr>
+      <tr><td>Prevalence on HH / BH broadband channels</td><td class="n">29.1% / 32.8%</td></tr>
+      <tr><td>Flagged traces' median percentile in the earthquake distribution</td><td class="n">77.1</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caveat">
+    <h3>What this does not show</h3>
+    <p>It does not show that the STEAD labels are wrong. A trace labelled <em>noise</em> means no
+      catalogued source, and a coherent local arrival too small to be catalogued is exactly what you
+      would expect to find in that category. The claim is about <b>what is present in the waveform</b>,
+      not about mislabelling. The system's own pre-registered hypothesis about instrument type was
+      also refuted, which is why the run is recorded as <em>mixed</em>; the site-level explanation
+      that replaced it was arrived at after seeing the breakdown, so it should be treated as a
+      hypothesis for a fresh dataset rather than as a tested result.</p>
+  </div>
+
+  <div class="prov">
+    <div><dt>Dataset</dt>STEAD, 60-second three-component broadband seismograms at 100&nbsp;Hz;
+      750 noise-labelled traces of a balanced 1,500-trace sample</div>
+    <div><dt>Run</dt><code class="mono">engine/examples/stead_seismic</code></div>
+    <div><dt>Paper title</dt>Coherent Polarized Signals in a Substantial Fraction of Sampled
+      Noise-Labeled STEAD Traces</div>
+    <div><dt>Figures</dt>Produced by the run itself, reproduced here unmodified</div>
+  </div>
+
+  <div class="cta2">
+    <a href="../replay.html?run=stead_seismic">Watch this run replayed step by step &rarr;</a>
+  </div>
+
+</article>
+</div>
+
+<script>
+/* All values copied from the run record in engine/examples/stead_seismic. */
+addEventListener('DOMContentLoaded', () => {
+  const { drawBars, drawLines } = window.Charts;
+  const pc = v => (v * 100).toFixed(1) + '%';
+
+  drawBars(document.getElementById('c-abl'), {
+    h: 320, yMax: 0.75, ticks: [0, 0.2, 0.4, 0.6], yLabel: 'fraction', yFmt: v => v.toFixed(1),
+    fmt: pc, maxBar: 30, tall: true,
+    series: [{ key: 'prev', label: 'Noise traces flagged', pal: 2 },
+             { key: 'eq',   label: 'Real earthquakes still detected', pal: 1 }],
+    rows: [
+      { label: 'Full\nscore',        prev: 0.2173, eq: 0.6533 },
+      { label: 'minus\npolarisation', prev: 0.2147, eq: 0.6427 },
+      { label: 'minus\nrectilinearity', prev: 0.2160, eq: 0.6493 },
+      { label: 'minus\nplanarity',   prev: 0.2160, eq: 0.6480 },
+      { label: 'minus\ncoincidence', prev: 0.0200, eq: 0.0653 },
+      { label: 'Amplitude\nonly',    prev: 0.0200, eq: 0.2693 },
+    ],
+  });
+
+  drawBars(document.getElementById('c-mech'), {
+    h: 270, yMax: 1.0, ticks: [0, 0.25, 0.5, 0.75, 1.0], yLabel: 'median value',
+    yFmt: v => v.toFixed(2), fmt: v => v.toFixed(2), maxBar: 52,
+    series: [{ key: 'f', label: 'Flagged', pal: 2 }, { key: 'u', label: 'Unflagged', pal: 1 }],
+    rows: [
+      { label: 'Rectilinearity',   f: 0.682, u: 0.445 },
+      { label: 'Planarity',        f: 0.876, u: 0.606 },
+    ],
+  });
+
+  drawBars(document.getElementById('c-chan'), {
+    h: 290, yMax: 0.40, ticks: [0, 0.1, 0.2, 0.3, 0.4], yLabel: 'fraction flagged',
+    yFmt: v => v.toFixed(1), fmt: pc, maxBar: 54, tall: true,
+    rows: [
+      { label: 'BH', sub: 'n=134', v: 0.3284, pal: 2 },
+      { label: 'HH', sub: 'n=320', v: 0.2906, pal: 2 },
+      { label: 'EH', sub: 'n=84',  v: 0.2381, pal: 1 },
+      { label: 'SH', sub: 'n=7',   v: 0.1429, pal: 1 },
+      { label: 'HN', sub: 'n=205', v: 0.0244, pal: 0 },
+    ],
+  });
+
+  drawBars(document.getElementById('c-net'), {
+    h: 300, yMax: 0.70, ticks: [0, 0.2, 0.4, 0.6], yLabel: 'fraction flagged',
+    yFmt: v => v.toFixed(1), fmt: pc, maxBar: 30, tall: true,
+    rows: [
+      { label: 'EC', sub: 'n=17',  v: 0.6471, pal: 2 }, { label: 'CI', sub: 'n=34', v: 0.3824, pal: 2 },
+      { label: 'IU', sub: 'n=20',  v: 0.3000, pal: 2 }, { label: 'TX', sub: 'n=48', v: 0.2917, pal: 2 },
+      { label: 'C1', sub: 'n=24',  v: 0.2917, pal: 2 }, { label: 'AV', sub: 'n=49', v: 0.2653, pal: 2 },
+      { label: 'CN', sub: 'n=35',  v: 0.1714, pal: 1 }, { label: 'TA', sub: 'n=18', v: 0.1667, pal: 1 },
+      { label: 'AU', sub: 'n=20',  v: 0.1500, pal: 1 }, { label: 'BK', sub: 'n=43', v: 0.0698, pal: 1 },
+      { label: 'NC', sub: 'n=156', v: 0.0192, pal: 0 }, { label: 'PB', sub: 'n=22', v: 0.0000, pal: 0 },
+      { label: 'NN', sub: 'n=18',  v: 0.0000, pal: 0 },
+    ],
+  });
+
+  drawLines(document.getElementById('c-far'), {
+    h: 300, yMax: 0.32, ticks: [0, 0.1, 0.2, 0.3], yLabel: 'prevalence in noise traces',
+    yFmt: v => v.toFixed(1),
+    x: ['0.1%', '0.5%', '1%', '2%', '5%'],
+    series: [
+      { label: 'IAAFT surrogate', v: [0.1373, 0.2027, 0.2173, 0.2240, 0.2533], pal: 4 },
+      { label: 'Phase randomised', v: [0.2040, 0.2120, 0.2227, 0.2440, 0.2747], pal: 3 },
+      { label: 'White noise',      v: [0.1960, 0.2160, 0.2173, 0.2400, 0.2733], pal: 1 },
+    ],
+  });
+
+  drawBars(document.getElementById('c-post'), {
+    h: 250, yMax: 100, ticks: [0, 25, 50, 75, 100], yLabel: 'percentile in earthquake scores',
+    yFmt: v => v, fmt: v => v.toFixed(1), maxBar: 74, ref: 50, refLabel: 'median earthquake',
+    rows: [{ label: 'Flagged noise traces', v: 77.1, pal: 2 }],
+  });
+});
+</script>
+</body>
+</html>

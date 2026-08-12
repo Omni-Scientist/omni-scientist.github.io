@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The metadata predicted the patient &middot; OmniScientist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&family=Caveat:wght@600&display=swap">
+<link rel="stylesheet" href="../assets/cloth.css">
+<link rel="stylesheet" href="finding.css">
+<script src="chart.js" defer></script>
+<style>
+  :root { --accent: var(--ochre); --accent-soft: rgba(207,139,58,.10); }
+</style>
+</head>
+<body class="cloth">
+
+<div class="top">
+  <a class="back" href="../index.html">&larr; <span class="mark">OmniScientist</span></a>
+</div>
+
+<div class="wrap">
+<article class="sheet">
+
+  <div class="eyebrow">
+    <span class="pill">Cardiology &middot; audio</span>
+    <span class="pill soft">2,000 phonocardiograms</span>
+    <span class="pill soft">6 cohorts</span>
+    <span class="pill soft">verdict: supported</span>
+  </div>
+
+  <h1>The metadata predicted the patient, until the site changed</h1>
+  <p class="stand">A model that never hears the heartbeat sorts normal from abnormal about as well
+    as the literature reports. Move it to an unseen cohort and it does worse than guessing.</p>
+
+  <div class="bignum">
+    <div class="n bad">0.596<small>Pooled 5-fold CV</small></div>
+    <div class="arrow">&rarr;</div>
+    <div class="n bad">0.347<small>Leave-one-cohort-out</small></div>
+    <div class="say">Both numbers come from the same metadata-only model: clip duration, RMS level,
+      spectral centroid, dominant frequency, zero-crossing rate. <b>No murmur information at all.</b>
+      0.347 is not merely useless, it is below chance: the ranking has inverted.</div>
+  </div>
+
+  <h2><span class="step">1</span>What it was given, and what it decided to ask</h2>
+  <p>The system received 2,000 single-channel heart-sound recordings at roughly 2&nbsp;kHz, each
+    labelled normal or abnormal and drawn from one of six cohorts collected at different sites and
+    under different conditions. Nothing else. It chose its own question: how much of the reported
+    normal-versus-abnormal separability in this corpus is carried by <b>non-physiological recording
+    bookkeeping</b> rather than by murmur-band energy, and does whichever signal drives it survive
+    when you hold out an entire cohort?</p>
+
+  <h2><span class="step">2</span>The metadata alone works, then collapses</h2>
+  <p>Under ordinary pooled 5-fold cross-validation the metadata-only model reaches
+    <span class="num">AUC 0.596</span>. Under strict leave-one-cohort-out validation it falls to
+    <span class="num">0.347</span>, a drop of <span class="num">0.248</span>
+    (bootstrap 95% CI 0.176 to 0.297, p&nbsp;&lt;&nbsp;0.0001, surviving Bonferroni correction across
+    11 tests at &alpha;&nbsp;=&nbsp;0.00455). The murmur-band model does not behave this way: it goes
+    from <span class="num">0.701</span> to <span class="num">0.656</span>, a drop of
+    <span class="num">0.045</span> that is not distinguishable from zero.</p>
+  <figure><div class="chart" id="c-primary"></div>
+    <figcaption>Pooled 5-fold CV against leave-one-cohort-out. The metadata bars cross the chance
+      line; the murmur bars barely move.</figcaption></figure>
+
+  <h2><span class="step">3</span>Why: the metadata is a name tag for the hospital</h2>
+  <p>The same five metadata features identify <b>which of the six cohorts</b> a recording came from
+    with <span class="num">87.2%</span> accuracy, against a <span class="num">16.7%</span> chance
+    baseline. And simply scoring every recording by the abnormal-prevalence of its <em>predicted</em>
+    cohort reproduces <span class="num">AUC 0.642</span>, which already exceeds the metadata model's
+    own pooled 0.596. An oracle that knows each cohort's true base rate reaches
+    <span class="num">0.766</span>. So the metadata model was never reading the patient. It was
+    reading the recording protocol, inferring the site, and quoting that site's base rate.</p>
+  <figure><div class="chart" id="c-confusion"></div>
+    <figcaption>Which cohort a recording came from, recovered from the five protocol numbers alone.
+      Rows are the true cohort, columns the predicted one; 87.2% land on the diagonal.</figcaption></figure>
+  <figure><div class="chart" id="c-mech"></div>
+    <figcaption>The chain metadata&nbsp;&rarr;&nbsp;cohort&nbsp;&rarr;&nbsp;base rate reproduces, and an
+      oracle exceeds, the metadata model's own pooled score.</figcaption></figure>
+
+  <h2><span class="step">4</span>The table that explains the whole thing</h2>
+  <p>These are the six cohorts' own averages, computed by the run. Read across a row and each site
+    has a recording signature: cohort&nbsp;b keeps clips down to <b>8 seconds</b> and records
+    <b>five times louder</b> than cohort&nbsp;d; cohort&nbsp;c runs <b>51 seconds</b>; cohort&nbsp;f's
+    microphone is <b>five times brighter</b> than cohort&nbsp;b's, with twelve times the zero-crossing
+    rate. Five numbers are more than enough to tell them apart.</p>
+  <p>Now read the second column. Abnormal prevalence runs from <b>9.8%</b> in cohort&nbsp;e to
+    <b>88.9%</b> in cohort&nbsp;c, a ninefold spread. Identify the site and you have already made
+    most of a diagnosis, without touching the heart.</p>
+  <table class="cohorts">
+    <thead><tr><th>Cohort</th><th class="n">n</th><th class="n">Abnormal</th><th class="n">Duration&nbsp;(s)</th>
+      <th class="n">RMS level</th><th class="n">Centroid&nbsp;(Hz)</th><th class="n">Dom.&nbsp;freq</th>
+      <th class="n">ZCR</th><th class="n">Held-out AUC</th></tr></thead>
+    <tbody>
+      <tr><td>training-a</td><td class="n">248</td><td class="n">69.4%</td><td class="n">32.6</td><td class="n">0.046</td><td class="n">124</td><td class="n">29.7</td><td class="n">0.050</td><td class="n">0.485</td></tr>
+      <tr><td>training-b</td><td class="n">296</td><td class="n">23.0%</td><td class="n mk">8.0</td><td class="n mk">0.221</td><td class="n">53</td><td class="n">0.21</td><td class="n">0.011</td><td class="n">0.519</td></tr>
+      <tr><td>training-c</td><td class="n">18</td><td class="n mk">88.9%</td><td class="n mk">50.9</td><td class="n">0.053</td><td class="n">82</td><td class="n">34.9</td><td class="n">0.042</td><td class="n">0.844</td></tr>
+      <tr><td>training-d</td><td class="n">34</td><td class="n">52.9%</td><td class="n">15.0</td><td class="n">0.033</td><td class="n">84</td><td class="n">24.5</td><td class="n">0.040</td><td class="n">0.608</td></tr>
+      <tr class="hi"><td>training-e</td><td class="n">1333</td><td class="n mk">9.8%</td><td class="n">23.2</td><td class="n">0.099</td><td class="n">116</td><td class="n">18.1</td><td class="n">0.071</td><td class="n">0.272</td></tr>
+      <tr><td>training-f</td><td class="n">71</td><td class="n">23.9%</td><td class="n">33.4</td><td class="n">0.087</td><td class="n mk">263</td><td class="n">59.2</td><td class="n mk">0.138</td><td class="n">0.315</td></tr>
+    </tbody>
+  </table>
+  <p>The last column is where the sub-chance number comes from. Cohort&nbsp;e alone is
+    <b>1,333 of the 2,000 recordings</b> and is the <em>least</em> abnormal cohort at 9.8%. A model
+    trained on the other five has learned that this recording profile belongs to sicker populations,
+    so on cohort&nbsp;e it ranks the wrong way round and scores <b>0.272</b>. Because cohort&nbsp;e
+    dominates the weighted average, the whole leave-one-cohort-out figure lands at 0.347, below
+    chance. The inversion is not a bug in the evaluation; it is the confound being read backwards.</p>
+
+  <h2><span class="step">5</span>The split runs through the features themselves</h2>
+  <p>An analysis of variance over each feature shows that the protocol statistics carry a far larger
+    fraction of between-cohort variance than the murmur-band feature does. All seven tests land at
+    p&nbsp;&lt;&nbsp;10<sup>&minus;30</sup>. Held out cohort by cohort the metadata model is wildly
+    unstable, from <span class="num">0.272</span> on the largest cohort to
+    <span class="num">0.844</span> on a cohort of only 18 recordings; the gap between the two models
+    is nonetheless stable across 10 independent cross-validation seeds and after dropping the two
+    smallest cohorts.</p>
+  <div class="two2">
+    <figure><div class="chart" id="c-var"></div>
+    <figcaption>Share of each feature's variance that lies between cohorts rather than within them.
+      The protocol statistics are site markers; the murmur features are not.</figcaption></figure>
+    <figure><div class="chart" id="c-breakdown"></div>
+    <figcaption>Held-out AUC cohort by cohort, with each cohort's size and abnormal prevalence.</figcaption></figure>
+  </div>
+
+  <h2><span class="step">6</span>Every number on this page</h2>
+  <table>
+    <thead><tr><th>Quantity</th><th class="n">Pooled</th><th class="n">Held out</th><th class="n">Drop</th></tr></thead>
+    <tbody>
+      <tr class="hi"><td>Metadata-only model &mdash; no murmur information</td><td class="n">0.596</td><td class="n">0.347</td><td class="n">0.248</td></tr>
+      <tr class="ok"><td>Murmur-band model (fill ratio, cycle length)</td><td class="n">0.701</td><td class="n">0.656</td><td class="n">0.045</td></tr>
+      <tr><td>Scoring by predicted-cohort prevalence</td><td class="n">0.642</td><td class="n">&mdash;</td><td class="n">&mdash;</td></tr>
+      <tr><td>Oracle cohort-prevalence predictor</td><td class="n">0.766</td><td class="n">&mdash;</td><td class="n">&mdash;</td></tr>
+      <tr><td>Cohort identity from metadata (chance 16.7%)</td><td class="n">87.2%</td><td class="n">&mdash;</td><td class="n">&mdash;</td></tr>
+    </tbody>
+  </table>
+
+  <div class="caveat">
+    <h3>What this does not show</h3>
+    <p>Eleven statistical tests were run, with Bonferroni correction at &alpha;&nbsp;=&nbsp;0.00455.
+      Two did not clear that bar. The murmur model's own drop is not distinguishable from zero
+      (p&nbsp;=&nbsp;0.287), which is consistent with the claim but is not independent evidence for it.
+      More importantly, the <b>direct paired comparison</b> between the metadata drop and the murmur
+      drop gives p&nbsp;=&nbsp;0.113. So "the murmur signal transfers better than the metadata signal"
+      should be read as directional rather than as a confirmed head-to-head difference. What is
+      firmly established is the metadata collapse itself, and the mechanism behind it.</p>
+  </div>
+
+  <div class="prov">
+    <div><dt>Dataset</dt>2,000 single-channel phonocardiograms, ~2&nbsp;kHz, six cohorts (a&ndash;f)
+      collected at different sites</div>
+    <div><dt>Run</dt><code class="mono">engine/examples/heartsound</code></div>
+    <div><dt>Paper title</dt>Recording-Protocol Metadata as a Confound in Phonocardiogram Abnormality
+      Classification</div>
+    <div><dt>Figures</dt>Produced by the run itself, reproduced here unmodified</div>
+  </div>
+
+  <div class="cta2">
+    <a href="../demos.html">See a run replayed step by step &rarr;</a>
+  </div>
+
+</article>
+</div>
+
+<script>
+/* Every number below is copied from the run record in engine/examples/heartsound.
+   Redrawn here only because the run's matplotlib output is not built for a screen. */
+addEventListener('DOMContentLoaded', () => {
+  const { drawBars, drawLines, drawMatrix } = window.Charts;
+  const auc = v => v.toFixed(3);
+
+  drawBars(document.getElementById('c-primary'), {
+    h: 300, yMax: 0.8, ticks: [0, 0.2, 0.4, 0.6, 0.8], yLabel: 'AUC (normal vs abnormal)',
+    yFmt: v => v.toFixed(1), fmt: auc, ref: 0.5, maxBar: 62,
+    series: [{ key: 'pooled', label: 'Pooled 5-fold CV', pal: 1 },
+             { key: 'loco',   label: 'Leave-one-cohort-out', pal: 2 }],
+    rows: [
+      { label: 'Metadata-only\n(duration, RMS, centroid, dom. freq, ZCR)', pooled: 0.596, loco: 0.347 },
+      { label: 'Murmur-band\n(fill ratio, cycle length)',                  pooled: 0.701, loco: 0.656 },
+    ],
+  });
+
+  drawMatrix(document.getElementById('c-confusion'), {
+    labels: ['training-a', 'training-b', 'training-c', 'training-d', 'training-e', 'training-f'],
+    xTitle: 'predicted cohort, from the five protocol numbers only',
+    rows: [[137, 0, 0, 0, 107, 4], [0, 296, 0, 0, 0, 0], [6, 0, 3, 4, 4, 1],
+           [2, 3, 0, 11, 18, 0], [55, 15, 1, 0, 1253, 9], [0, 0, 0, 0, 27, 44]],
+  });
+
+  drawBars(document.getElementById('c-mech'), {
+    h: 280, yMax: 0.8, ticks: [0, 0.2, 0.4, 0.6, 0.8], yLabel: 'AUC', yFmt: v => v.toFixed(1),
+    fmt: auc, ref: 0.5, maxBar: 70,
+    rows: [
+      { label: 'Metadata-only\n(pooled)',            v: 0.596, pal: 1 },
+      { label: 'Predicted-cohort\nprevalence only',  v: 0.642, pal: 3 },
+      { label: 'Cohort-prevalence\noracle',          v: 0.766, pal: 2 },
+    ],
+  });
+
+  drawBars(document.getElementById('c-var'), {
+    h: 290, yMax: 0.45, ticks: [0, 0.1, 0.2, 0.3, 0.4], yLabel: 'between-cohort variance share',
+    yFmt: v => v.toFixed(1), fmt: v => v.toFixed(3), maxBar: 46, tall: true,
+    rows: [
+      { label: 'duration',   v: 0.355, pal: 1 }, { label: 'RMS',       v: 0.363, pal: 1 },
+      { label: 'centroid',   v: 0.410, pal: 1 }, { label: 'dom. freq', v: 0.231, pal: 1 },
+      { label: 'ZCR',        v: 0.312, pal: 1 },
+      { label: 'fill ratio', v: 0.088, pal: 0 }, { label: 'cycle len', v: 0.078, pal: 0 },
+    ],
+  });
+
+  drawBars(document.getElementById('c-breakdown'), {
+    h: 320, yMax: 1.0, ticks: [0, 0.25, 0.5, 0.75, 1.0], yLabel: 'held-out AUC',
+    yFmt: v => v.toFixed(2), fmt: auc, ref: 0.5, maxBar: 34, tall: true,
+    series: [{ key: 'meta', label: 'Metadata-only', pal: 1 },
+             { key: 'murm', label: 'Murmur-band',   pal: 0 }],
+    rows: [
+      { label: 'a', sub: 'n=248 · 69%',  meta: 0.485, murm: 0.629 },
+      { label: 'b', sub: 'n=296 · 23%',  meta: 0.519, murm: 0.512 },
+      { label: 'c', sub: 'n=18 · 89%',   meta: 0.844, murm: 0.938 },
+      { label: 'd', sub: 'n=34 · 53%',   meta: 0.608, murm: 0.455 },
+      { label: 'e', sub: 'n=1333 · 10%', meta: 0.272, murm: 0.688 },
+      { label: 'f', sub: 'n=71 · 24%',   meta: 0.315, murm: 0.759 },
+    ],
+  });
+});
+</script>
+</body>
+</html>

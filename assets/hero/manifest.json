@@ -1,0 +1,936 @@
+[
+ {
+  "f": "galaxy_xsurvey_00.webp",
+  "mod": "image",
+  "disc": "Astronomy",
+  "src": "g000.png",
+  "case": "galaxy_xsurvey",
+  "verdict": "smooth/smooth OK"
+ },
+ {
+  "f": "galaxy_xsurvey_01.webp",
+  "mod": "image",
+  "disc": "Astronomy",
+  "src": "g035.png",
+  "case": "galaxy_xsurvey",
+  "verdict": "smooth/spiral X"
+ },
+ {
+  "f": "galaxy_xsurvey_02.webp",
+  "mod": "image",
+  "disc": "Astronomy",
+  "src": "g070.png",
+  "case": "galaxy_xsurvey",
+  "verdict": "edge_on/edge_on OK"
+ },
+ {
+  "f": "galaxy_xsurvey_03.webp",
+  "mod": "image",
+  "disc": "Astronomy",
+  "src": "g000.jpg",
+  "case": "galaxy_xsurvey",
+  "verdict": "smooth/smooth OK"
+ },
+ {
+  "f": "galaxy_xsurvey_04.webp",
+  "mod": "image",
+  "disc": "Astronomy",
+  "src": "g035.jpg",
+  "case": "galaxy_xsurvey",
+  "verdict": "spiral/spiral OK"
+ },
+ {
+  "f": "galaxy_xsurvey_05.webp",
+  "mod": "image",
+  "disc": "Astronomy",
+  "src": "g070.jpg",
+  "case": "galaxy_xsurvey",
+  "verdict": "edge_on/edge_on OK"
+ },
+ {
+  "f": "chestxray_00.webp",
+  "mod": "image",
+  "disc": "Radiology",
+  "src": "test_005216.png",
+  "case": "chestxray"
+ },
+ {
+  "f": "chestxray_01.webp",
+  "mod": "image",
+  "disc": "Radiology",
+  "src": "train_000400.png",
+  "case": "chestxray"
+ },
+ {
+  "f": "chestxray_02.webp",
+  "mod": "image",
+  "disc": "Radiology",
+  "src": "train_001397.png",
+  "case": "chestxray"
+ },
+ {
+  "f": "chestxray_03.webp",
+  "mod": "image",
+  "disc": "Radiology",
+  "src": "train_002323.png",
+  "case": "chestxray"
+ },
+ {
+  "f": "chestxray_04.webp",
+  "mod": "image",
+  "disc": "Radiology",
+  "src": "train_003299.png",
+  "case": "chestxray"
+ },
+ {
+  "f": "chestxray_05.webp",
+  "mod": "image",
+  "disc": "Radiology",
+  "src": "train_004252.png",
+  "case": "chestxray"
+ },
+ {
+  "f": "histopath_00.webp",
+  "mod": "image",
+  "disc": "Pathology",
+  "src": "mucosa_00.png",
+  "case": "histopath"
+ },
+ {
+  "f": "histopath_01.webp",
+  "mod": "image",
+  "disc": "Pathology",
+  "src": "mucosa_02.png",
+  "case": "histopath"
+ },
+ {
+  "f": "histopath_02.webp",
+  "mod": "image",
+  "disc": "Pathology",
+  "src": "mucosa_04.png",
+  "case": "histopath"
+ },
+ {
+  "f": "histopath_03.webp",
+  "mod": "image",
+  "disc": "Pathology",
+  "src": "mucosa_06.png",
+  "case": "histopath"
+ },
+ {
+  "f": "histopath_04.webp",
+  "mod": "image",
+  "disc": "Pathology",
+  "src": "tumor_00.png",
+  "case": "histopath"
+ },
+ {
+  "f": "histopath_05.webp",
+  "mod": "image",
+  "disc": "Pathology",
+  "src": "tumor_02.png",
+  "case": "histopath"
+ },
+ {
+  "f": "nffa_sem_00.webp",
+  "mod": "image",
+  "disc": "Materials science",
+  "src": "L0_0038707665fc59f16025e8c29b158d90.jpg",
+  "case": "nffa_sem"
+ },
+ {
+  "f": "nffa_sem_01.webp",
+  "mod": "image",
+  "disc": "Materials science",
+  "src": "L1_efcc9394d829bced11c716256d2e1191.jpg",
+  "case": "nffa_sem"
+ },
+ {
+  "f": "nffa_sem_02.webp",
+  "mod": "image",
+  "disc": "Materials science",
+  "src": "L3_90b565abe29e61e246ef57d99048ec70.jpg",
+  "case": "nffa_sem"
+ },
+ {
+  "f": "nffa_sem_03.webp",
+  "mod": "image",
+  "disc": "Materials science",
+  "src": "L5_0851776002e1cf0e5e053b65dc0c65e1.jpg",
+  "case": "nffa_sem"
+ },
+ {
+  "f": "nffa_sem_04.webp",
+  "mod": "image",
+  "disc": "Materials science",
+  "src": "L6_75a82867a7f4922e6f55805317e610bd.jpg",
+  "case": "nffa_sem"
+ },
+ {
+  "f": "nffa_sem_05.webp",
+  "mod": "image",
+  "disc": "Materials science",
+  "src": "L7_fb0efcafce9da6a9493c2459cde2430c.jpg",
+  "case": "nffa_sem"
+ },
+ {
+  "f": "plantvillage_00.webp",
+  "mod": "image",
+  "disc": "Plant pathology",
+  "src": "pv_00000.png",
+  "case": "plantvillage"
+ },
+ {
+  "f": "plantvillage_01.webp",
+  "mod": "image",
+  "disc": "Plant pathology",
+  "src": "pv_00500.png",
+  "case": "plantvillage"
+ },
+ {
+  "f": "plantvillage_02.webp",
+  "mod": "image",
+  "disc": "Plant pathology",
+  "src": "pv_01000.png",
+  "case": "plantvillage"
+ },
+ {
+  "f": "plantvillage_03.webp",
+  "mod": "image",
+  "disc": "Plant pathology",
+  "src": "pv_01500.png",
+  "case": "plantvillage"
+ },
+ {
+  "f": "plantvillage_04.webp",
+  "mod": "image",
+  "disc": "Plant pathology",
+  "src": "pv_02000.png",
+  "case": "plantvillage"
+ },
+ {
+  "f": "plantvillage_05.webp",
+  "mod": "image",
+  "disc": "Plant pathology",
+  "src": "pv_02500.png",
+  "case": "plantvillage"
+ },
+ {
+  "f": "whoi_plankton_00.webp",
+  "mod": "image",
+  "disc": "Marine ecology",
+  "src": "Amphidinium_sp_2479.png",
+  "case": "whoi_plankton"
+ },
+ {
+  "f": "whoi_plankton_01.webp",
+  "mod": "image",
+  "disc": "Marine ecology",
+  "src": "Corethron_1450.png",
+  "case": "whoi_plankton"
+ },
+ {
+  "f": "whoi_plankton_02.webp",
+  "mod": "image",
+  "disc": "Marine ecology",
+  "src": "Dinobryon_2604.png",
+  "case": "whoi_plankton"
+ },
+ {
+  "f": "whoi_plankton_03.webp",
+  "mod": "image",
+  "disc": "Marine ecology",
+  "src": "Leptocylindrus_1399.png",
+  "case": "whoi_plankton"
+ },
+ {
+  "f": "whoi_plankton_04.webp",
+  "mod": "image",
+  "disc": "Marine ecology",
+  "src": "Skeletonema_2321.png",
+  "case": "whoi_plankton"
+ },
+ {
+  "f": "whoi_plankton_05.webp",
+  "mod": "image",
+  "disc": "Marine ecology",
+  "src": "detritus_0076.png",
+  "case": "whoi_plankton"
+ },
+ {
+  "f": "eurosat_demo_00.webp",
+  "mod": "image",
+  "disc": "Remote sensing",
+  "src": "AnnualCrop_000.png",
+  "case": "eurosat_demo"
+ },
+ {
+  "f": "eurosat_demo_01.webp",
+  "mod": "image",
+  "disc": "Remote sensing",
+  "src": "Forest_333.png",
+  "case": "eurosat_demo"
+ },
+ {
+  "f": "eurosat_demo_02.webp",
+  "mod": "image",
+  "disc": "Remote sensing",
+  "src": "Highway_166.png",
+  "case": "eurosat_demo"
+ },
+ {
+  "f": "eurosat_demo_03.webp",
+  "mod": "image",
+  "disc": "Remote sensing",
+  "src": "IndustrialBuildings_499.png",
+  "case": "eurosat_demo"
+ },
+ {
+  "f": "eurosat_demo_04.webp",
+  "mod": "image",
+  "disc": "Remote sensing",
+  "src": "PermanentCrop_332.png",
+  "case": "eurosat_demo"
+ },
+ {
+  "f": "eurosat_demo_05.webp",
+  "mod": "image",
+  "disc": "Remote sensing",
+  "src": "River_165.png",
+  "case": "eurosat_demo"
+ },
+ {
+  "f": "calms21_00.webp",
+  "mod": "image",
+  "disc": "Ethology",
+  "src": "v000_00001.jpg",
+  "case": "calms21"
+ },
+ {
+  "f": "calms21_01.webp",
+  "mod": "image",
+  "disc": "Ethology",
+  "src": "v000_00574.jpg",
+  "case": "calms21"
+ },
+ {
+  "f": "calms21_02.webp",
+  "mod": "image",
+  "disc": "Ethology",
+  "src": "v000_01180.jpg",
+  "case": "calms21"
+ },
+ {
+  "f": "calms21_03.webp",
+  "mod": "image",
+  "disc": "Ethology",
+  "src": "v000_01764.jpg",
+  "case": "calms21"
+ },
+ {
+  "f": "calms21_04.webp",
+  "mod": "image",
+  "disc": "Ethology",
+  "src": "v002_00473.jpg",
+  "case": "calms21"
+ },
+ {
+  "f": "calms21_05.webp",
+  "mod": "image",
+  "disc": "Ethology",
+  "src": "v004_00591.jpg",
+  "case": "calms21"
+ },
+ {
+  "f": "comma2k19_00.webp",
+  "mod": "image",
+  "disc": "Autonomous driving",
+  "src": "seg000_00007.jpg",
+  "case": "comma2k19"
+ },
+ {
+  "f": "comma2k19_01.webp",
+  "mod": "image",
+  "disc": "Autonomous driving",
+  "src": "seg008_00241.jpg",
+  "case": "comma2k19"
+ },
+ {
+  "f": "comma2k19_02.webp",
+  "mod": "image",
+  "disc": "Autonomous driving",
+  "src": "seg018_00001.jpg",
+  "case": "comma2k19"
+ },
+ {
+  "f": "comma2k19_03.webp",
+  "mod": "image",
+  "disc": "Autonomous driving",
+  "src": "seg026_00074.jpg",
+  "case": "comma2k19"
+ },
+ {
+  "f": "comma2k19_04.webp",
+  "mod": "image",
+  "disc": "Autonomous driving",
+  "src": "seg034_00250.jpg",
+  "case": "comma2k19"
+ },
+ {
+  "f": "comma2k19_05.webp",
+  "mod": "image",
+  "disc": "Autonomous driving",
+  "src": "seg042_00341.jpg",
+  "case": "comma2k19"
+ },
+ {
+  "f": "whale_audio_00.webp",
+  "mod": "audio",
+  "disc": "Marine bioacoustics",
+  "src": "0000.wav",
+  "case": "whale_audio"
+ },
+ {
+  "f": "whale_audio_01.webp",
+  "mod": "audio",
+  "disc": "Marine bioacoustics",
+  "src": "0424.wav",
+  "case": "whale_audio"
+ },
+ {
+  "f": "whale_audio_02.webp",
+  "mod": "audio",
+  "disc": "Marine bioacoustics",
+  "src": "0848.wav",
+  "case": "whale_audio"
+ },
+ {
+  "f": "whale_audio_03.webp",
+  "mod": "audio",
+  "disc": "Marine bioacoustics",
+  "src": "1272.wav",
+  "case": "whale_audio"
+ },
+ {
+  "f": "birdaudio_00.webp",
+  "mod": "audio",
+  "disc": "Bioacoustics",
+  "src": "100263.wav",
+  "case": "birdaudio"
+ },
+ {
+  "f": "birdaudio_01.webp",
+  "mod": "audio",
+  "disc": "Bioacoustics",
+  "src": "146691.wav",
+  "case": "birdaudio"
+ },
+ {
+  "f": "birdaudio_02.webp",
+  "mod": "audio",
+  "disc": "Bioacoustics",
+  "src": "18525.wav",
+  "case": "birdaudio"
+ },
+ {
+  "f": "birdaudio_03.webp",
+  "mod": "audio",
+  "disc": "Bioacoustics",
+  "src": "57735.wav",
+  "case": "birdaudio"
+ },
+ {
+  "f": "heartsound_00.webp",
+  "mod": "audio",
+  "disc": "Cardiology",
+  "src": "a0003.wav",
+  "case": "heartsound"
+ },
+ {
+  "f": "heartsound_01.webp",
+  "mod": "audio",
+  "disc": "Cardiology",
+  "src": "b0412.wav",
+  "case": "heartsound"
+ },
+ {
+  "f": "heartsound_02.webp",
+  "mod": "audio",
+  "disc": "Cardiology",
+  "src": "e00652.wav",
+  "case": "heartsound"
+ },
+ {
+  "f": "heartsound_03.webp",
+  "mod": "audio",
+  "disc": "Cardiology",
+  "src": "e01447.wav",
+  "case": "heartsound"
+ },
+ {
+  "f": "machine_sound_00.webp",
+  "mod": "audio",
+  "disc": "Machine diagnostics",
+  "src": "slider_id00_anomaly_test_00000000.wav",
+  "case": "machine_sound"
+ },
+ {
+  "f": "machine_sound_01.webp",
+  "mod": "audio",
+  "disc": "Machine diagnostics",
+  "src": "slider_id02_normal_train_00000931.wav",
+  "case": "machine_sound"
+ },
+ {
+  "f": "machine_sound_02.webp",
+  "mod": "audio",
+  "disc": "Machine diagnostics",
+  "src": "valve_id00_anomaly_test_00000013.wav",
+  "case": "machine_sound"
+ },
+ {
+  "f": "machine_sound_03.webp",
+  "mod": "audio",
+  "disc": "Machine diagnostics",
+  "src": "valve_id04_anomaly_test_00000006.wav",
+  "case": "machine_sound"
+ },
+ {
+  "f": "stead_seismic_00.webp",
+  "mod": "signal",
+  "disc": "Seismology",
+  "src": "seis_0000.npy",
+  "case": "stead_seismic"
+ },
+ {
+  "f": "stead_seismic_01.webp",
+  "mod": "signal",
+  "disc": "Seismology",
+  "src": "seis_0375.npy",
+  "case": "stead_seismic"
+ },
+ {
+  "f": "stead_seismic_02.webp",
+  "mod": "signal",
+  "disc": "Seismology",
+  "src": "seis_0750.npy",
+  "case": "stead_seismic"
+ },
+ {
+  "f": "stead_seismic_03.webp",
+  "mod": "signal",
+  "disc": "Seismology",
+  "src": "seis_1125.npy",
+  "case": "stead_seismic"
+ },
+ {
+  "f": "gwosc_gw_00.webp",
+  "mod": "signal",
+  "disc": "Gravitational waves",
+  "src": "strain_0000.npy",
+  "case": "gwosc_gw"
+ },
+ {
+  "f": "gwosc_gw_01.webp",
+  "mod": "signal",
+  "disc": "Gravitational waves",
+  "src": "strain_0375.npy",
+  "case": "gwosc_gw"
+ },
+ {
+  "f": "gwosc_gw_02.webp",
+  "mod": "signal",
+  "disc": "Gravitational waves",
+  "src": "strain_0750.npy",
+  "case": "gwosc_gw"
+ },
+ {
+  "f": "gwosc_gw_03.webp",
+  "mod": "signal",
+  "disc": "Gravitational waves",
+  "src": "strain_1125.npy",
+  "case": "gwosc_gw"
+ },
+ {
+  "f": "sleepedf_00.webp",
+  "mod": "signal",
+  "disc": "Sleep medicine",
+  "src": "SC4001E0_ep103.npy",
+  "case": "sleepedf"
+ },
+ {
+  "f": "sleepedf_01.webp",
+  "mod": "signal",
+  "disc": "Sleep medicine",
+  "src": "SC4051E0_ep029.npy",
+  "case": "sleepedf"
+ },
+ {
+  "f": "sleepedf_02.webp",
+  "mod": "signal",
+  "disc": "Sleep medicine",
+  "src": "SC4101E0_ep039.npy",
+  "case": "sleepedf"
+ },
+ {
+  "f": "sleepedf_03.webp",
+  "mod": "signal",
+  "disc": "Sleep medicine",
+  "src": "SC4152E0_ep010.npy",
+  "case": "sleepedf"
+ },
+ {
+  "f": "rruff_raman_00.webp",
+  "mod": "signal",
+  "disc": "Mineralogy",
+  "src": "Abhurite__R060227__Raman__532______Raman_Data_Processed__0ffb340f1f86044a5495110ef799.npy",
+  "case": "rruff_raman"
+ },
+ {
+  "f": "rruff_raman_01.webp",
+  "mod": "signal",
+  "disc": "Mineralogy",
+  "src": "Crocoite__R040053__Raman__514______Raman_Data_Processed__70c4aa159d7da0b3e4456f7a6692.npy",
+  "case": "rruff_raman"
+ },
+ {
+  "f": "rruff_raman_02.webp",
+  "mod": "signal",
+  "disc": "Mineralogy",
+  "src": "Kalsilite__R060801__Raman__780______Raman_Data_Processed__2e54b4df16c815ff70bd4da4f456.npy",
+  "case": "rruff_raman"
+ },
+ {
+  "f": "rruff_raman_03.webp",
+  "mod": "signal",
+  "disc": "Mineralogy",
+  "src": "Quintinite__R070709__Raman__532______Raman_Data_Processed__6357f7d7bf09cbd3556c64dbd192.npy",
+  "case": "rruff_raman"
+ },
+ {
+  "f": "hyperspectral_00.webp",
+  "mod": "signal",
+  "disc": "Hyperspectral sensing",
+  "src": "spectrum_0000.npy",
+  "case": "hyperspectral"
+ },
+ {
+  "f": "hyperspectral_01.webp",
+  "mod": "signal",
+  "disc": "Hyperspectral sensing",
+  "src": "spectrum_0500.npy",
+  "case": "hyperspectral"
+ },
+ {
+  "f": "hyperspectral_02.webp",
+  "mod": "signal",
+  "disc": "Hyperspectral sensing",
+  "src": "spectrum_1000.npy",
+  "case": "hyperspectral"
+ },
+ {
+  "f": "hyperspectral_03.webp",
+  "mod": "signal",
+  "disc": "Hyperspectral sensing",
+  "src": "spectrum_1500.npy",
+  "case": "hyperspectral"
+ },
+ {
+  "f": "rock_ct_00.webp",
+  "mod": "3d",
+  "disc": "Digital rock physics",
+  "src": "berea_000.npy",
+  "case": "rock_ct"
+ },
+ {
+  "f": "rock_ct_01.webp",
+  "mod": "3d",
+  "disc": "Digital rock physics",
+  "src": "c1_000.npy",
+  "case": "rock_ct"
+ },
+ {
+  "f": "rock_ct_02.webp",
+  "mod": "3d",
+  "disc": "Digital rock physics",
+  "src": "c2_000.npy",
+  "case": "rock_ct"
+ },
+ {
+  "f": "med_ct3d_00.webp",
+  "mod": "3d",
+  "disc": "Medical imaging",
+  "src": "fracture_0000.npy",
+  "case": "med_ct3d"
+ },
+ {
+  "f": "med_ct3d_01.webp",
+  "mod": "3d",
+  "disc": "Medical imaging",
+  "src": "fracture_0498.npy",
+  "case": "med_ct3d"
+ },
+ {
+  "f": "med_ct3d_02.webp",
+  "mod": "3d",
+  "disc": "Medical imaging",
+  "src": "nodule_0495.npy",
+  "case": "med_ct3d"
+ },
+ {
+  "f": "mcb_cad_00.webp",
+  "mod": "3d",
+  "disc": "Mechanical CAD",
+  "src": "bearing__test_00055046.xyz",
+  "case": "mcb_cad"
+ },
+ {
+  "f": "mcb_cad_01.webp",
+  "mod": "3d",
+  "disc": "Mechanical CAD",
+  "src": "gear__train_00055190.xyz",
+  "case": "mcb_cad"
+ },
+ {
+  "f": "mcb_cad_02.webp",
+  "mod": "3d",
+  "disc": "Mechanical CAD",
+  "src": "pulley__train_00066306.xyz",
+  "case": "mcb_cad"
+ },
+ {
+  "f": "plant_pheno3d_00.webp",
+  "mod": "3d",
+  "disc": "Plant phenotyping",
+  "src": "M01_0313_a.xyz",
+  "case": "plant_pheno3d"
+ },
+ {
+  "f": "plant_pheno3d_01.webp",
+  "mod": "3d",
+  "disc": "Plant phenotyping",
+  "src": "M07_0316.xyz",
+  "case": "plant_pheno3d"
+ },
+ {
+  "f": "plant_pheno3d_02.webp",
+  "mod": "3d",
+  "disc": "Plant phenotyping",
+  "src": "T04_0310.xyz",
+  "case": "plant_pheno3d"
+ },
+ {
+  "f": "semantickitti_00.webp",
+  "mod": "3d",
+  "disc": "LiDAR perception",
+  "src": "00_000006.xyz",
+  "case": "semantickitti"
+ },
+ {
+  "f": "semantickitti_01.webp",
+  "mod": "3d",
+  "disc": "LiDAR perception",
+  "src": "00_003475.xyz",
+  "case": "semantickitti"
+ },
+ {
+  "f": "semantickitti_02.webp",
+  "mod": "3d",
+  "disc": "LiDAR perception",
+  "src": "02_001152.xyz",
+  "case": "semantickitti"
+ },
+ {
+  "f": "cell_video_00.webp",
+  "mod": "video",
+  "disc": "Cell biology",
+  "src": "hela_01_r000_c000_w0.mp4",
+  "case": "cell_video"
+ },
+ {
+  "f": "cell_video_01.webp",
+  "mod": "video",
+  "disc": "Cell biology",
+  "src": "hela_02_r000_c768_w52.mp4",
+  "case": "cell_video"
+ },
+ {
+  "f": "cell_video_02.webp",
+  "mod": "video",
+  "disc": "Cell biology",
+  "src": "psc_01_r128_c384_w60.mp4",
+  "case": "cell_video"
+ },
+ {
+  "f": "fish_sonar_video_00.webp",
+  "mod": "video",
+  "disc": "Fisheries",
+  "src": "elwha__Elwha_2018_OM_ARIS_2018_07_09_2018-07-09_190000_490_941.mp4",
+  "case": "fish_sonar_video"
+ },
+ {
+  "f": "fish_sonar_video_01.webp",
+  "mod": "video",
+  "disc": "Fisheries",
+  "src": "kenai-rightbank__2018-05-26-JD146_RightFar_Stratum1_Set1_RO_2018-05-26_050004_3642_3842.mp4",
+  "case": "fish_sonar_video"
+ },
+ {
+  "f": "fish_sonar_video_02.webp",
+  "mod": "video",
+  "disc": "Fisheries",
+  "src": "kenai-val__2018-06-03-JD154_LeftFar_Stratum1_Set1_LO_2018-06-03_020004_3240_3840.mp4",
+  "case": "fish_sonar_video"
+ },
+ {
+  "f": "storm_radar_video_00.webp",
+  "mod": "video",
+  "disc": "Atmospheric science",
+  "src": "sevir_S824719.mp4",
+  "case": "storm_radar_video"
+ },
+ {
+  "f": "storm_radar_video_01.webp",
+  "mod": "video",
+  "disc": "Atmospheric science",
+  "src": "sevir_S843930.mp4",
+  "case": "storm_radar_video"
+ },
+ {
+  "f": "storm_radar_video_02.webp",
+  "mod": "video",
+  "disc": "Atmospheric science",
+  "src": "sevir_S850881.mp4",
+  "case": "storm_radar_video"
+ },
+ {
+  "f": "animal_track_00.webp",
+  "mod": "trace",
+  "disc": "Movement ecology",
+  "src": "stork_90962B.json",
+  "case": "animal_track",
+  "labels": {
+   "species": "Ciconia ciconia"
+  }
+ },
+ {
+  "f": "animal_track_01.webp",
+  "mod": "trace",
+  "disc": "Movement ecology",
+  "src": "stork_93412A.json",
+  "case": "animal_track",
+  "labels": {
+   "species": "Ciconia ciconia"
+  }
+ },
+ {
+  "f": "animal_track_02.webp",
+  "mod": "trace",
+  "disc": "Movement ecology",
+  "src": "stork_77195A.json",
+  "case": "animal_track",
+  "labels": {
+   "species": "Ciconia ciconia"
+  }
+ },
+ {
+  "f": "storm_track_00.webp",
+  "mod": "trace",
+  "disc": "Tropical cyclones",
+  "src": "AL041956.json",
+  "case": "storm_track",
+  "labels": {
+   "name": "CARLA",
+   "season": "1956",
+   "basin": "AL"
+  }
+ },
+ {
+  "f": "storm_track_01.webp",
+  "mod": "trace",
+  "disc": "Tropical cyclones",
+  "src": "AL021963.json",
+  "case": "storm_track",
+  "labels": {
+   "name": "BEULAH",
+   "season": "1963",
+   "basin": "AL"
+  }
+ },
+ {
+  "f": "storm_track_02.webp",
+  "mod": "trace",
+  "disc": "Tropical cyclones",
+  "src": "AL122011.json",
+  "case": "storm_track",
+  "labels": {
+   "name": "KATIA",
+   "season": "2011",
+   "basin": "AL"
+  }
+ },
+ {
+  "f": "vehicle_track_00.webp",
+  "mod": "trace",
+  "disc": "Transportation",
+  "src": "veh_2289_154.json",
+  "case": "vehicle_track",
+  "labels": {
+   "road": "us-101",
+   "v_class": "2"
+  }
+ },
+ {
+  "f": "vehicle_track_01.webp",
+  "mod": "trace",
+  "disc": "Transportation",
+  "src": "veh_1208_48.json",
+  "case": "vehicle_track",
+  "labels": {
+   "road": "us-101",
+   "v_class": "2"
+  }
+ },
+ {
+  "f": "supercon_00.webp",
+  "mod": "table",
+  "disc": "Materials informatics",
+  "src": "train.csv",
+  "case": "supercon"
+ },
+ {
+  "f": "supercon_01.webp",
+  "mod": "table",
+  "disc": "Materials informatics",
+  "src": "unique_m.csv",
+  "case": "supercon"
+ },
+ {
+  "f": "feynman_00.webp",
+  "mod": "formula",
+  "disc": "Symbolic physics",
+  "src": "I.12.1_newton_F.csv",
+  "case": "feynman"
+ },
+ {
+  "f": "feynman_01.webp",
+  "mod": "formula",
+  "disc": "Symbolic physics",
+  "src": "I.14.4_spring.csv",
+  "case": "feynman"
+ },
+ {
+  "f": "feynman_02.webp",
+  "mod": "formula",
+  "disc": "Symbolic physics",
+  "src": "I.34.8_cyclotron.csv",
+  "case": "feynman"
+ },
+ {
+  "f": "dna_00.webp",
+  "mod": "sequence",
+  "disc": "Regulatory genomics",
+  "src": "dna.csv",
+  "case": "dna"
+ }
+]

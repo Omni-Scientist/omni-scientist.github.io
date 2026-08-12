@@ -1,0 +1,57 @@
+/* the ground: a fine grey graph-paper mesh, measured off the reference rather than guessed.
+   Sampled numbers it reproduces:
+     cell interior  #f5f6f6      grid pitch 42px
+     over one line  #e3e3e4      -> a 1px line at ~8.5% of a cool dark grey
+     at a crossing  #d1d1d3      -> which is exactly two of those layers multiplied
+   Scattered slightly darker cells sit UNDER the mesh, the way they do on the reference,
+   and come from two SVG tiles of coprime size (420 and 294) so the eye never finds the repeat.
+   Shared by index.html, demos.html and replay.html: one definition, no second copy. */
+
+:root {
+  --ink: #2b3540;
+  --ink-2: #4a5764;
+  --dim: #74838f;
+  --soft: 0 10px 30px rgba(63,86,110,.14);
+  --omni-o: #ef476f; --omni-m: #f28e2b; --omni-n: #00a890;
+  --omni-i: #934bed; --omni-sci: #184878;
+
+  /* the accent set the deck uses. They live here, not only in index.html's :root,
+     because any page loading cloth.css may reach for them -- and an undefined var
+     inside a background or color makes the whole declaration invalid, which shows up
+     as an element that silently disappears rather than as an error. */
+  --sky-blue: #3f7fb3; --leaf: #4c8a5c; --ochre: #cf8b3a;
+  --clay: #c0584e; --plum: #7a5aa6; --teal: #2f8a86;
+
+  --mesh-base: #f4f5f7;
+  --mesh-line: rgba(42,50,64,.085);   /* one layer; crossings multiply on their own */
+  --mesh-dot:  rgba(42,50,64,.045);
+  --mesh-pitch: 42px;
+}
+
+/* The mesh lives on its own fixed layer rather than on `background-attachment: fixed`.
+   Six stacked gradients repainted every scroll frame is what made the deck feel sticky;
+   as a fixed pseudo-element the browser composites it once and scrolling never touches it. */
+.cloth { background-color: var(--mesh-base); position: relative; }
+.cloth::before {
+  content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background-color: var(--mesh-base);
+  background-image:
+    /* 1. the mesh itself, on top */
+    repeating-linear-gradient(90deg, var(--mesh-line) 0 1px, transparent 1px var(--mesh-pitch)),
+    repeating-linear-gradient(0deg,  var(--mesh-line) 0 1px, transparent 1px var(--mesh-pitch)),
+    /* 2. a finer dotted texture at half the pitch, barely there */
+    radial-gradient(circle at 0 0, var(--mesh-dot) .8px, transparent .9px),
+    /* 3. the scattered cells, underneath the mesh */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Cg fill='%23767e8f' fill-opacity='.055'%3E%3Crect x='42' y='0' width='42' height='42'/%3E%3Crect x='210' y='42' width='42' height='42'/%3E%3Crect x='336' y='84' width='42' height='42'/%3E%3Crect x='168' y='126' width='84' height='84'/%3E%3Crect x='0' y='168' width='42' height='42'/%3E%3Crect x='294' y='252' width='42' height='42'/%3E%3Crect x='126' y='294' width='42' height='42'/%3E%3Crect x='378' y='336' width='42' height='42'/%3E%3Crect x='84' y='378' width='42' height='42'/%3E%3C/g%3E%3C/svg%3E"),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='294' height='294'%3E%3Cg fill='%23767e8f' fill-opacity='.038'%3E%3Crect x='126' y='0' width='42' height='42'/%3E%3Crect x='0' y='84' width='42' height='42'/%3E%3Crect x='252' y='126' width='42' height='42'/%3E%3Crect x='84' y='210' width='42' height='42'/%3E%3Crect x='210' y='252' width='42' height='42'/%3E%3C/g%3E%3C/svg%3E"),
+    /* 4. light pooling toward the middle, so the mesh recedes behind the words */
+    radial-gradient(ellipse 76% 62% at 50% 40%, #fbfbfc 0%, rgba(251,251,252,.55) 42%, rgba(244,245,247,0) 78%);
+  background-size:
+    auto, auto,
+    21px 21px,
+    420px 420px,
+    294px 294px,
+    auto;
+}
+
+* { box-sizing: border-box; }

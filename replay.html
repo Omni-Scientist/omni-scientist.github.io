@@ -1,0 +1,934 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Replay &middot; OmniScientist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&family=Caveat:wght@600&display=swap">
+<link rel="stylesheet" href="assets/cloth.css">
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { font-family: "Noto Sans", system-ui, sans-serif; color: var(--ink);
+         display: flex; flex-direction: column; overflow: hidden; }
+  a { color: inherit; }
+  code, pre, .mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+
+  /* ---------------- chrome ---------------- */
+  .top {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 18px;
+    padding: 12px 22px; font-size: .84rem;
+    background: rgba(255,255,255,.86); border-bottom: 1px solid rgba(63,96,124,.16);
+    backdrop-filter: blur(6px);
+  }
+  .top a.back { text-decoration: none; color: var(--ink-2); white-space: nowrap; }
+  .top a.back:hover { color: var(--ink); }
+  .top .mark { font-family: "Noto Serif", Georgia, serif; font-weight: 700; color: var(--ink); }
+  .top .runtitle { font-family: "Noto Serif", Georgia, serif; font-weight: 600;
+                   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .top .runpick { margin-left: auto; display: flex; gap: 6px; }
+  .top .runpick a {
+    text-decoration: none; font-size: .74rem; padding: 5px 12px; border-radius: 999px;
+    border: 1px solid rgba(63,96,124,.22); color: var(--ink-2); background: rgba(255,255,255,.6);
+  }
+  .top .runpick a.on { background: var(--omni-sci); color: #fbfdff; border-color: var(--omni-sci); }
+
+  .stage { flex: 1 1 auto; display: grid; grid-template-columns: 280px minmax(0,1fr) 380px;
+           gap: 0; min-height: 0; }
+
+  /* --stage is repainted on every stage change, so rail, banner, cards and panel
+     all shift colour together; the three acts should never be mistaken for each other */
+  :root { --stage: #00a890; --stage-soft: rgba(0,168,144,.10); }
+
+  /* ---------------- left rail: the pipeline ---------------- */
+  .rail { border-right: 1px solid rgba(63,96,124,.16); padding: 18px 16px; overflow-y: auto;
+          background: rgba(255,255,255,.62); }
+  .railhead { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+  .stg {
+    position: relative; margin-top: 12px; padding: 12px 13px; border-radius: 13px; cursor: pointer;
+    border: 1px solid rgba(63,96,124,.16); background: rgba(255,255,255,.5); transition: all .25s;
+  }
+  .stg:hover { background: #fff; }
+  /* the live stage is a filled block in its own colour, not a slightly darker border */
+  .stg.on {
+    border-color: transparent; background: var(--sc);
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--sc) 40%, transparent);
+  }
+  .stg.on .n, .stg.on .b { color: rgba(255,255,255,.82); }
+  .stg.on .t { color: #fff; }
+  .stg.on .chk { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.45); color: #fff; }
+  .stg.on .chk i { background: #fff; }
+  .stg.done { opacity: .6; }
+  .stg.done .n::after { content: " · done"; }
+  .stg .n { font-size: .62rem; letter-spacing: .16em; text-transform: uppercase; color: var(--dim); }
+  .stg .t { font-family: "Noto Serif", Georgia, serif; font-weight: 600; font-size: 1rem; margin-top: 3px;
+            display: flex; align-items: center; gap: 8px; }
+  .stg .t i { width: 9px; height: 9px; border-radius: 50%; background: var(--sc); font-style: normal; flex: 0 0 auto; }
+  .stg.on .t i { background: #fff; }
+  .stg .b { font-size: .74rem; line-height: 1.55; color: var(--ink-2); margin-top: 6px; }
+  .stg .chk {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 9px;
+    font-size: .68rem; padding: 3px 9px; border-radius: 999px;
+    border: 1px solid rgba(63,96,124,.22); color: var(--dim); background: rgba(63,96,124,.05);
+  }
+  .stg .chk i { width: 7px; height: 7px; border-radius: 50%; background: rgba(116,131,143,.5); font-style: normal; }
+  .stg .chk.rej { color: var(--omni-o); border-color: rgba(239,71,111,.42); background: rgba(239,71,111,.08); }
+  .stg .chk.rej i { background: var(--omni-o); }
+  .stg .chk.pass { color: #1b7f5c; border-color: rgba(27,127,92,.42); background: rgba(27,127,92,.08); }
+  .stg .chk.pass i { background: #1b7f5c; }
+  .tally { margin-top: 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 9px 6px; }
+  .tally div { font-size: .6rem; letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+  .tally b { display: block; font-family: "Noto Serif", Georgia, serif; font-size: 1.22rem;
+             color: var(--ink); letter-spacing: 0; text-transform: none; }
+
+  /* ---------------- middle: the stream ----------------
+     the cloth stays visible at the edges, but the reading column gets a calm
+     wash so forty cards of code and prose are not fighting a tartan */
+  /* no scroll-behavior here on purpose: it would turn every scrollTo into a smooth
+     animation, including the instant jumps the scrubber needs. JS asks per call. */
+  .stream {
+    overflow-y: auto; padding: 26px 34px 40vh; position: relative;
+    background:
+      linear-gradient(90deg, rgba(252,252,253,0) 0, rgba(252,252,253,.90) 7%,
+                             rgba(252,252,253,.94) 93%, rgba(252,252,253,0) 100%);
+  }
+  .stream::-webkit-scrollbar { width: 9px; }
+  .stream::-webkit-scrollbar-thumb { background: rgba(63,96,124,.22); border-radius: 9px; }
+
+  /* a full-width act break, so you always know which of the three you are watching */
+  .banner {
+    max-width: 980px; margin: 26px auto 18px; padding: 15px 20px; border-radius: 14px;
+    opacity: 0; transition: opacity .35s;   /* space is reserved so nothing reflows mid-replay */
+    background: linear-gradient(100deg, var(--sc), color-mix(in srgb, var(--sc) 62%, #ffffff));
+    color: #fff; display: flex; align-items: center; gap: 16px;
+    box-shadow: 0 10px 26px color-mix(in srgb, var(--sc) 34%, transparent);
+  }
+  .banner.vis { opacity: 1; }
+  .banner .no {
+    font-family: "Noto Serif", Georgia, serif; font-size: 2.1rem; font-weight: 700;
+    line-height: 1; opacity: .55; flex: 0 0 auto;
+  }
+  .banner .tt { font-family: "Noto Serif", Georgia, serif; font-size: 1.22rem; font-weight: 600; }
+  .banner .bb { font-size: .78rem; line-height: 1.5; opacity: .88; margin-top: 3px; }
+  .banner .gate-name {
+    margin-left: auto; flex: 0 0 auto; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.2);
+    border: 1px solid rgba(255,255,255,.42);
+  }
+
+  .step { max-width: 980px; margin: 0 auto 16px; opacity: 0; transition: opacity .3s; }
+  .step.vis { opacity: 1; }
+  .step.now .card { box-shadow: 0 8px 26px rgba(63,86,110,.17); }
+  .card {
+    background: rgba(255,255,255,.97); border: 1px solid rgba(63,96,124,.17);
+    border-left: 5px solid rgba(63,96,124,.3); border-radius: 12px; padding: 13px 16px;
+    transition: box-shadow .3s;
+  }
+  /* the head is a tinted band in the step's own colour, so kinds read from across the room */
+  .hd {
+    display: flex; align-items: center; gap: 9px; font-size: .82rem; font-weight: 700;
+    margin: -13px -16px 0; padding: 9px 16px; border-radius: 7px 7px 0 0;
+    background: var(--kind-soft, rgba(63,96,124,.07)); color: var(--kind, var(--ink));
+  }
+  .hd .ico { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center;
+             font-size: .66rem; font-weight: 700; color: #fff; flex: 0 0 auto;
+             background: var(--kind, var(--dim)); }
+  .card > *:nth-child(2) { margin-top: 11px; }
+  .hd .tool { margin-left: auto; font-size: .66rem; color: var(--dim); font-weight: 400; }
+  .txt { font-size: .845rem; line-height: 1.72; color: var(--ink-2); margin-top: 8px;
+         white-space: pre-wrap; word-break: break-word; }
+  .ask { font-size: .8rem; line-height: 1.6; color: var(--ink); margin-top: 8px;
+         padding: 7px 11px; border-radius: 8px; background: rgba(63,96,124,.06); font-style: italic; }
+  .think { font-family: "Caveat", cursive; font-size: 1.06rem; line-height: 1.5; color: var(--dim);
+           margin-top: 7px; white-space: pre-wrap; }
+
+  /* one saturated colour per kind, set once and used by border, head band and icon */
+  .step.perceive { --kind: #00a890; --kind-soft: rgba(0,168,144,.14); }
+  .step.search   { --kind: #7c3aed; --kind-soft: rgba(124,58,237,.13); }
+  .step.code     { --kind: #184878; --kind-soft: rgba(24,72,120,.12); }
+  .step.measure  { --kind: #0f766e; --kind-soft: rgba(15,118,110,.13); }
+  .step.finalize { --kind: #d97706; --kind-soft: rgba(217,119,6,.15); }
+  .step.task     { --kind: #1f2937; --kind-soft: rgba(31,41,55,.10); }
+  .step.write    { --kind: #b45309; --kind-soft: rgba(180,83,9,.13); }
+  .step.think    { --kind: #64748b; --kind-soft: rgba(100,116,139,.11); }
+  .step.brief, .step.materials { --kind: #64748b; --kind-soft: rgba(100,116,139,.09); }
+  .step .card { border-left-color: var(--kind, rgba(63,96,124,.3)); }
+  /* a dataset dump is reference material, not a scene: give it a box, not the screen */
+  .step.materials .txt {
+    max-height: 260px; overflow: auto; font-family: ui-monospace, Menlo, monospace;
+    font-size: .73rem; line-height: 1.6; background: rgba(32,39,51,.05);
+    border: 1px solid rgba(63,96,124,.16); border-radius: 10px; padding: 10px 13px;
+  }
+
+  .gate { padding: 12px 16px; border-radius: 12px;
+          font-size: .84rem; line-height: 1.6; display: flex; gap: 11px; align-items: flex-start; }
+  .step.gate { display: none; }            /* .step sets the width and the reveal */
+  .step.gate.vis { display: flex; }
+  .gate b { display: block; font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
+  .gate.rej { background: rgba(239,71,111,.11); border: 1px solid rgba(239,71,111,.4); color: #8c1e3c; }
+  .gate.pass { background: rgba(27,127,92,.11); border: 1px solid rgba(27,127,92,.4); color: #14603f; }
+  .gate .sym { font-size: 1.1rem; line-height: 1.2; }
+
+  pre.code {
+    background: #202733; color: #e6edf5; border-radius: 10px; padding: 12px 14px; margin: 9px 0 0;
+    font-size: .735rem; line-height: 1.62; overflow-x: auto; white-space: pre; max-height: 340px;
+  }
+  pre.out {
+    background: rgba(32,39,51,.055); border: 1px solid rgba(63,96,124,.16); border-radius: 10px;
+    padding: 10px 13px; margin: 9px 0 0; font-size: .73rem; line-height: 1.6;
+    overflow-x: auto; white-space: pre-wrap; max-height: 260px; color: var(--ink-2);
+  }
+  .refs { margin: 9px 0 0; display: grid; gap: 7px; }
+  .ref { padding: 8px 11px; border-radius: 9px; background: rgba(147,75,237,.055);
+         border: 1px solid rgba(147,75,237,.18); font-size: .78rem; line-height: 1.5;
+         opacity: 0; transform: translateY(4px); transition: opacity .3s, transform .3s; }
+  .ref.on { opacity: 1; transform: none; }
+  .ref .t { font-weight: 600; color: var(--ink); }
+  .ref .m { color: var(--dim); font-size: .71rem; margin-top: 2px; }
+  .fields { margin: 9px 0 0; display: grid; gap: 8px; }
+  .fld { font-size: .8rem; line-height: 1.62; }
+  .fld .k { font-size: .64rem; letter-spacing: .12em; text-transform: uppercase; color: var(--omni-m); }
+  .fld .v { color: var(--ink-2); white-space: pre-wrap; }
+
+  .made { display: flex; gap: 9px; flex-wrap: wrap; margin-top: 10px; }
+  .made figure { margin: 0; width: 132px; opacity: 0; transform: scale(.96);
+                 transition: opacity .4s, transform .4s; }
+  .made figure.on { opacity: 1; transform: none; }
+  .made img { width: 100%; height: auto; border-radius: 7px; border: 1px solid rgba(63,96,124,.18); display: block;
+              background: #fff; }
+  .made figcaption { font-size: .6rem; color: var(--dim); margin-top: 4px; }
+  .made figure.dropped img { filter: grayscale(1); opacity: .55; }
+  .made figure.dropped figcaption { color: var(--omni-o); }
+
+  /* the closing card */
+  .final { max-width: 980px; margin: 22px auto 0; padding: 22px 24px; border-radius: 16px;
+           background: rgba(255,255,255,.97); border: 1px solid rgba(63,96,124,.22);
+           box-shadow: var(--soft); }
+  .final .k { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--dim); }
+  .final h2 { font-family: "Noto Serif", Georgia, serif; font-size: 1.24rem; line-height: 1.45;
+              margin: 8px 0 0; font-weight: 600; }
+  .final p { font-size: .84rem; line-height: 1.75; color: var(--ink-2); margin: 12px 0 0; }
+  .dl { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .dl a { text-decoration: none; padding: 10px 18px; border-radius: 999px; font-size: .82rem;
+          border: 1px solid rgba(63,96,124,.24); background: #fff; color: var(--ink); }
+  .dl a.primary { background: var(--omni-sci); color: #fbfdff; border-color: var(--omni-sci); }
+  .dl a:hover { transform: translateY(-1px); }
+  .verdict { display: inline-block; margin-top: 12px; font-size: .7rem; letter-spacing: .12em;
+             text-transform: uppercase; padding: 4px 11px; border-radius: 999px;
+             border: 1px solid currentColor; }
+
+  /* ---------------- right: what it is looking at ---------------- */
+  .panel { border-left: 1px solid rgba(63,96,124,.16); padding: 18px 16px; overflow-y: auto;
+           background: rgba(255,255,255,.62); }
+  .panel h3 { font-size: .62rem; letter-spacing: .18em; text-transform: uppercase; color: var(--dim);
+              margin: 0 0 10px; font-weight: 500; }
+  .panel .slot { min-height: 90px; }
+
+  /* every step of the live stage, clickable: the small moves are yours to drive too */
+  .substeps { max-height: 32vh; overflow-y: auto; margin: -2px -4px 0; padding: 0 4px; }
+  .substeps::-webkit-scrollbar { width: 6px; }
+  .substeps::-webkit-scrollbar-thumb { background: rgba(63,96,124,.2); border-radius: 6px; }
+  .sub {
+    display: flex; align-items: center; gap: 8px; width: 100%; text-align: left;
+    padding: 6px 9px; margin-bottom: 3px; border-radius: 8px; cursor: pointer;
+    border: 1px solid transparent; background: transparent; font: inherit;
+    font-size: .745rem; color: var(--ink-2); line-height: 1.35;
+  }
+  .sub:hover { background: rgba(63,96,124,.07); }
+  .sub .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--kc, var(--dim));
+              flex: 0 0 auto; opacity: .38; }
+  .sub .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sub .nn { margin-left: auto; font-size: .64rem; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .sub.past { color: var(--ink); }
+  .sub.past .dot { opacity: 1; }
+  .sub.now {
+    background: var(--stage-soft); border-color: var(--stage); color: var(--ink); font-weight: 600;
+  }
+  .sub.now .dot { opacity: 1; box-shadow: 0 0 0 3px color-mix(in srgb, var(--kc, var(--stage)) 26%, transparent); }
+  .sub.rej { color: var(--omni-o); }
+  .sub.rej .dot { background: var(--omni-o); opacity: 1; }
+  .evc { margin-bottom: 12px; opacity: 0; transition: opacity .45s; }
+  .evc.on { opacity: 1; }
+  .evc img { width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(63,96,124,.2);
+             background: #fff; display: block; }
+  .evc figcaption { font-size: .66rem; color: var(--dim); margin-top: 5px; line-height: 1.5; }
+  .idle { font-size: .76rem; color: var(--dim); line-height: 1.7; font-style: italic; }
+  .panel .sep { height: 1px; background: rgba(63,96,124,.15); margin: 18px 0; }
+
+  /* ---------------- transport ---------------- */
+  .bar {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 14px; padding: 11px 22px;
+    background: rgba(255,255,255,.92); border-top: 1px solid rgba(63,96,124,.18);
+    backdrop-filter: blur(6px);
+  }
+  .bar button {
+    border: 1px solid rgba(63,96,124,.22); background: #fff; color: var(--ink); cursor: pointer;
+    border-radius: 999px; padding: 0; width: 34px; height: 34px; display: grid; place-items: center;
+    font-size: .82rem; transition: background .16s, transform .16s;
+  }
+  .bar button:hover { background: #f2f6fa; transform: translateY(-1px); }
+  .bar button.play { width: 42px; height: 42px; background: var(--omni-sci); color: #fbfdff;
+                     border-color: var(--omni-sci); font-size: .95rem; }
+  .scrub { flex: 1 1 auto; position: relative; height: 34px; display: flex; align-items: center; }
+  .scrub .track { position: absolute; left: 0; right: 0; height: 6px; border-radius: 6px;
+                  background: rgba(63,96,124,.16); overflow: hidden; }
+  .scrub .fill { height: 100%; width: 0; background: linear-gradient(90deg, var(--omni-n), var(--omni-sci)); }
+  /* one tick per stage boundary and one per rejection, so the shape of the run is visible */
+  .scrub .ticks { position: absolute; left: 0; right: 0; height: 16px; pointer-events: none; }
+  .scrub .ticks i { position: absolute; top: 0; width: 2px; height: 16px; border-radius: 2px;
+                    background: rgba(63,96,124,.35); transform: translateX(-1px); }
+  .scrub .ticks i.rej { background: var(--omni-o); }
+  .scrub input {
+    position: absolute; left: 0; right: 0; width: 100%; margin: 0; appearance: none;
+    background: transparent; height: 34px; cursor: pointer;
+  }
+  .scrub input::-webkit-slider-thumb {
+    appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff;
+    border: 2px solid var(--omni-sci); box-shadow: 0 2px 6px rgba(0,0,0,.2); cursor: grab;
+  }
+  .scrub input::-moz-range-thumb {
+    width: 14px; height: 14px; border-radius: 50%; background: #fff;
+    border: 2px solid var(--omni-sci); cursor: grab;
+  }
+  .clock { font-size: .74rem; color: var(--ink-2); white-space: nowrap;
+           font-variant-numeric: tabular-nums; min-width: 128px; text-align: right; }
+  .spd { display: flex; gap: 3px; }
+  .spd button { width: auto; padding: 0 10px; height: 28px; font-size: .72rem; }
+  .spd button.on { background: var(--omni-sci); color: #fbfdff; border-color: var(--omni-sci); }
+
+  /* the big one: a video-player transport, parked centre-right, so the state of the
+     replay is readable from across the room and one click starts or stops it */
+  .bigplay {
+    position: fixed; right: 400px; top: 50%; transform: translateY(-50%); z-index: 30;
+    width: 96px; height: 96px; border-radius: 50%; cursor: pointer; padding: 0;
+    display: grid; place-items: center; border: 0;
+    background: color-mix(in srgb, var(--stage) 92%, #000);
+    box-shadow: 0 14px 40px color-mix(in srgb, var(--stage) 46%, transparent);
+    transition: transform .2s, opacity .35s, background .3s, box-shadow .2s;
+  }
+  .bigplay:hover { transform: translateY(-50%) scale(1.07); }
+  .bigplay:active { transform: translateY(-50%) scale(.96); }
+  .bigplay svg { width: 40px; height: 40px; fill: #fff; }
+  .bigplay .pausebars { display: none; }
+  /* while it runs the button steps back, so it never sits on top of the reading */
+  .bigplay.running { opacity: .16; }
+  .bigplay.running:hover { opacity: .95; }
+  .bigplay.running .playtri { display: none; }
+  .bigplay.running .pausebars { display: block; }
+  /* a ring breathes outward while it plays: the page is visibly alive */
+  .bigplay::after {
+    content: ""; position: absolute; inset: -6px; border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--stage) 55%, transparent); opacity: 0;
+  }
+  .bigplay.running::after { animation: pulse 2.4s ease-out infinite; }
+  @keyframes pulse {
+    0%   { opacity: .75; transform: scale(1); }
+    100% { opacity: 0;   transform: scale(1.34); }
+  }
+  @media (max-width: 1180px) { .bigplay { right: 26px; width: 76px; height: 76px; } }
+
+  /* appears only once the reader has scrolled away from the live step */
+  .follow {
+    position: fixed; left: 50%; bottom: 86px; transform: translate(-50%, 14px);
+    z-index: 28; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+    padding: 9px 18px; border-radius: 999px; border: 1px solid rgba(63,96,124,.2);
+    background: rgba(255,255,255,.96); color: var(--ink); font: inherit; font-size: .8rem;
+    font-weight: 600; box-shadow: 0 8px 24px rgba(63,86,110,.22);
+    opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s;
+    backdrop-filter: blur(6px);
+  }
+  .follow.on { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+  .follow .ar {
+    width: 17px; height: 17px; border-radius: 50%; background: var(--stage); color: #fff;
+    display: grid; place-items: center; font-size: .62rem; line-height: 1;
+  }
+
+  .loading { display: grid; place-items: center; height: 100%; color: var(--dim); font-size: .9rem; }
+
+  @media (max-width: 1180px) {
+    .stage { grid-template-columns: 210px minmax(0,1fr); }
+    .panel { display: none; }
+  }
+  @media (max-width: 820px) {
+    .stage { grid-template-columns: 1fr; }
+    .rail { display: none; }
+    .clock { min-width: 0; font-size: .68rem; }
+  }
+</style>
+</head>
+<body class="cloth">
+
+<div class="top">
+  <a class="back" href="demos.html">&larr; Demos</a>
+  <span class="runtitle" id="runtitle"></span>
+  <span class="runpick" id="runpick"></span>
+</div>
+
+<div class="stage">
+  <aside class="rail">
+    <div class="railhead">Pipeline</div>
+    <div id="stages"></div>
+    <div class="sep" style="height:1px;background:rgba(63,96,124,.15);margin:18px 0"></div>
+    <div class="railhead">This run</div>
+    <div class="tally" id="tally"></div>
+  </aside>
+
+  <section class="stream" id="stream"><div class="loading">loading the run&hellip;</div></section>
+
+  <aside class="panel">
+    <h3><span id="substephead">Steps in this stage</span></h3>
+    <div class="substeps" id="substeps"></div>
+    <div class="sep"></div>
+    <h3>What it is looking at</h3>
+    <div class="slot" id="evslot"><p class="idle">The evidence the system opened appears here, exactly as it was rendered for the perception layer.</p></div>
+    <div class="sep"></div>
+    <h3>Figures produced</h3>
+    <div class="slot" id="figslot"><p class="idle">None yet.</p></div>
+  </aside>
+</div>
+
+<button class="follow" id="follow" title="jump back to the live step">
+  <span class="ar">&#9660;</span>Follow the replay
+</button>
+
+<button class="bigplay" id="bigplay" title="play / pause (space)" aria-label="play or pause">
+  <svg viewBox="0 0 40 40" aria-hidden="true">
+    <!-- a soft rounded triangle, drawn with arcs at the corners rather than sharp points -->
+    <path class="playtri" d="M14.6 8.4c-1.9-1.1-4.3.3-4.3 2.5v18.2c0 2.2 2.4 3.6 4.3 2.5l15.8-9.1c1.9-1.1 1.9-3.9 0-5z"/>
+    <g class="pausebars">
+      <rect x="11" y="9" width="6.4" height="22" rx="3.2"/>
+      <rect x="22.6" y="9" width="6.4" height="22" rx="3.2"/>
+    </g>
+  </svg>
+</button>
+
+<div class="bar">
+  <button id="bStart" title="back to the start (Home)">&#8676;</button>
+  <button id="bPrev" title="previous step (&larr;)">&#8249;</button>
+  <button class="play" id="bPlay" title="play / pause (space)">&#9654;</button>
+  <button id="bNext" title="next step (&rarr;)">&#8250;</button>
+  <div class="scrub">
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="ticks" id="ticks"></div>
+    <input type="range" id="scrub" min="0" max="10000" value="0" step="1" aria-label="progress">
+  </div>
+  <div class="spd" id="spd">
+    <button data-s="0.5">0.5&times;</button><button data-s="1" class="on">1&times;</button>
+    <button data-s="2">2&times;</button><button data-s="4">4&times;</button>
+  </div>
+  <div class="clock" id="clock">0:00 / 0:00</div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  const RUNS = ['stead_seismic', 'galaxy_xsurvey', 'birdaudio'];
+  const run = new URLSearchParams(location.search).get('run') || RUNS[0];
+  const BASE = 'demos/' + run + '/';
+
+  const ICON = { brief: 'sys', task: 'ask', think: '~', materials: '#', perceive: '眼',
+                 measure: 'fx', search: 'lit', code: '>_', finalize: '!', write: 'W' };
+  // one colour per act, and one per kind; both are used by the rail, the stream and the panel
+  const STAGE_COLOR = { ideation: '#00a890', experiment: '#184878', writeup: '#d97706' };
+  const STAGE_SOFT  = { ideation: 'rgba(0,168,144,.12)', experiment: 'rgba(24,72,120,.10)',
+                        writeup: 'rgba(217,119,6,.12)' };
+  const KIND_COLOR = { perceive: '#00a890', search: '#7c3aed', code: '#184878', measure: '#0f766e',
+                       finalize: '#d97706', task: '#1f2937', write: '#b45309', think: '#64748b',
+                       brief: '#64748b', materials: '#64748b',
+                       gate_reject: '#ef476f', gate_pass: '#1b7f5c', output: '#184878' };
+  const SHORT = { brief: 'Role brief', task: 'The request', think: 'Thinking',
+                  materials: 'Inspect the data', perceive: 'Look at the evidence',
+                  measure: 'Measure features', search: 'Search the literature',
+                  code: 'Run code', finalize: 'Commit', write: 'Write section',
+                  gate_reject: 'Sent back', gate_pass: 'Check passed', output: 'The manuscript' };
+  const $ = id => document.getElementById(id);
+  // quotes matter: this text also goes into data-full="...", where an unescaped
+  // double quote would close the attribute and silently cut the rest away
+  // width/height come from the build so the browser reserves the right box before
+  // the file arrives; without this, images landing late shift the column under the reader
+  const wh = o => (o && o.wh) ? ` width="${o.wh[0]}" height="${o.wh[1]}"` : '';
+  // a redrawn figure keeps its filename, so only a changed URL gets past the cache
+  const bust = o => (o && o.v) ? '?v=' + o.v : '';
+  const esc = s => String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+  const stream = $('stream');
+  let doc = null, steps = [], T = [], total = 0, playing = false, speed = 1, t = 0, cur = -1;
+
+  fetch(BASE + 'script.json').then(r => r.json()).then(d => { doc = d; boot(); })
+    .catch(() => { stream.innerHTML = '<div class="loading">could not load ' + esc(BASE) + 'script.json</div>'; });
+
+  // ---------------------------------------------------------------- build
+  function boot() {
+    $('runtitle').textContent = doc.title || run;
+    document.title = (doc.field || 'Replay') + ' replay · OmniScientist';
+
+    const pick = $('runpick');
+    RUNS.forEach(r => {
+      const a = document.createElement('a');
+      a.href = 'replay.html?run=' + r;
+      a.textContent = r.replace(/_/g, ' ');
+      if (r === run) a.className = 'on';
+      pick.appendChild(a);
+    });
+
+    // rail
+    const rejBy = {};
+    doc.steps.forEach(s => { if (s.kind === 'gate_reject') rejBy[s.stage] = (rejBy[s.stage] || 0) + 1; });
+    $('stages').innerHTML = doc.stages.map(st => `
+      <div class="stg" data-stage="${st.id}" style="--sc:${STAGE_COLOR[st.id] || '#184878'}">
+        <div class="n">Stage ${st.n}</div>
+        <div class="t"><i></i>${esc(st.label)}</div>
+        <div class="b">${esc(st.blurb)}</div>
+        <span class="chk" data-chk="${st.id}"><i></i>${esc(st.check)}</span>
+      </div>`).join('');
+    const c = doc.counts || {};
+    $('tally').innerHTML = [
+      [c.images, 'looked at'], [c.refs, 'papers read'], [c.code, 'code runs'],
+      [c.reject, 'sent back'], [c.figures_made, 'figures made'], [c.sections, 'sections written'],
+    ].map(([v, k]) => `<div><b>${v == null ? 0 : v}</b>${k}</div>`).join('');
+
+    // the closing card is part of the timeline, so the replay ends on the paper
+    steps = doc.steps.concat([{ kind: 'output', stage: 'writeup', i: doc.steps.length }]);
+
+    stream.innerHTML = '';
+    steps.forEach((s, i) => {
+      // the first step of an act carries the act break above it
+      if (i === 0 || steps[i - 1].stage !== s.stage) {
+        const st = doc.stages.find(x => x.id === s.stage);
+        if (st) {
+          const b = document.createElement('div');
+          b.className = 'banner';
+          b.style.setProperty('--sc', STAGE_COLOR[st.id] || '#184878');
+          b.innerHTML = `<span class="no">${st.n}</span>
+            <span><span class="tt">Stage ${st.n} &middot; ${esc(st.label)}</span>
+            <span class="bb">${esc(st.blurb)}</span></span>
+            <span class="gate-name">${esc(st.check)}</span>`;
+          s.banner = b;
+          stream.appendChild(b);
+        }
+      }
+      s.el = render(s);
+      stream.appendChild(s.el);
+    });
+
+    // duration per step: long blocks type faster but never stall the run
+    let acc = 0;
+    T = steps.map(s => {
+      const n = chars(s);
+      const d = s.kind === 'output' ? 4.5
+        : Math.max(1.1, Math.min(9, 0.7 + n / 400));
+      const seg = { a: acc, d: d };
+      acc += d;
+      return seg;
+    });
+    total = acc;
+
+    const tk = $('ticks');
+    steps.forEach((s, i) => {
+      const first = i === 0 || steps[i - 1].stage !== s.stage;
+      if (!first && s.kind !== 'gate_reject') return;
+      const el = document.createElement('i');
+      el.style.left = (T[i].a / total * 100) + '%';
+      if (s.kind === 'gate_reject') el.className = 'rej';
+      tk.appendChild(el);
+    });
+
+    document.querySelectorAll('.stg').forEach(el => el.addEventListener('click', () => {
+      const k = steps.findIndex(s => s.stage === el.dataset.stage);
+      if (k >= 0) { seek(T[k].a + 0.001); }
+    }));
+    // clicking a small step drives the replay the same way the big ones do
+    $('substeps').addEventListener('click', e => {
+      const b = e.target.closest('.sub');
+      if (b) { subStick = true; play(false); seek(T[Number(b.dataset.k)].a + 0.001); }
+    });
+
+    // ?at=<step> opens the replay parked on one step, for linking and for checking
+    const at = Number(new URLSearchParams(location.search).get('at'));
+    if (at > 0 && at < steps.length) { seek(T[at].a + 0.0001); play(false); }
+    else { seek(0); play(true); }
+  }
+
+  function chars(s) {
+    let n = 0;
+    if (s.think) n += s.think.length;
+    if (s.ask) n += s.ask.length;
+    if (s.body) n += s.body.length;
+    if (s.code) n += s.code.length * 0.55;      // code reads faster than prose
+    if (s.out) n += s.out.length * 0.7;
+    if (s.args) n += s.args.length;
+    (s.refs || []).forEach(() => { n += 70; });
+    (s.fields || []).forEach(f => { n += f.v.length * 0.6; });
+    return n;
+  }
+
+  // ---------------------------------------------------------------- one step's DOM
+  function render(s) {
+    const el = document.createElement('div');
+    if (s.kind === 'gate_reject' || s.kind === 'gate_pass') {
+      const rej = s.kind === 'gate_reject';
+      // needs .step too, or it would sit there visible before the run reaches it
+      el.className = 'step gate ' + (rej ? 'rej' : 'pass');
+      el.innerHTML = `<span class="sym">${rej ? '↺' : '✓'}</span>
+        <span><b>${rej ? 'sent back' : 'check passed'}</b>
+        <span class="tw" data-full="${esc(s.body)}"></span></span>`;
+      return el;
+    }
+    if (s.kind === 'output') { el.className = 'step out'; el.appendChild(finalCard()); return el; }
+
+    el.className = 'step ' + s.kind;
+    const parts = [];
+    parts.push(`<div class="hd"><span class="ico">${esc(ICON[s.kind] || '?')}</span>
+      <span>${esc(s.head || s.kind)}</span>
+      ${s.tool ? `<span class="tool mono">${esc(s.tool)}</span>` : ''}</div>`);
+    if (s.think) parts.push(`<div class="think tw" data-full="${esc(s.think)}"></div>`);
+    if (s.ask) parts.push(`<div class="ask tw" data-full="${esc(s.ask)}"></div>`);
+    if (s.ev && s.ev.length) {
+      parts.push('<div class="made evrow">' + s.ev.map(e =>
+        `<figure><img src="${esc(BASE + e.src) + bust(e)}"${wh(e)} alt="" loading="lazy">
+         <figcaption>${esc(e.cap)}</figcaption></figure>`).join('') + '</div>');
+    }
+    if (s.args) parts.push(`<pre class="out tw" data-full="${esc(s.args)}"></pre>`);
+    if (s.code) parts.push(`<pre class="code tw" data-full="${esc(s.code)}"></pre>`);
+    if (s.body) parts.push(`<div class="txt tw" data-full="${esc(s.body)}"></div>`);
+    if (s.out) parts.push(`<pre class="out tw" data-full="${esc(s.out)}"></pre>`);
+    if (s.refs && s.refs.length) {
+      parts.push('<div class="refs">' + s.refs.map(r =>
+        `<div class="ref"><div class="t">${esc(r.title)}</div>
+         <div class="m">${esc(r.who)}${r.year ? ' · ' + esc(r.year) : ''}${
+           r.cites != null ? ' · ' + r.cites + ' citations' : ''}</div></div>`).join('') + '</div>');
+    }
+    if (s.fields && s.fields.length) {
+      parts.push('<div class="fields">' + s.fields.map(f =>
+        `<div class="fld"><div class="k">${esc(f.k.replace(/_/g, ' '))}</div>
+         <div class="v tw" data-full="${esc(f.v)}"></div></div>`).join('') + '</div>');
+    }
+    if (s.made && s.made.length) {
+      parts.push('<div class="made mades">' + s.made.map(f =>
+        `<figure class="${f.kept ? '' : 'dropped'}"><img src="${esc(BASE + f.src) + bust(f)}"${wh(f)} alt="" loading="lazy">
+         <figcaption>${esc(f.src.split('/').pop())}${f.kept ? '' : ' · later dropped'}</figcaption></figure>`
+      ).join('') + '</div>');
+    }
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = parts.join('');
+    el.appendChild(card);
+    return el;
+  }
+
+  // What the run left behind, in the order it should be offered. The public build
+  // ships no manuscript and a trimmed log, so each entry is named from the data
+  // rather than assumed to be there.
+  function downloads(o) {
+    const out = [];
+    if (o.paper) out.push({ href: o.paper, label: `Download the paper (PDF, ${o.paper_kb} KB)` });
+    if (o.log) out.push({ href: o.log, label: `Download the ${o.log_full === false ? 'run' : 'full'} log (JSON, ${o.log_kb} KB)` });
+    if (o.md) out.push({ href: o.md, label: 'Markdown' });
+    return out;
+  }
+
+  function finalCard() {
+    const o = doc.outputs || {};
+    const col = { supported: '#1b7f5c', mixed: '#b7791f', refuted: '#8c1e3c' }[doc.verdict] || 'var(--dim)';
+    const d = document.createElement('div');
+    d.className = 'final';
+    d.innerHTML = `
+      <div class="k">What the run produced</div>
+      <h2>${esc(doc.title)}</h2>
+      <span class="verdict" style="color:${col}">verdict: ${esc(doc.verdict || 'n/a')}</span>
+      <p>${esc(doc.result_statement)}</p>
+      <div class="dl">
+        ${downloads(o).map((a, k) => `<a${k ? '' : ' class="primary"'} href="${esc(BASE + a.href)}" download>${esc(a.label)}</a>`).join('')}
+      </div>`;
+    return d;
+  }
+
+  // ---------------------------------------------------------------- typing
+  function setProgress(s, p) {
+    const el = s.el;
+    if (!el) return;
+    // cached: this runs every frame for the step being typed
+    if (!s._tw) {
+      s._tw = [...el.querySelectorAll('.tw')];
+      s._budget = s._tw.reduce((n, x) => n + (x.dataset.full || '').length, 0);
+      s._refs = [...el.querySelectorAll('.ref')];
+      s._evf = [...el.querySelectorAll('.evrow figure')];
+      s._madef = [...el.querySelectorAll('.mades figure')];
+    }
+    const tws = s._tw, budget = s._budget;
+    let want = Math.round(budget * Math.min(1, Math.max(0, p)));
+    tws.forEach(n => {
+      const full = n.dataset.full || '';
+      const take = Math.max(0, Math.min(full.length, want));
+      if (n._at !== take) { n.textContent = full.slice(0, take); n._at = take; }
+      want -= full.length;
+    });
+    if (s._refs.length) {
+      const k = Math.ceil(p * s._refs.length);
+      s._refs.forEach((r, i) => r.classList.toggle('on', i < k));
+    }
+    s._evf.forEach((f, i) => f.classList.toggle('on', p > 0.02 + i * 0.05));
+    s._madef.forEach((f, i) => f.classList.toggle('on', p > 0.6 + i * 0.08));
+  }
+
+  function findStep(time) {
+    let lo = 0, hi = T.length - 1;
+    while (lo < hi) { const m = (lo + hi + 1) >> 1; if (T[m].a <= time) lo = m; else hi = m - 1; }
+    return lo;
+  }
+
+  // ---------------------------------------------------------------- paint
+  function paint() {
+    const i = findStep(t);
+    const p = Math.min(1, (t - T[i].a) / T[i].d);
+
+    if (i !== cur) {
+      const from = Math.min(cur < 0 ? 0 : cur, i), to = Math.max(cur < 0 ? 0 : cur, i);
+      for (let k = from; k <= to; k++) {
+        steps[k].el.classList.toggle('vis', k <= i);
+        steps[k].el.classList.toggle('now', k === i);
+        if (steps[k].banner) steps[k].banner.classList.toggle('vis', k <= i);
+        if (k < i) setProgress(steps[k], 1);
+        if (k > i) setProgress(steps[k], 0);
+      }
+      // a backwards drag or a stage jump can leave later steps showing
+      steps.forEach((s, k) => { if (k > i && s.el.classList.contains('vis')) {
+        s.el.classList.remove('vis', 'now'); setProgress(s, 0);
+        if (s.banner) s.banner.classList.remove('vis'); } });
+      cur = i;
+      const sc = STAGE_COLOR[steps[i].stage] || '#184878';
+      document.documentElement.style.setProperty('--stage', sc);
+      document.documentElement.style.setProperty('--stage-soft', STAGE_SOFT[steps[i].stage] || 'rgba(24,72,120,.10)');
+      paintRail(i);
+      paintSubsteps(i);
+      paintPanel(i);
+      // follow along while playing, jump straight there when scrubbing or stepping
+      scrollTo(i, playing ? 'smooth' : 'instant');
+    }
+    setProgress(steps[i], p);
+    // a card grows as it types; keep its foot in view the way a terminal does,
+    // but only while the reader is still following along
+    if (playing && p < 1 && stick) {
+      const el = steps[i].el;
+      const foot = el.offsetTop + el.offsetHeight;
+      const seen = stream.scrollTop + stream.clientHeight;
+      if (foot > seen) setTop(foot - stream.clientHeight * 0.86);
+    }
+
+    const frac = t / total;
+    $('fill').style.width = (frac * 100) + '%';
+    if (document.activeElement !== $('scrub')) $('scrub').value = Math.round(frac * 10000);
+    $('clock').textContent = `${clock(t)} / ${clock(total)}  ·  step ${i + 1}/${steps.length}`;
+  }
+
+  function clock(x) {
+    const m = Math.floor(x / 60), s = Math.floor(x % 60);
+    return m + ':' + String(s).padStart(2, '0');
+  }
+
+  /* ---- follow mode ----------------------------------------------------------
+     While it plays the stream follows the live step. The moment the reader scrolls
+     away with wheel or touch it lets go, exactly like a chat window during
+     generation, and it takes hold again when they come back to the live edge or
+     press the follow button. Only wheel/touch count as intent: our own scrollTo
+     also fires `scroll`, and treating that as the reader would detach instantly. */
+  let stick = true, ourTop = -1, quiet = 0;
+
+  /* Every programmatic scroll goes through here and records where it put the stream.
+     The scroll listener then only has to ask "is this where I left it?" -- which works
+     for the wheel, a trackpad, a touch drag, the keyboard, and, importantly, dragging
+     the scrollbar itself. Watching wheel/touch events instead would miss the scrollbar
+     entirely, and that is the one the reader actually reached for. */
+  function setTop(v, smooth) {
+    ourTop = Math.round(v);
+    if (smooth) { quiet = performance.now() + 700; stream.scrollTo({ top: v, behavior: 'smooth' }); }
+    else stream.scrollTop = v;
+  }
+
+  function wantTop(i) {
+    const el = steps[i].banner || steps[i].el;   // land on the act break when one opens the stage
+    return Math.max(0, el.offsetTop - stream.clientHeight * 0.30);
+  }
+  // "live" means the growing edge of the current card is still on screen. Measuring
+  // against the card's foot rather than a fixed scroll offset matters: while a long
+  // card types, the follower has already pushed well past its top, so an offset test
+  // would still call the reader live after they had scrolled a long way up.
+  function atLive() {
+    const el = steps[cur < 0 ? 0 : cur].el;
+    const foot = el.offsetTop + el.offsetHeight;
+    return stream.scrollTop + stream.clientHeight >= foot - 60;
+  }
+  function setStick(v) {
+    if (stick === v) return;
+    stick = v;
+    $('follow').classList.toggle('on', !v);
+  }
+  stream.addEventListener('scroll', () => {
+    if (performance.now() < quiet) return;                  // our own smooth scroll, still running
+    if (Math.abs(stream.scrollTop - ourTop) <= 2) return;    // exactly where we left it: ours
+    setStick(atLive());
+  }, { passive: true });
+  // scrolling up is unambiguous, so let go on the gesture rather than waiting for the frame
+  stream.addEventListener('wheel', e => { if (e.deltaY < 0) setStick(false); }, { passive: true });
+
+  function scrollTo(i, behavior) {
+    if (!stick) return;                          // the reader is reading; do not yank them back
+    setTop(wantTop(i), behavior === 'smooth');
+  }
+
+  /* The sub-step list keeps the live step centred, which means it scrolls itself on
+     every step -- so it needs the same courtesy as the stream: once the reader scrolls
+     it by hand, stop moving it under them. It takes hold again when the stage changes
+     (the list is rebuilt) or when they click a step. */
+  let subStick = true, subOurTop = -1;
+  (function () {
+    const host = $('substeps');
+    host.addEventListener('scroll', () => {
+      if (Math.abs(host.scrollTop - subOurTop) > 2) subStick = false;
+    }, { passive: true });
+  })();
+
+  /* the live stage's own steps, listed and clickable */
+  function paintSubsteps(i) {
+    const sid = steps[i].stage;
+    const host = $('substeps');
+    if (host.dataset.stage !== sid) {
+      host.dataset.stage = sid;
+      subStick = true;                       // a new act, a new list: follow again
+      const st = doc.stages.find(x => x.id === sid);
+      $('substephead').textContent = st ? `Steps in stage ${st.n} · ${st.label}` : 'Steps in this stage';
+      host.innerHTML = steps.map((s, k) => ({ s, k })).filter(o => o.s.stage === sid)
+        .map(({ s, k }, n) => `
+          <button class="sub${s.kind === 'gate_reject' ? ' rej' : ''}" data-k="${k}"
+                  style="--kc:${KIND_COLOR[s.kind] || '#64748b'}">
+            <span class="dot"></span>
+            <span class="lbl">${esc(s.head || SHORT[s.kind] || s.kind)}</span>
+            <span class="nn">${n + 1}</span>
+          </button>`).join('');
+    }
+    [...host.children].forEach(b => {
+      const k = Number(b.dataset.k);
+      b.classList.toggle('now', k === i);
+      b.classList.toggle('past', k < i);
+      if (k === i && subStick) {
+        const top = Math.max(0, b.offsetTop - host.clientHeight / 2 + b.offsetHeight / 2);
+        subOurTop = Math.round(top);
+        host.scrollTop = top;                // instant: a smooth scroll here reads as the reader
+      }
+    });
+  }
+
+  function paintRail(i) {
+    const at = steps[i].stage;
+    const order = doc.stages.map(s => s.id);
+    document.querySelectorAll('.stg').forEach(el => {
+      const k = order.indexOf(el.dataset.stage);
+      el.classList.toggle('on', el.dataset.stage === at);
+      el.classList.toggle('done', k < order.indexOf(at));
+    });
+    // the check lamp for each stage reflects what has happened up to now
+    order.forEach(sid => {
+      const lamp = document.querySelector(`[data-chk="${sid}"]`);
+      if (!lamp) return;
+      let cls = '';
+      for (let k = 0; k <= i; k++) {
+        if (steps[k].stage !== sid) continue;
+        if (steps[k].kind === 'gate_reject') cls = 'rej';
+        if (steps[k].kind === 'gate_pass') cls = 'pass';
+      }
+      lamp.className = 'chk ' + cls;
+    });
+  }
+
+  function paintPanel(i) {
+    // last evidence seen at or before this step
+    let ev = null;
+    for (let k = i; k >= 0; k--) if (steps[k].ev && steps[k].ev.length) { ev = steps[k]; break; }
+    const slot = $('evslot');
+    if (!ev) {
+      slot.innerHTML = '<p class="idle">The evidence the system opened appears here, exactly as it was rendered for the perception layer.</p>';
+    } else if (slot.dataset.at !== String(ev.i)) {
+      slot.dataset.at = String(ev.i);
+      slot.innerHTML = ev.ev.map(e =>
+        `<figure class="evc on"><img src="${esc(BASE + e.src) + bust(e)}"${wh(e)} alt="">
+         <figcaption>${esc(e.cap)}</figcaption></figure>`).join('');
+    }
+    // every figure made so far
+    const made = [];
+    for (let k = 0; k <= i; k++) (steps[k].made || []).forEach(f => made.push(f));
+    const fs = $('figslot');
+    if (fs.dataset.n !== String(made.length)) {
+      fs.dataset.n = String(made.length);
+      fs.innerHTML = made.length
+        ? made.map(f => `<figure class="evc on"><img src="${esc(BASE + f.src) + bust(f)}"${wh(f)} alt="">
+            <figcaption>${esc(f.src.split('/').pop())}${f.kept ? '' : ' · dropped by the check'}</figcaption></figure>`).join('')
+        : '<p class="idle">None yet.</p>';
+    }
+  }
+
+  // ---------------------------------------------------------------- transport
+  let last = 0;
+  function frame(ts) {
+    if (playing) {
+      // clamp the step: a backgrounded tab stops firing rAF, and the first frame back
+      // would otherwise carry minutes of delta and skip most of the run
+      if (last) t = Math.min(total, t + Math.min(0.1, (ts - last) / 1000) * speed);
+      last = ts;
+      paint();
+      if (t >= total) play(false);
+    } else last = 0;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  function play(on) {
+    playing = on == null ? !playing : on;
+    if (playing) { setStick(true); scrollTo(cur < 0 ? 0 : cur, 'smooth'); }
+    if (playing && t >= total) t = 0;
+    last = 0;
+    $('bPlay').innerHTML = playing ? '&#10074;&#10074;' : '&#9654;';
+    $('bigplay').classList.toggle('running', playing);
+  }
+  // asking to go somewhere (scrubber, step buttons, a stage, a sub-step) means
+  // you want to watch from there, so following resumes
+  function seek(x) {
+    setStick(true); t = Math.max(0, Math.min(total, x)); last = 0;
+    paint();
+    if (cur >= 0) setTop(wantTop(cur));
+  }
+  function step(d) {
+    const i = Math.max(0, Math.min(steps.length - 1, findStep(t) + d));
+    seek(T[i].a + 0.0001);
+  }
+
+  $('bPlay').addEventListener('click', () => play());
+  $('bigplay').addEventListener('click', () => play());
+  $('follow').addEventListener('click', () => {
+    setStick(true);
+    setTop(wantTop(cur < 0 ? 0 : cur), true);
+  });
+  $('bNext').addEventListener('click', () => step(1));
+  $('bPrev').addEventListener('click', () => step(-1));
+  $('bStart').addEventListener('click', () => seek(0));
+  $('scrub').addEventListener('input', e => { play(false); seek(e.target.value / 10000 * total); });
+  $('spd').addEventListener('click', e => {
+    const s = e.target.dataset.s;
+    if (!s) return;
+    speed = Number(s);
+    [...$('spd').children].forEach(b => b.classList.toggle('on', b === e.target));
+  });
+  addEventListener('keydown', e => {
+    if (e.key === ' ') { e.preventDefault(); play(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+    if (e.key === 'Home') { e.preventDefault(); seek(0); }
+    if (e.key === 'End') { e.preventDefault(); play(false); seek(total); }
+  });
+})();
+</script>
+
+</body>
+</html>

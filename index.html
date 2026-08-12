@@ -1,0 +1,1273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OmniScientist: An Omni-Modal Omni-Discipline AI Scientist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&display=swap">
+<!-- display faces for the mixed-type wordmark, plus one handwriting face for the typed line -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bodoni+Moda:opsz,wght@6..96,700;6..96,900&family=Caveat:wght@500;600;700&family=Elsie:wght@400;900&family=Glass+Antiqua&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Playfair+Display:wght@700;900&family=Prata&family=Rye&family=Yeseva+One&display=swap">
+<link rel="stylesheet" href="assets/cloth.css">
+<style>
+  :root {
+    --ink: #2b3540;          /* warm slate, never pure black */
+    --ink-2: #4a5764;
+    --dim: #74838f;
+    --sky-line: rgba(63,96,124,.16);
+    --paper: rgba(255,255,255,.78);
+    --sky-blue: #3f7fb3;
+    --leaf: #4c8a5c;
+    --ochre: #cf8b3a;
+    --clay: #c0584e;
+    --plum: #7a5aa6;
+    --teal: #2f8a86;
+    --soft: 0 10px 30px rgba(63,86,110,.14);
+
+    /* wordmark colours, same five as the paper */
+    --omni-o: #ef476f; --omni-m: #f28e2b; --omni-n: #00a890;
+    --omni-i: #934bed; --omni-sci: #184878;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: "Noto Sans", system-ui, sans-serif; color: var(--ink);
+    -webkit-font-smoothing: antialiased; overflow: hidden;
+  }
+  a { color: inherit; }
+  h1, h2, .claim, .figurenum { font-family: "Noto Serif", Georgia, serif; }
+
+  /* Paging is driven entirely from JS: one gesture, one slide, landing exactly on it.
+     Native snap is off on purpose. Snap plus a scroll animation fight each other, which
+     is what made the deck feel sticky and stop between slides. */
+  .deck {
+    height: 100vh; overflow: hidden;
+    scroll-snap-type: none; scrollbar-width: none; overscroll-behavior: contain;
+  }
+  .deck::-webkit-scrollbar { display: none; }
+  .slide {
+    height: 100vh;
+    position: relative; display: flex; align-items: center; justify-content: center;
+    /* wider gutter on the right: the page-dot rail lives there, and with the cards gone
+       the content runs to its own edge instead of stopping at a panel border */
+    padding: 64px 4.7vw 78px 3.4vw;
+  }
+  /* ---------- 1. title ---------- */
+  /* light pools under the wordmark so the cloth never fights the letters */
+  .halo {
+    position: absolute; inset: 0; pointer-events: none; z-index: 1;
+    background: radial-gradient(ellipse 56% 50% at 50% 46%,
+      rgba(252,252,253,.96) 0%, rgba(252,252,253,.88) 40%, rgba(252,252,253,.44) 72%, rgba(252,252,253,0) 100%);
+  }
+
+  .title-block { position: relative; z-index: 2; text-align: center; max-width: 1180px; }
+
+  /* the big sign: one display face per letter, brand colour per letter, dropped in one at a time */
+  h1.sign {
+    margin: 6px 0 0; line-height: 1.02; letter-spacing: -.008em; font-weight: 400;
+    font-size: 8rem;                             /* starting point; fitSign() sizes it to the viewport */
+    display: flex; justify-content: center; align-items: baseline;
+    flex-wrap: nowrap; white-space: nowrap;      /* the sign never breaks across lines */
+  }
+  h1.sign .mark {
+    height: .82em; width: auto; align-self: center; margin-right: .12em;
+    opacity: 0; transform: scale(.55) rotate(-70deg); transform-origin: 50% 50%;
+  }
+  h1.sign .mark.set { animation: spin .8s cubic-bezier(.2,.85,.3,1.02) forwards; }
+  @keyframes spin {
+    0%   { opacity: 0; transform: scale(.55) rotate(-70deg); }
+    100% { opacity: 1; transform: scale(1) rotate(0); }
+  }
+  /* the full title, one step down from the sign so the hierarchy is unmistakable */
+  .fullname {
+    font-family: "Noto Serif", Georgia, serif; font-weight: 600;
+    font-size: clamp(1.05rem, 2.45vw, 2.05rem);  /* ~1/4 of the sign */
+    letter-spacing: -.015em; color: var(--omni-sci);
+    margin: 8px 0 0; min-height: 1.35em;
+  }
+  h1.sign span {
+    display: inline-block; opacity: 0; transform: translateY(-.36em) rotate(-4deg);
+    will-change: transform, opacity;
+  }
+  h1.sign span.set { animation: drop .52s cubic-bezier(.18,.9,.24,1.06) forwards; }
+  @keyframes drop {
+    0%   { opacity: 0; transform: translateY(-.36em) rotate(-4deg); }
+    62%  { opacity: 1; transform: translateY(.035em) rotate(.6deg); }
+    100% { opacity: 1; transform: translateY(0) rotate(0); }
+  }
+
+  /* the typed line, in a hand */
+  .hand {
+    font-family: "Caveat", "Noto Serif", cursive; font-weight: 600;
+    font-size: clamp(1.15rem, 2.1vw, 1.78rem); line-height: 1.45;
+    color: var(--ink-2); margin: 18px auto 0; max-width: 68ch; min-height: 2.95em;
+    text-wrap: balance;            /* keeps the last word off a line of its own */
+  }
+  .cur {
+    display: inline-block; width: .045em; height: .92em; margin-left: .04em;
+    background: var(--omni-o); vertical-align: -.13em; animation: blink 1.05s steps(1) infinite;
+  }
+  .done .cur { display: none; }                 /* the cursor moves on to the next line */
+  .hand.done .cur { display: inline-block; animation: blink 1.6s steps(1) infinite; opacity: .55; }
+  @keyframes blink { 0%,55% { opacity: 1; } 56%,100% { opacity: 0; } }
+
+  .reveal { opacity: 0; transform: translateY(9px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.on { opacity: 1; transform: none; }
+
+  /* authors read as a proper byline: bigger, in the accent colour, generously spaced */
+  .authors {
+    margin-top: 28px; font-size: 1.24rem; font-weight: 500; line-height: 1.85;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 2px 26px;
+  }
+  /* each name and its marks are one flex item, or the gap prises them apart */
+  .au { white-space: nowrap; }
+  .authors a {
+    color: var(--omni-sci); text-decoration: none; white-space: nowrap;
+    border-bottom: 1px solid transparent; transition: border-color .18s;
+  }
+  .authors a:hover { border-bottom-color: var(--omni-sci); }
+  .authors sup { font-size: .58em; margin-left: 2px; vertical-align: super; }
+  .nus { color: var(--ochre); } .ox { color: var(--sky-blue); } .star { color: var(--clay); }
+  .affil {
+    margin-top: 12px; font-size: .93rem; color: var(--ink-2);
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 30px;
+  }
+  .affil-item { white-space: nowrap; }
+  .contact {
+    margin-top: 9px; font-size: .93rem; color: var(--ink-2);
+    display: flex; flex-wrap: wrap; justify-content: center; align-items: baseline; gap: 4px 12px;
+  }
+  .contact a { color: var(--sky-blue); text-decoration: none; border-bottom: 1px solid rgba(63,127,179,.32); }
+  .contact a:hover { border-bottom-color: var(--sky-blue); }
+  .contact .dot { color: var(--dim); }
+  .contact .corr { font-style: normal; color: var(--dim); font-size: .88em; }
+  .counts { display: flex; gap: 46px; justify-content: center; margin-top: 34px; flex-wrap: wrap; }
+  .counts b { display: block; font-family: "Noto Serif", Georgia, serif; font-size: 1.7rem; font-weight: 700; }
+  .counts span { font-size: .67rem; letter-spacing: .17em; text-transform: uppercase; color: var(--dim); }
+  .cta { display: flex; gap: 13px; justify-content: center; margin-top: 34px; flex-wrap: wrap; }
+  /* names the row of buttons beside it; a label, not an action */
+  .cta-label { align-self: center; margin-right: 3px; font-size: .95rem; font-weight: 600; color: var(--dim); }
+  /* each button carries one of the wordmark colours instead of a flat institutional blue */
+  .btn {
+    --bc: var(--omni-sci);          /* always defined; a c-* class overrides it */
+    position: relative; display: inline-flex; align-items: center; gap: 9px;
+    padding: 13px 27px; border-radius: 999px; font-size: .95rem; font-weight: 600;
+    text-decoration: none; color: var(--bc);
+    background: #fff; border: 1.5px solid color-mix(in srgb, var(--bc) 38%, transparent);
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--bc) 16%, transparent);
+    transition: transform .18s, box-shadow .18s, background .18s, color .18s;
+  }
+  .btn:hover {
+    transform: translateY(-3px); background: var(--bc); color: #fff;
+    border-color: transparent;
+    box-shadow: 0 12px 26px color-mix(in srgb, var(--bc) 40%, transparent);
+  }
+  .btn .ic { font-size: 1.05em; line-height: 1; }
+  .btn.c-demo  { --bc: #ef476f; }
+  .btn.c-code  { --bc: #184878; }
+  .btn.c-paper { --bc: #f28e2b; }
+  .btn.c-more  { --bc: #00a890; }
+  /* the lead action is filled from the start */
+  .btn.primary {
+    background: linear-gradient(135deg, var(--bc), color-mix(in srgb, var(--bc) 68%, #ffffff));
+    color: #fff; border-color: transparent;
+    box-shadow: 0 10px 24px color-mix(in srgb, var(--bc) 42%, transparent);
+  }
+  .btn.primary:hover { filter: brightness(1.06); color: #fff; }
+
+  /* ---------- the workbench: one recorded run, played left to right ----------
+     A window rather than a panel, because what it shows is a machine at work. The
+     three stage columns are the engine's three stages; cards land in them in the
+     order the run produced them. */
+  .wb-wrap { width: 100%; max-width: 1560px; position: relative; z-index: 2; }
+  .wbwin {
+    display: flex; flex-direction: column; max-height: calc(100vh - 168px);
+    background: #fbfcfd; border: 1px solid rgba(63,96,124,.17); border-radius: 15px;
+    box-shadow: 0 26px 60px rgba(63,86,110,.20), 0 3px 10px rgba(63,86,110,.08);
+    overflow: hidden; opacity: 0; transform: translateY(16px) scale(.988);
+    transition: opacity .5s ease, transform .5s cubic-bezier(.2,.85,.3,1);
+  }
+  .wbwin.on { opacity: 1; transform: none; }
+  .wbbar {
+    flex: 0 0 auto; display: flex; align-items: center; gap: 13px; padding: 9px 15px;
+    background: linear-gradient(180deg, #f4f6f8, #eef1f4);
+    border-bottom: 1px solid rgba(63,96,124,.15);
+  }
+  .lights { display: flex; gap: 7px; }
+  .lights i { width: 11px; height: 11px; border-radius: 50%; display: block; }
+  .lights .r { background: #ff5f57; } .lights .y { background: #febc2e; } .lights .g { background: #28c840; }
+  .wbtitle { font-size: .78rem; font-weight: 600; color: var(--ink-2); letter-spacing: .01em; }
+  .wbrun { margin-left: auto; font-size: .68rem; color: var(--dim); letter-spacing: .07em; }
+  .wbrun b { color: var(--omni-n); font-weight: 600; }
+  .wbreplay {
+    border: 1px solid rgba(63,96,124,.2); background: #fff; color: var(--ink-2);
+    width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-size: .8rem;
+    line-height: 1; display: grid; place-items: center; padding: 0;
+  }
+  .wbreplay:hover { background: var(--omni-sci); color: #fff; border-color: transparent; }
+
+  .wbbody { display: grid; grid-template-columns: 232px minmax(0,1fr) 258px;
+             flex: 1 1 auto; min-height: 0; }
+  .wbask, .wbout, .wbcanvas { min-height: 0; overflow: hidden; }
+  .wbask { padding: 14px; border-right: 1px solid rgba(63,96,124,.13); background: #f7f9fa; }
+  .wbout { padding: 14px; border-left: 1px solid rgba(63,96,124,.13); background: #f7f9fa; }
+  .wbk {
+    font-size: .57rem; letter-spacing: .17em; text-transform: uppercase; color: var(--dim);
+    margin-bottom: 9px;
+  }
+  /* the canvas is the blank editing surface the three stages are produced onto */
+  .wbcanvas {
+    position: relative; padding: 14px 16px;
+    display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px;
+    background-image: radial-gradient(rgba(63,96,124,.14) 1px, transparent 1px);
+    background-size: 15px 15px;
+  }
+  .wbcol { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+  .wbcolhead {
+    display: flex; align-items: center; gap: 8px; font-size: .69rem; font-weight: 600;
+    color: var(--dim); padding-bottom: 2px; opacity: .4; transition: opacity .3s, color .3s;
+  }
+  .wbcolhead.on { opacity: 1; color: var(--sc); }
+  .wbcolhead .no {
+    width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center;
+    font-size: .62rem; background: rgba(63,96,124,.14); color: var(--ink-2); transition: background .3s, color .3s;
+  }
+  .wbcolhead.on .no { background: var(--sc); color: #fff; }
+  .wbcol.idea { --sc: #00a890; } .wbcol.experiment { --sc: #934bed; } .wbcol.writeup { --sc: #f28e2b; }
+
+  /* every card starts hidden and pops; nothing types out character by character */
+  .pop { opacity: 0; transform: translateY(7px) scale(.985); }
+  .pop.in { animation: popin .34s cubic-bezier(.2,.9,.25,1.04) forwards; }
+  @keyframes popin {
+    0% { opacity: 0; transform: translateY(7px) scale(.985); }
+    100% { opacity: 1; transform: none; }
+  }
+
+  .wbcard {
+    background: #fff; border: 1px solid rgba(63,96,124,.16); border-radius: 10px;
+    padding: 9px 11px; box-shadow: 0 2px 7px rgba(63,86,110,.07);
+  }
+  .wbcard .t {
+    display: flex; align-items: center; gap: 7px; font-size: .76rem; font-weight: 600; color: var(--ink);
+  }
+  .wbcard .t .ic {
+    width: 17px; height: 17px; border-radius: 5px; display: grid; place-items: center;
+    font-size: .62rem; background: var(--sc, rgba(63,96,124,.12)); color: #fff; flex: 0 0 auto;
+  }
+  .wbcard .b { font-size: .69rem; line-height: 1.5; color: var(--ink-2); margin-top: 5px; }
+  .wbcard.bad { border-color: rgba(239,71,111,.4); background: rgba(239,71,111,.05); }
+  .wbcard.bad .t .ic { background: var(--omni-o); }
+  .wbcard.good { border-color: rgba(27,127,92,.36); background: rgba(27,127,92,.05); }
+  .wbcard.good .t .ic { background: #1b7f5c; }
+  .wbcard pre {
+    margin: 6px 0 0; padding: 7px 9px; border-radius: 7px; background: #2b3540; color: #e8eef4;
+    font-size: .6rem; line-height: 1.5; overflow: hidden; max-height: 74px; white-space: pre-wrap;
+  }
+  .wbfigs { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 7px; }
+  .wbfigs img { width: 100%; height: 44px; object-fit: cover; object-position: top left; aspect-ratio: auto;
+                border-radius: 5px; border: 1px solid rgba(63,96,124,.14); background: #fff; display: block; }
+  .wbchips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+  .wbchips span {
+    font-size: .56rem; letter-spacing: .05em; padding: 2px 7px; border-radius: 999px;
+    background: rgba(242,142,43,.13); color: #9a5b12; font-weight: 600;
+  }
+
+  /* the ask, and the evidence handed over with it */
+  .wbask .prompt {
+    background: #fff; border: 1px solid rgba(63,96,124,.16); border-radius: 10px; padding: 9px 11px;
+    font-size: .68rem; line-height: 1.55; color: var(--ink-2);
+    max-height: 128px; overflow: hidden; position: relative;
+  }
+  .wbask .prompt::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 26px;
+    background: linear-gradient(180deg, rgba(255,255,255,0), #fff);
+  }
+  .wbgrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 5px; margin-top: 8px; }
+  .wbgrid figure { margin: 0; }
+  .wbgrid img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 6px;
+                display: block; border: 1px solid rgba(63,96,124,.14); }
+  .wbgrid figcaption { font-size: .5rem; color: var(--dim); margin-top: 2px; text-align: center;
+                       white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* the manuscript that came out */
+  .wbpaper {
+    background: #fff; border: 1px solid rgba(63,96,124,.16); border-radius: 10px; padding: 11px 12px;
+    box-shadow: 0 3px 10px rgba(63,86,110,.09);
+  }
+  .wbpaper h4 { font-family: "Noto Serif", Georgia, serif; font-size: .8rem; font-weight: 600;
+                line-height: 1.34; margin: 8px 0 0; }
+  .wbpaper .vd {
+    display: inline-block; font-size: .56rem; letter-spacing: .13em; text-transform: uppercase;
+    font-weight: 700; padding: 2px 8px; border-radius: 999px; color: #1b7f5c; background: rgba(27,127,92,.11);
+  }
+  .wbpaper .meta { display: flex; gap: 12px; margin-top: 10px; padding-top: 9px;
+                   border-top: 1px solid rgba(63,96,124,.13); }
+  .wbpaper .meta div { font-size: .53rem; letter-spacing: .08em; text-transform: uppercase; color: var(--dim); }
+  .wbpaper .meta b { display: block; font-family: "Noto Serif", Georgia, serif; font-size: .95rem;
+                     color: var(--ink); letter-spacing: 0; text-transform: none; }
+  .wbopen {
+    display: block; text-align: center; margin-top: 10px; text-decoration: none;
+    font-size: .7rem; font-weight: 600; padding: 8px 10px; border-radius: 999px;
+    color: #fff; background: var(--omni-sci); box-shadow: 0 5px 14px rgba(24,72,120,.24);
+  }
+  .wbnote { text-align: center; font-size: .74rem; color: var(--dim); margin: 13px 0 0; line-height: 1.6; }
+  .wbnote b { color: var(--ink-2); font-weight: 600; }
+
+  @media (max-width: 1180px) {
+    .wbbody { grid-template-columns: 1fr; }
+    .wbask, .wbout { border: 0; border-bottom: 1px solid rgba(63,96,124,.13); }
+    .wbgrid { grid-template-columns: repeat(6, 1fr); }
+  }
+
+  /* ---------- 2. findings, paged sideways by the edge arrows ---------- */
+  .galhead {
+    position: absolute; top: 62px; left: 50%; transform: translateX(-50%); z-index: 3;
+    font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--dim);
+  }
+  .galhead span { color: var(--ochre); font-weight: 600; }
+  .gal { width: 100%; max-width: 1440px; overflow: hidden; position: relative; z-index: 2; }
+  .gal-track { display: flex; transition: transform .62s cubic-bezier(.22,.8,.24,1); }
+  .gal-item { flex: 0 0 100%; display: grid; grid-template-columns: minmax(280px, 34%) 1fr; gap: 3.6vw; align-items: center; }
+  .said { position: relative; padding: 30px 32px; }
+  /* a wash of light behind the words, no card, no border */
+  .said::before {
+    content: ""; position: absolute; inset: -34% -46% -34% -60%; z-index: -1;
+    background: radial-gradient(ellipse 44% 40% at 46% 50%,
+      rgba(255,255,255,.92) 0%, rgba(255,255,255,.82) 40%, rgba(255,255,255,.40) 66%,
+      rgba(255,255,255,0) 92%);
+    /* blurred so the wash has no edge at all, the way paint bleeds into paper */
+    filter: blur(26px);
+  }
+  .tag { display: inline-flex; align-items: center; gap: 8px; font-size: .68rem; letter-spacing: .19em; text-transform: uppercase; color: var(--dim); }
+  .tag i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; font-style: normal; }
+  .claim { font-size: clamp(1.45rem, 2.5vw, 2.15rem); font-weight: 600; line-height: 1.28; margin: 14px 0 0; letter-spacing: -.015em; }
+  .figurenum { font-size: clamp(2.6rem, 5.4vw, 4.1rem); font-weight: 700; line-height: 1; margin: 22px 0 0; letter-spacing: -.02em; }
+  .figurenum small { display: block; margin-top: 13px; font-family: "Noto Sans", sans-serif; font-size: .73rem; font-weight: 500; letter-spacing: .12em; line-height: 1.6; text-transform: uppercase; color: var(--dim); }
+  .support { margin: 24px 0 0; padding: 0; list-style: none; }
+  .support li { position: relative; padding-left: 18px; color: var(--ink-2); font-size: .91rem; line-height: 1.72; margin-top: 9px; }
+  .support li::before { content: ""; position: absolute; left: 0; top: .66em; width: 6px; height: 6px; border-radius: 50%; background: rgba(63,96,124,.38); }
+  .support b { color: var(--ink); font-weight: 600; }
+  .findlink {
+    display: inline-flex; align-items: center; gap: 7px; margin-top: 18px; text-decoration: none;
+    padding: 9px 20px; border-radius: 999px; font-size: .84rem; font-weight: 600;
+    color: #fff; background: var(--ochre); box-shadow: 0 6px 16px rgba(207,139,58,.3);
+    transition: transform .16s;
+  }
+  .findlink:hover { transform: translateX(3px); }
+  .plate img { width: 100%; display: block; filter: drop-shadow(0 14px 30px rgba(63,86,110,.20)); }
+  .plate .cap { margin-top: 12px; font-size: .76rem; line-height: 1.6; color: var(--dim); font-style: italic; }
+
+  .edge-arrow {
+    position: fixed; top: 50%; transform: translateY(-50%); z-index: 30;
+    width: 60px; height: 60px; border-radius: 50%; cursor: pointer;
+    border: 1px solid rgba(63,96,124,.2); background: rgba(255,255,255,.9);
+    box-shadow: var(--soft); color: var(--ink); font-size: 1.4rem; line-height: 1;
+    display: grid; place-items: center; opacity: 0; pointer-events: none;
+    transition: opacity .3s, transform .18s, background .18s;
+  }
+  .edge-arrow.on { opacity: 1; pointer-events: auto; }
+  .edge-arrow:hover { transform: translateY(-50%) scale(1.08); background: #ffffff; }
+  .edge-arrow.l { left: 20px; } .edge-arrow.r { right: 20px; }
+  .gal-meta {
+    position: absolute; left: 50%; transform: translateX(-50%); bottom: 78px; z-index: 3;
+    display: flex; align-items: center; gap: 13px; font-size: .74rem; color: var(--dim); letter-spacing: .06em;
+  }
+  .gal-meta .bar { display: flex; gap: 7px; }
+  .gal-meta .bar i { width: 24px; height: 3px; border-radius: 2px; background: rgba(63,96,124,.28); }
+  .gal-meta .bar i.on { background: var(--sky-blue); }
+
+  /* ---------- demos slide: one run per row, words left, figure right ---------- */
+  .demopanel { max-width: 1620px; }
+  .demorows { display: flex; flex-direction: column; gap: 0; margin-top: 20px; }
+  .drow {
+    display: grid; grid-template-columns: minmax(0,1fr) 400px; align-items: stretch;
+    text-decoration: none; overflow: hidden; min-height: 134px; position: relative;
+    background: transparent; border: 0; border-top: 1px solid rgba(63,96,124,.17);
+    border-left: 4px solid var(--accent); border-radius: 0;
+    transition: background .18s, transform .18s;
+  }
+  .drow:last-child { border-bottom: 1px solid rgba(63,96,124,.17); }
+  .drow:hover { transform: translateX(3px); background: rgba(255,255,255,.55); }
+  .drow.signal { --accent: #184878; } .drow.image { --accent: #934bed; } .drow.audio { --accent: #00a890; }
+  .drow .dbody { padding: 11px 22px 10px; display: flex; flex-direction: column; min-width: 0; }
+  .drow .dchips { display: flex; gap: 7px; align-items: center; }
+  .drow .dchip {
+    font-size: .6rem; letter-spacing: .13em; text-transform: uppercase; font-weight: 600;
+    padding: 3px 9px; border-radius: 999px; color: #fff; background: var(--accent);
+  }
+  .drow .dchip.f { color: var(--ink-2); background: rgba(63,96,124,.09); font-weight: 500; }
+  .drow h3 {
+    font-family: "Noto Serif", Georgia, serif; font-size: 1.12rem; line-height: 1.32;
+    margin: 7px 0 0; font-weight: 600;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .drow p { font-size: .84rem; line-height: 1.5; color: var(--ink-2); margin: 5px 0 0;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .drow .dstats { display: flex; gap: 18px; margin-top: auto; padding-top: 9px; }
+  .drow .dstats div { font-size: .58rem; letter-spacing: .09em; text-transform: uppercase; color: var(--dim); }
+  .drow .dstats b { display: block; font-family: "Noto Serif", Georgia, serif; font-size: 1.08rem;
+                    color: var(--ink); letter-spacing: 0; text-transform: none; }
+  .drow .dstats div.hot b { color: var(--omni-o); }
+  .drow .dfig { position: relative; background: transparent; border-left: 1px solid rgba(63,96,124,.10); }
+  .drow .dfig img { position: absolute; inset: 0; width: 100%; height: 100%;
+                    object-fit: contain; padding: 10px 8px; display: block; }
+  .drow .dfig::after { content: none; }   /* the posters are drawn on white already */
+  .drow .dgo { position: absolute; right: 16px; bottom: 13px; z-index: 2;
+    padding: 7px 16px; border-radius: 999px; background: var(--accent); color: #fff;
+    font-size: .75rem; font-weight: 600; box-shadow: 0 5px 14px rgba(24,72,120,.26); }
+  .demoall { margin-top: 14px; }
+
+  /* ---------- overview: the teaser carries the page, news runs beside it ---------- */
+  .ovgrid { display: grid; grid-template-columns: minmax(0, 2.05fr) minmax(330px, 1fr);
+            gap: 2.4vw; align-items: center; }
+  .ovpanel { max-width: 1660px; padding: 6px 26px; }
+  .ovfig { margin: 0; }
+  .ovfig img { width: 100%; height: auto; display: block; border-radius: 12px;
+               max-height: 72vh; object-fit: contain; }
+  .ovfig figcaption { margin-top: 12px; font-size: .8rem; line-height: 1.65; color: var(--dim);
+                      font-style: italic; }
+  .ovnews h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px;
+               font-size: clamp(1.3rem, 2.2vw, 1.8rem); }
+  .newsemoji { font-size: .9em; }
+  .newslist { list-style: none; margin: 12px 0 0; padding: 0; }
+  .newslist li {
+    display: grid; grid-template-columns: 58px 1fr; gap: 11px; align-items: baseline;
+    padding: 9px 0; border-top: 1px solid rgba(63,96,124,.14);
+    font-size: .855rem; line-height: 1.62; color: var(--ink-2);
+  }
+  .newslist li:first-child { border-top: 0; }
+  .newslist time {
+    font-size: .7rem; letter-spacing: .06em; color: var(--omni-sci); font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+  .newslist li:first-child time { color: var(--omni-o); }
+  .newslist b { color: var(--ink); font-weight: 600; }
+  .newslist a { color: var(--sky-blue); text-decoration: none; border-bottom: 1px solid rgba(63,127,179,.34); }
+
+  /* ---------- about: the byline the title page no longer carries, beside the news ---------- */
+  .aboutpanel { max-width: 1480px; padding: 6px 26px; }
+  .aboutgrid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr);
+               gap: 3vw; align-items: start; }
+  .aboutwho { text-align: left; }
+  .eyebrow-s { font-size: .66rem; letter-spacing: .26em; text-transform: uppercase; color: var(--dim); }
+  .aboutwho h2 { margin: 9px 0 0; font-size: clamp(1.15rem, 1.9vw, 1.6rem); line-height: 1.3; }
+  /* the shared byline styles centre themselves for the title page; here they read left */
+  .aboutwho .authors { margin-top: 22px; font-size: 1.06rem; justify-content: flex-start; gap: 2px 22px; }
+  .aboutwho .affil, .aboutwho .contact, .aboutwho .counts { justify-content: flex-start; }
+  .aboutwho .counts { gap: 38px; margin-top: 26px; }
+  @media (max-width: 1020px) { .aboutgrid { grid-template-columns: 1fr; gap: 20px; } }
+
+  /* ---------- framework: give the figure the whole slide ----------
+     max-height on the panel is what makes the figure shrinkable: without a bounded
+     parent the img's own max-height:100% has nothing to resolve against, so it renders
+     at full width and pushes straight out of the slide. */
+  .fwpanel { display: flex; flex-direction: column; max-height: 100%; overflow: hidden; }
+  .fwfig { margin: 14px 0 0; flex: 1 1 auto; min-height: 0; display: flex; justify-content: center; }
+  .fwfig img { max-width: 100%; max-height: 100%; width: auto; height: auto;
+               object-fit: contain; display: block; }
+  /* the plate opens at full size in a new tab: on a phone the figure lands at ~330px
+     wide and its smallest labels are unreadable at that scale */
+  .fwfig a { display: flex; justify-content: center; align-items: center;
+             max-width: 100%; max-height: 100%; min-height: 0; }
+  /* The heading and its note sit on one line above the plate. These are dense paper
+     figures whose smallest labels have to stay legible, and a full-width paragraph
+     of prose above them eats the height the figure needs to render large. */
+  .fighead { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+             gap: 0 3vw; align-items: baseline; }
+  .fighead h2 { font-size: clamp(1.4rem, 2.35vw, 1.95rem); }
+  .fighead p.note { margin: 0; font-size: .94rem; line-height: 1.58; max-width: none; }
+  @media (max-width: 1020px) { .fighead { grid-template-columns: 1fr; gap: 10px; } }
+
+  @media (max-width: 1020px) {
+    .ovgrid { grid-template-columns: 1fr; gap: 18px; }
+    .ovfig img { max-height: 34vh; }
+  }
+
+  /* ---------- reading slides ---------- */
+  /* No card. The content sits straight on the grid, with a pool of light behind it so
+     the type stays readable -- the same edgeless wash the title page and the findings
+     use. A white sheet with a shadow floating over the background read as timid. */
+  .panel { width: 100%; max-width: 1620px; position: relative; z-index: 2; padding: 6px 26px; }
+  .panel::before {
+    content: ""; position: absolute; inset: -9% -7%; z-index: -1;
+    background: radial-gradient(ellipse 54% 52% at 50% 50%,
+      rgba(252,252,253,.97) 0%, rgba(252,252,253,.90) 46%, rgba(252,252,253,.45) 74%,
+      rgba(252,252,253,0) 100%);
+    filter: blur(24px);
+  }
+  .panel h2 { font-size: clamp(1.8rem, 3.5vw, 2.75rem); font-weight: 600; margin: 0;
+              letter-spacing: -.022em; line-height: 1.14; }
+  .panel p.note { color: var(--ink-2); font-size: 1.01rem; line-height: 1.7; margin: 14px 0 0; max-width: 104ch; }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; margin-top: 26px; }
+  th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid var(--sky-line); }
+  thead th { font-size: .63rem; letter-spacing: .13em; text-transform: uppercase; color: var(--dim); }
+  tbody tr:last-child td { border-bottom: 0; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tbody tr:hover { background: rgba(255,255,255,.5); }
+  .best { color: var(--sky-blue); font-weight: 700; } .snd { color: var(--leaf); font-weight: 600; }
+  .res { font-weight: 700; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 10px; margin-top: 22px; }
+  .tiles figure { margin: 0; }
+  .tiles img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; display: block; box-shadow: 0 4px 12px rgba(63,86,110,.16); }
+  .tiles figcaption { font-size: .63rem; color: var(--dim); margin-top: 5px; text-align: center; }
+  pre {
+    background: rgba(43,53,64,.9); border-radius: 14px; padding: 16px 18px; color: #eaf1f6;
+    font: .79rem/1.7 ui-monospace, Menlo, monospace; overflow-x: auto; margin: 18px 0 0;
+  }
+
+  /* ---------- chrome ---------- */
+  .side { position: fixed; right: 22px; top: 50%; transform: translateY(-50%); z-index: 25; display: flex; flex-direction: column; gap: 10px; }
+  .side button { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(63,96,124,.3); padding: 0; background: rgba(255,255,255,.7); cursor: pointer; transition: background .2s, transform .2s; }
+  .side button.on { background: var(--sky-blue); border-color: var(--sky-blue); transform: scale(1.3); }
+  .foot {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: flex; align-items: center; gap: 14px;
+    padding: 13px 24px; font-size: .8rem; color: var(--ink-2);
+  }
+  .foot b { font-family: "Noto Serif", Georgia, serif; color: var(--ink); font-size: .95rem; }
+  .foot .counter { margin-left: auto; font-size: .73rem; letter-spacing: .08em; color: var(--dim); }
+  .scroll-cue {
+    position: absolute; bottom: 104px; left: 50%; transform: translateX(-50%); z-index: 3;
+    font-size: .68rem; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-2);
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .scroll-cue i { width: 1px; height: 28px; background: linear-gradient(to bottom, rgba(43,53,64,.05), rgba(43,53,64,.45)); }
+
+
+  @media (max-width: 980px) {
+    .slide { padding: 62px 6vw 88px; }
+    .gal-item { grid-template-columns: 1fr; gap: 16px; }
+    .said { padding: 18px 8px; }
+    .edge-arrow { width: 46px; height: 46px; left: 8px; } .edge-arrow.r { right: 8px; }
+    .panel { padding: 22px 18px; }
+    table { font-size: .74rem; } th, td { padding: 6px 7px; }
+  }
+</style>
+</head>
+<body class="cloth">
+
+<div class="deck" id="deck">
+
+  <section class="slide" data-name="Title">
+    <div class="halo"></div>
+    <div class="title-block">
+      <h1 class="sign" id="sign" aria-label="OmniScientist"></h1>
+      <p class="fullname" id="fullname" aria-live="polite"></p>
+      <p class="hand" id="hand" aria-live="polite"></p>
+      <!-- the three ways to install it. The targets are not published yet, so each
+           button stays on this page until its link exists. -->
+      <div class="cta reveal" id="rev1">
+        <span class="cta-label">Install:</span>
+        <a class="btn primary c-demo" href="#" data-go="Title"><span class="ic">&#9670;</span>Skill</a>
+        <a class="btn c-more" href="#" data-go="Title"><span class="ic">&#9634;</span>Desktop</a>
+        <a class="btn c-code" href="#" data-go="Title"><span class="ic">&#9654;</span>CLI</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Workbench">
+    <div class="wb-wrap">
+      <div class="wbwin" id="wbwin">
+        <div class="wbbar">
+          <span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
+          <span class="wbtitle">OmniScientist &mdash; workbench</span>
+          <span class="wbrun" id="wbrun"></span>
+          <button class="wbreplay" id="wbreplay" aria-label="play again" title="play again">&#8635;</button>
+        </div>
+        <div class="wbbody">
+          <aside class="wbask">
+            <div class="wbk">The ask</div>
+            <div id="wbprompt"></div>
+            <div class="wbk" style="margin-top:13px">Evidence handed over</div>
+            <div class="wbgrid" id="wbgrid"></div>
+          </aside>
+          <div class="wbcanvas" id="wbcanvas"></div>
+          <aside class="wbout">
+            <div class="wbk">What came out</div>
+            <div id="wbpaper"></div>
+          </aside>
+        </div>
+      </div>
+      <p class="wbnote">Not a mock-up. Every card is lifted from <b>one recorded run</b> &mdash; the request that
+        was sent, the images it opened, the papers it read, the check that sent it back, the code it ran and the
+        manuscript it produced.</p>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Demos">
+    <div class="panel demopanel">
+      <h2>Watch it work</h2>
+      <p class="note">Three complete runs, replayed from their recorded traces: the raw evidence it
+        opened, the papers it read, every line of code it ran, and every time a check sent it back.
+        Pause anywhere, drag the scrubber, take the paper and the log with you.</p>
+      <div class="demorows" id="demorows"></div>
+      <a class="btn primary c-demo demoall" href="demos.html"><span class="ic">&#9654;</span>Open all three demos</a>
+    </div>
+  </section>
+
+  <section class="slide" data-name="About">
+    <div class="panel aboutpanel">
+      <div class="aboutgrid">
+        <div class="aboutwho">
+          <div class="eyebrow-s">Technical report &middot; 2026</div>
+          <h2>OmniScientist: An Omni-Modal Omni-Discipline AI Scientist</h2>
+          <div class="authors">
+            <span class="au"><a href="https://libobo.site">Bobo Li</a><sup class="nus">&clubs;</sup></span>
+            <span class="au"><a href="https://haofei.vip/">Hao Fei</a><sup class="ox">&diams;</sup><sup class="star">*</sup></span>
+            <span class="au"><a href="https://jometeorie.github.io/">Tianjie Ju</a><sup class="nus">&clubs;</sup></span>
+            <span class="au"><a href="https://www.comp.nus.edu.sg/~leeml/">Mong-Li Lee</a><sup class="nus">&clubs;</sup></span>
+            <span class="au"><a href="https://www.comp.nus.edu.sg/~whsu/">Wynne Hsu</a><sup class="nus">&clubs;</sup></span>
+          </div>
+          <div class="affil">
+            <span class="affil-item"><span class="nus">&clubs;</span> National University of Singapore</span>
+            <span class="affil-item"><span class="ox">&diams;</span> University of Oxford</span>
+          </div>
+          <div class="contact">
+            <span>Contact <a href="mailto:libobo@nus.edu.sg">libobo@nus.edu.sg</a></span>
+            <span class="dot">&middot;</span>
+            <span><a href="mailto:haofei7419@gmail.com">haofei7419@gmail.com</a>
+              <em class="corr">(<span class="star">*</span> corresponding author)</em></span>
+          </div>
+          <div class="counts">
+            <div><b>10</b><span>evidence modalities</span></div>
+            <div><b>20+</b><span>disciplines</span></div>
+            <div><b>34</b><span>end-to-end cases</span></div>
+          </div>
+        </div>
+        <div class="ovnews">
+          <h2><span class="newsemoji" aria-hidden="true">&#127881;</span>News</h2>
+          <ul class="newslist">
+            <li><time>2026/08</time><span><b>Interactive replays</b> of three complete runs are live: step through the
+              evidence, the code and the checks, and take the paper and the log with you.</span></li>
+            <li><time>2026/07</time><span>Technical report completed, covering the full OmniScientist evaluation.</span></li>
+            <li><time>2026/07</time><span>Source code and the one-command research workflow are available on
+              <a href="https://github.com/Omni-Scientist/OmniScientist">GitHub</a>.</span></li>
+            <li><time>2026/07</time><span>Five representative papers produced end to end by OmniScientist are
+              <a href="#" data-go="Papers">listed with their scores</a>.</span></li>
+            <li><time>2026/07</time><span>Project page updated with results and multimodal evidence.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Overview">
+    <div class="panel fwpanel">
+      <div class="fighead">
+        <h2>Raw evidence in, a finished study out</h2>
+        <p class="note">Observations of every kind go in; the engine reads them, tests what it reads, and writes
+          the result up. Nothing on the way through is staged: the code runs against the real data, and a claim
+          the numbers do not carry gets sent back rather than polished.</p>
+      </div>
+      <figure class="fwfig">
+        <a href="assets/site/fig_teaser.png" target="_blank" rel="noopener" title="Open the full-size figure">
+          <img src="assets/site/fig_teaser.png" alt="From raw observations through the engine to scientific discoveries" loading="lazy">
+        </a>
+      </figure>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Interface">
+    <div class="panel fwpanel">
+      <div class="fighead">
+        <h2>Which relations survive the interface</h2>
+        <p class="note">A caption or a feature vector arrives with the structure already removed. Three cases
+          start at the raw record instead, and the cues read off it are what the hypothesis is built on. The
+          band at the bottom is the interface most systems expose in its place.</p>
+      </div>
+      <figure class="fwfig">
+        <a href="assets/site/fig_interface.png" target="_blank" rel="noopener" title="Open the full-size figure">
+          <img src="assets/site/fig_interface.png" loading="lazy"
+               alt="Three cases from raw record to structural cues, hypothesis and verified finding, above the blind precomputed interface">
+        </a>
+      </figure>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Framework">
+    <div class="panel fwpanel">
+      <div class="fighead">
+        <h2>One command, the whole research lifecycle</h2>
+        <p class="note">Evidence enters in its native form, and a deterministic pipeline routes the run through
+          ideation, experiment and writeup, reporting only what the execution record supports. Perception stays
+          available to every stage, and a new discipline takes a specification file, not a new engine.</p>
+      </div>
+      <figure class="fwfig">
+        <a href="assets/site/fig_pipeline.png" target="_blank" rel="noopener" title="Open the full-size figure">
+          <img src="assets/site/fig_pipeline.png" loading="lazy"
+               alt="The OmniScientist framework: raw evidence entering three agents for ideation, experiment and writeup, over a lifecycle-wide perception band">
+        </a>
+      </figure>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Checks">
+    <div class="panel fwpanel">
+      <div class="fighead">
+        <h2>Only what the record carries becomes a claim</h2>
+        <p class="note">The rigour check asks whether the code really ran, whether every attempted test is
+          accounted for, and whether the headline rests on an analysis that supports it. The claim check then
+          matches every number and every sentence against the analysis that produced it.</p>
+      </div>
+      <figure class="fwfig">
+        <a href="assets/site/fig_checks.png" target="_blank" rel="noopener" title="Open the full-size figure">
+          <img src="assets/site/fig_checks.png" loading="lazy"
+               alt="Rigour check and claim check auditing a reported result against the execution record">
+        </a>
+      </figure>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Findings" id="gallery">
+    <div class="galhead">Findings &middot; <span>two of these open a full write-up</span></div>
+    <div class="gal">
+      <div class="gal-track" id="galTrack">
+
+        <div class="gal-item">
+          <div class="said">
+            <div class="tag"><i style="background:var(--teal)"></i>Seismology &middot; three-component signal</div>
+            <h2 class="claim">A fifth of the discard pile was never noise</h2>
+            <div class="figurenum" style="color:var(--teal)">21.7%<small>163 of 750 noise-labelled traces carry coherent transients</small></div>
+            <a class="findlink" style="background:var(--teal);box-shadow:0 6px 16px rgba(47,138,134,.3)" href="findings/stead.html">See the full finding &rarr;</a>
+            <ul class="support">
+              <li>The detector never sees the label. Threshold calibrated on <b>IAAFT surrogates</b> of the noise itself at a 1% false-alarm rate, measured back at 1.07%.</li>
+              <li>An amplitude-only detector at the same rate flags <b>2.0%</b>: polarization and cross-channel coincidence carry the finding.</li>
+              <li>Stable at <b>19 to 25%</b> across a fifty-fold threshold range and three null models.</li>
+            </ul>
+          </div>
+          <div class="plate">
+            <img src="assets/slides/seismology.webp" alt="Eight traces labelled noise, four flat and four with clear impulsive onsets" loading="lazy">
+            <div class="cap">Eight traces filed as noise. Lower half: the four with the strongest impulsive onsets in this sample.</div>
+          </div>
+        </div>
+
+        <div class="gal-item">
+          <div class="said">
+            <div class="tag"><i style="background:var(--ochre)"></i>Cardiology &middot; audio</div>
+            <h2 class="claim">The metadata predicted the patient until the hospital changed</h2>
+            <div class="figurenum" style="color:var(--ochre)">0.60 &rarr; 0.35<small>metadata-only AUC, pooled then leave-one-cohort-out</small></div>
+            <a class="findlink" href="findings/heartsound.html">See the full finding &rarr;</a>
+            <ul class="support">
+              <li>Below chance once the cohort is held out: the shortcut <b>flips sign</b> across sites. Drop 0.248, p &lt; 0.0001.</li>
+              <li>The murmur-band acoustic feature barely moves: <b>0.701 to 0.656</b>, not significant.</li>
+              <li>What sounded like a model of the heart was partly a model of the recording booth.</li>
+            </ul>
+          </div>
+          <div class="plate">
+            <img src="assets/slides/cardiology.webp" alt="Heart sound spectrograms grouped by cohort" loading="lazy">
+            <div class="cap">Heart-sound recordings, labelled normal or abnormal, grouped by the cohort that recorded them.</div>
+          </div>
+        </div>
+
+        <div class="gal-item">
+          <div class="said">
+            <div class="tag"><i style="background:var(--clay)"></i>Astronomy &middot; imaging</div>
+            <h2 class="claim">Change the telescope and its reading of the galaxy stays put</h2>
+            <div class="figurenum" style="color:var(--sky-blue)">83.8%<small>agreement on the same galaxies across two surveys</small></div>
+            <ul class="support">
+              <li>Chance agreement for this label mix is <b>35.0%</b>; Cohen's &kappa; is <b>0.75</b>, CI 0.64 to 0.85.</li>
+              <li>Permutation test over the pairing gives <b>p = 0.0002</b>.</li>
+              <li>105 galaxies, each imaged twice: once by SDSS, once by DECaLS.</li>
+            </ul>
+          </div>
+          <div class="plate">
+            <img src="assets/slides/astronomy.webp" alt="The same galaxies imaged by SDSS and DECaLS">
+            <div class="cap">Top row SDSS, bottom row DECaLS. Labels are the catalogue morphology.</div>
+          </div>
+        </div>
+
+        <div class="gal-item">
+          <div class="said">
+            <div class="tag"><i style="background:var(--plum)"></i>Materials informatics &middot; table</div>
+            <h2 class="claim">The usual split flattered the model by a factor of seven</h2>
+            <div class="figurenum" style="color:var(--plum)">3.1 - 7.0&times;<small>error gap, random split versus leave-one-family-out</small></div>
+            <ul class="support">
+              <li>Cuprates: RMSE <b>12.1 &rarr; 51.6 K</b>. Iron-based: <b>6.6 &rarr; 20.5 K</b>. Other families: <b>4.3 &rarr; 30.3 K</b>.</li>
+              <li>Same data, same model. Only the question changed, from interpolating inside a family to predicting one it had never seen.</li>
+            </ul>
+          </div>
+          <div class="plate">
+            <img src="assets/slides/materials.webp" alt="Random split versus leave-one-family-out error" loading="lazy">
+            <div class="cap">Figure produced by the run itself.</div>
+          </div>
+        </div>
+
+        <div class="gal-item">
+          <div class="said">
+            <div class="tag"><i style="background:var(--sky-blue)"></i>Remote sensing &middot; imaging</div>
+            <h2 class="claim">Rotate the patches and the benchmark falls apart</h2>
+            <div class="figurenum" style="color:var(--sky-blue)">62.0% &rarr; 50.7%<small>orientation-only classifier, upright then rotated</small></div>
+            <ul class="support">
+              <li>Features carry <b>no colour and no raw pixels</b>, only orientation histograms, angular FFT and coherence. Chance is 20%.</li>
+              <li>Per class the collapse is uneven: forest recall <b>0.68 &rarr; 0.27</b>, residential <b>0.91 &rarr; 0.62</b>, annual crop does not move.</li>
+              <li>A frame-locked cue was doing part of the work that looked like land-cover understanding.</li>
+            </ul>
+          </div>
+          <div class="plate">
+            <img src="assets/slides/remote_sensing.webp" alt="Sentinel-2 land cover patches" loading="lazy">
+            <div class="cap">Sentinel-2 land-cover patches, six of the benchmark classes.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="gal-meta"><span id="galLabel"></span><span class="bar" id="galBar"></span></div>
+  </section>
+
+  <section class="slide" data-name="Evidence">
+    <div class="panel">
+      <h2>One engine, ten kinds of evidence</h2>
+      <p class="note">The same pipeline reads photographs, spectrograms, waveforms, volumes, point clouds, video, trajectories, tables and sequences, across more than twenty disciplines, without first flattening every research object into a scalar benchmark.</p>
+      <div class="tiles" id="tiles"></div>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Results">
+    <div class="panel">
+      <h2>Reviewed by a cross-family judge panel</h2>
+      <p class="note">Scores run 0 to 10 across seven review dimensions. Composite is their mean. Blue marks the best in a column, green the second.</p>
+      <table>
+        <thead><tr><th>Backbone</th><th class="n">Novelty</th><th class="n">Sound.</th><th class="n">Clarity</th><th class="n">Signif.</th><th class="n">Reprod.</th><th class="n">MM ground.</th><th class="n">Factual</th><th class="n">Composite</th></tr></thead>
+        <tbody>
+          <tr><td>GLM-5.2</td><td class="n snd">6.2</td><td class="n snd">7.1</td><td class="n snd">6.8</td><td class="n best">6.4</td><td class="n snd">5.9</td><td class="n best">6.6</td><td class="n">7.5</td><td class="n best">6.6</td></tr>
+          <tr><td>Sonnet 5</td><td class="n best">6.3</td><td class="n">7.0</td><td class="n best">7.0</td><td class="n snd">6.3</td><td class="n best">6.1</td><td class="n">5.1</td><td class="n snd">7.8</td><td class="n snd">6.5</td></tr>
+          <tr><td>Kimi K2.7</td><td class="n snd">6.2</td><td class="n best">7.2</td><td class="n">6.7</td><td class="n">6.2</td><td class="n">5.5</td><td class="n snd">5.8</td><td class="n best">8.0</td><td class="n snd">6.5</td></tr>
+          <tr><td>GPT-5.6</td><td class="n">5.2</td><td class="n">6.3</td><td class="n">6.3</td><td class="n">5.0</td><td class="n">5.2</td><td class="n">4.2</td><td class="n">7.7</td><td class="n">5.7</td></tr>
+          <tr><td>Qwen3.5-122B</td><td class="n">4.7</td><td class="n">5.5</td><td class="n">6.2</td><td class="n">4.8</td><td class="n">4.8</td><td class="n">4.8</td><td class="n">6.5</td><td class="n">5.3</td></tr>
+          <tr><td>Qwen3.5-27B</td><td class="n">4.9</td><td class="n">5.5</td><td class="n">5.9</td><td class="n">4.9</td><td class="n">4.6</td><td class="n">4.9</td><td class="n">6.3</td><td class="n">5.3</td></tr>
+          <tr><td>Gemma-4-31B</td><td class="n">4.7</td><td class="n">5.1</td><td class="n">5.6</td><td class="n">4.5</td><td class="n">4.4</td><td class="n">4.7</td><td class="n">6.5</td><td class="n">5.1</td></tr>
+          <tr><td>Gemma-4-26B</td><td class="n">4.4</td><td class="n">4.4</td><td class="n">5.0</td><td class="n">4.0</td><td class="n">3.7</td><td class="n">3.8</td><td class="n">5.1</td><td class="n">4.3</td></tr>
+          <tr><td>Qwen3.5-9B</td><td class="n">4.0</td><td class="n">4.1</td><td class="n">4.8</td><td class="n">3.7</td><td class="n">3.7</td><td class="n">3.9</td><td class="n">4.8</td><td class="n">4.1</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Papers">
+    <div class="panel">
+      <h2>Papers it wrote, start to finish</h2>
+      <table>
+        <thead><tr><th>Paper</th><th>Discipline</th><th>Evidence</th><th class="n">Score</th></tr></thead>
+        <tbody>
+          <tr><td>Cram&eacute;r-Rao scaling of exponent precision in monomial Feynman laws</td><td>Physics</td><td>Formula</td><td class="n res">7.1</td></tr>
+          <tr><td>Sequential versus bursty leaf initiation in 3-D plant scans</td><td>Plant science</td><td>3-D scan</td><td class="n res">7.2</td></tr>
+          <tr><td>A continuum-removed index for residue and tillage ordering</td><td>Remote sensing</td><td>Hyperspectral</td><td class="n res">6.3</td></tr>
+          <tr><td>Transient-impulsivity features across machine types</td><td>Machinery</td><td>Audio</td><td class="n res">7.1</td></tr>
+          <tr><td>Coherent polarized signals in noise-labelled STEAD traces</td><td>Seismology</td><td>Signal</td><td class="n res">6.9</td></tr>
+        </tbody>
+      </table>
+      <pre>@techreport{omniscientist2026,
+  title  = {OmniScientist: An Omni-Modal Omni-Discipline AI Scientist},
+  author = {Li, Bobo and Fei, Hao and Ju, Tianjie and Lee, Mong-Li and Hsu, Wynne},
+  year   = {2026},
+  note   = {Technical Report}
+}</pre>
+      <p class="note">Every number on this page comes from the run that produced it. Observations are public research datasets; sources and licences are listed in the release documentation.</p>
+    </div>
+  </section>
+
+</div>
+
+<button class="edge-arrow l" id="galPrev" aria-label="previous finding">&#8249;</button>
+<button class="edge-arrow r" id="galNext" aria-label="next finding">&#8250;</button>
+<div class="side" id="side"></div>
+<div class="foot"><b>OmniScientist</b><span>An Omni-Modal Omni-Discipline AI Scientist</span><span class="counter" id="counter"></span></div>
+
+<script>
+/* ---- the workbench: one recorded run, laid out left to right ----
+   Whole cards land, one after another; nothing is typed out letter by letter here.
+   The data is built by webdev/tools/build_workbench.py straight from a run's replay
+   script, so the request, the images, the queries, the rejection and the manuscript
+   are the ones that run actually produced. */
+(function () {
+  const win = document.getElementById('wbwin');
+  if (!win) return;
+  const canvas = document.getElementById('wbcanvas');
+  const grid = document.getElementById('wbgrid');
+  const promptBox = document.getElementById('wbprompt');
+  const paperBox = document.getElementById('wbpaper');
+  const runLabel = document.getElementById('wbrun');
+  const replayBtn = document.getElementById('wbreplay');
+  const ICON = { eye: '◉', book: '≡', back: '↺', aim: '◆', code: '⌥',
+                 chart: '▦', ok: '✓', pen: '✎' };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g,
+    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+  let steps = [];          // [{el, ms}] in the order they land
+  let token = 0, played = false;
+  const slow = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function card(c) {
+    const d = document.createElement('div');
+    d.className = 'wbcard pop' + (c.bad ? ' bad' : c.good ? ' good' : '');
+    let inner = `<div class="t"><span class="ic">${ICON[c.ic] || '●'}</span>${esc(c.t)}</div>`;
+    if (c.b) inner += `<div class="b">${esc(c.b)}</div>`;
+    if (c.code) inner += `<pre>${esc(c.code)}</pre>`;
+    if (c.figs && c.figs.length) inner += `<div class="wbfigs">${c.figs.map(f =>
+      `<img src="${esc(f.src)}" alt=""${f.wh ? ` width="${f.wh[0]}" height="${f.wh[1]}"` : ''} loading="lazy">`).join('')}</div>`;
+    if (c.chips) inner += `<div class="wbchips">${c.chips.map(x => `<span>${esc(x)}</span>`).join('')}</div>`;
+    d.innerHTML = inner;
+    return d;
+  }
+
+  function build(d) {
+    runLabel.innerHTML = `${esc(d.run)} &middot; ${esc(d.field)} &middot; <b>recorded trace</b>`;
+
+    const ask = document.createElement('div');
+    ask.className = 'prompt pop';
+    ask.textContent = d.ask;
+    promptBox.appendChild(ask);
+    steps.push({ el: ask, ms: 170 });
+
+    (d.candidates || []).forEach(c => {
+      const f = document.createElement('figure');
+      f.className = 'pop';
+      f.innerHTML = `<img src="${esc(c.src)}" alt=""${c.wh ? ` width="${c.wh[0]}" height="${c.wh[1]}"` : ''}
+        loading="lazy"><figcaption>${esc(c.cap)}</figcaption>`;
+      grid.appendChild(f);
+      steps.push({ el: f, ms: 48 });
+    });
+
+    (d.stages || []).forEach(st => {
+      const col = document.createElement('div');
+      col.className = 'wbcol ' + st.id;
+      const head = document.createElement('div');
+      head.className = 'wbcolhead';
+      head.innerHTML = `<span class="no">${st.n}</span>${esc(st.label)}`;
+      col.appendChild(head);
+      canvas.appendChild(col);
+      steps.push({ el: head, ms: 210, head: true });
+      (st.cards || []).forEach(c => {
+        const el = card(c);
+        col.appendChild(el);
+        steps.push({ el, ms: 175 });
+      });
+    });
+
+    const p = d.paper || {};
+    const box = document.createElement('div');
+    box.className = 'wbpaper pop';
+    box.innerHTML = `<span class="vd">${esc(p.verdict || 'done')}</span>
+      <h4>${esc(p.title)}</h4>
+      <div class="meta">
+        <div><b>${p.sections || 0}</b>sections</div>
+        <div><b>${p.figures || 0}</b>figures</div>
+        <div><b>${p.refs || 0}</b>refs</div>
+      </div>
+      <a class="wbopen" href="replay.html?run=${encodeURIComponent(d.run)}">Replay this run step by step &rarr;</a>`;
+    paperBox.appendChild(box);
+    steps.push({ el: box, ms: 260 });
+  }
+
+  function reset() {
+    token++;
+    steps.forEach(s => { s.el.classList.remove('in'); if (s.head) s.el.classList.remove('on'); });
+  }
+
+  function play(force) {
+    if (played && !force) return;
+    played = true;
+    reset();
+    const mine = token;
+    win.classList.add('on');
+    if (slow) {
+      steps.forEach(s => { s.el.classList.add('in'); if (s.head) s.el.classList.add('on'); });
+      return;
+    }
+    let t = 260;
+    steps.forEach(s => {
+      t += s.ms;
+      setTimeout(() => {
+        if (token !== mine) return;
+        s.el.classList.add('in');
+        if (s.head) s.el.classList.add('on');
+      }, t);
+    });
+  }
+
+  fetch('assets/workbench.json').then(r => r.json()).then(d => {
+    build(d);
+    window.__wbPlay = play;
+    replayBtn.addEventListener('click', () => play(true));
+    // arriving straight on the workbench (a reload mid-deck) still starts it
+    if (document.querySelector('.slide[data-name="Workbench"]').getBoundingClientRect().top < innerHeight * 0.6) play();
+  }).catch(() => { win.classList.add('on'); });
+})();
+
+
+/* ---- the sign, set one letter at a time, then the line written out by hand ---- */
+(function () {
+  // one display face and one brand colour per letter; the mix is what makes it a sign
+  // every face here has a true lowercase; unicase and caps-only faces would turn
+  // "OmniScientist" into "OmniScieNtist", so none of those are in the mix
+  const LETTERS = [
+    ['O', 'Rye',              'var(--omni-o)'],
+    ['m', 'Abril Fatface',    'var(--omni-m)'],
+    ['n', 'Yeseva One',       'var(--omni-n)'],
+    ['i', 'Playfair Display', 'var(--omni-i)'],
+    ['S', 'Bodoni Moda',      'var(--omni-sci)'],
+    ['c', 'Prata',            'var(--omni-sci)'],
+    ['i', 'Elsie',            'var(--omni-sci)'],
+    ['e', 'Glass Antiqua',    'var(--omni-sci)'],
+    ['n', 'Newsreader',       'var(--omni-sci)'],
+    ['t', 'Rye',              'var(--omni-sci)'],
+    ['i', 'Yeseva One',       'var(--omni-sci)'],
+    ['s', 'Playfair Display', 'var(--omni-sci)'],
+    ['t', 'Abril Fatface',    'var(--omni-sci)'],
+  ];
+  // per-face optical sizing: these nine faces have very different x-heights,
+  // so each is scaled to sit on one line without any looking dropped or oversized
+  const TUNE = {
+    'Rye': [0.92, 400], 'Abril Fatface': [0.96, 400], 'Yeseva One': [1.00, 400],
+    'Playfair Display': [1.06, 900], 'Bodoni Moda': [1.10, 900], 'Prata': [1.00, 400],
+    'Elsie': [1.04, 900], 'Glass Antiqua': [1.08, 400], 'Newsreader': [1.08, 600],
+  };
+  const FULL = 'An Omni-Modal Omni-Discipline AI Scientist';
+  const LINE = 'The omni-modal AI scientist for every discipline and the entire research '
+             + 'lifecycle, turning raw evidence into novel scientific discoveries.';
+
+  const sign = document.getElementById('sign');
+  const full = document.getElementById('fullname');
+  const hand = document.getElementById('hand');
+  if (!sign) return;
+
+  // the mark leads the sign, the same lockup the paper title uses
+  const mark = new Image();
+  mark.src = 'assets/omni-logo.svg';
+  mark.className = 'mark';
+  mark.alt = '';
+  sign.appendChild(mark);
+
+  LETTERS.forEach(([ch, face, col]) => {
+    const s = document.createElement('span');
+    const t = TUNE[face] || [1, 400];
+    s.textContent = ch;
+    s.style.fontFamily = `"${face}", Georgia, serif`;
+    s.style.fontSize = `${t[0]}em`;
+    s.style.fontWeight = t[1];
+    s.style.color = col;
+    sign.appendChild(s);
+  });
+  // no colon on the sign: the full title carries it on the line below instead
+  const spans = [...sign.querySelectorAll('span')];
+  const slow = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // set the sign as large as the viewport takes, measured rather than guessed:
+  // thirteen different faces make the natural width impossible to predict from vw alone
+  function fitSign() {
+    const want = Math.min(innerWidth * 0.90, 1560);
+    sign.style.fontSize = '100px';
+    const at100 = sign.scrollWidth || 1;
+    const px = Math.max(34, Math.min(196, 100 * want / at100));
+    sign.style.fontSize = px + 'px';
+  }
+  fitSign();
+  addEventListener('resize', fitSign);
+  mark.addEventListener('load', fitSign);   // the mark widens the sign once it arrives
+
+  /* type `text` into `host`, char by char, calling done() at the end.
+     `pace` scales the whole rhythm so the two typed lines can run at different speeds. */
+  function type(host, text, pace, done) {
+    const body = document.createElement('span');
+    const cur = document.createElement('i');
+    cur.className = 'cur';
+    host.append(body, cur);
+    let i = 0;
+    (function tick() {
+      body.textContent = text.slice(0, ++i);
+      if (i >= text.length) { host.classList.add('done'); return done(); }
+      // rests on punctuation, runs through the short words
+      const c = text[i - 1];
+      const ms = c === ',' ? 190 : c === '.' ? 230 : c === ' ' ? 44 : 24 + Math.random() * 28;
+      setTimeout(tick, ms * pace);
+    })();
+  }
+
+  function reveal() {
+    ['rev1'].forEach((id, k) => {
+      const el = document.getElementById(id);
+      if (el) setTimeout(() => el.classList.add('on'), k * 150);
+    });
+  }
+
+  function run() {
+    if (slow) {                                     // no motion: set everything at once
+      mark.style.opacity = 1; mark.style.transform = 'none';
+      spans.forEach(s => { s.style.opacity = 1; s.style.transform = 'none'; });
+      full.textContent = FULL; hand.textContent = LINE; reveal(); return;
+    }
+    const GAP = 50;                                 // one letter lands, then the next
+    setTimeout(() => mark.classList.add('set'), 130);
+    spans.forEach((s, k) => setTimeout(() => s.classList.add('set'), 330 + k * GAP));
+    // sign lands -> full title runs out fast -> the sentence is written at reading pace
+    setTimeout(() => type(full, FULL, 0.35,
+      () => type(hand, LINE, 0.62, reveal)), 330 + spans.length * GAP + 190);
+  }
+  // wait for the display faces, otherwise the letters land in Georgia and then jump
+  (document.fonts ? document.fonts.ready : Promise.resolve()).then(
+    () => { fitSign(); run(); }, () => { fitSign(); run(); });
+})();
+
+
+(function () {
+  const deck = document.getElementById('deck');
+  const slides = [...deck.querySelectorAll('.slide')];
+  const side = document.getElementById('side');
+  const counter = document.getElementById('counter');
+  const galPrev = document.getElementById('galPrev');
+  const galNext = document.getElementById('galNext');
+  let at = 0;
+
+  slides.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.title = s.dataset.name;
+    b.addEventListener('click', () => goSlide(i));
+    side.appendChild(b);
+  });
+
+  // one gesture moves exactly one slide, and the animation always finishes on it
+  let animating = false;
+  function goSlide(i, instant) {
+    const next = Math.max(0, Math.min(slides.length - 1, i));
+    const target = next * deck.clientHeight;
+    at = next;
+    paint();
+    if (instant) { deck.scrollTop = target; return; }
+    const from = deck.scrollTop, dist = target - from;
+    if (!dist) return;
+    const t0 = performance.now(), dur = 520;
+    animating = true;
+    (function step(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      const e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;   // easeInOutCubic
+      deck.scrollTop = from + dist * e;
+      if (p < 1) return requestAnimationFrame(step);
+      deck.scrollTop = target;          // land on it exactly, never a pixel short
+      animating = false;
+    })(performance.now());
+  }
+  function paint() {
+    [...side.children].forEach((b, i) => b.classList.toggle('on', i === at));
+    counter.textContent = `${String(at + 1).padStart(2, '0')} / ${String(slides.length).padStart(2, '0')}  ${slides[at].dataset.name}`;
+    const inGal = slides[at].id === 'gallery';
+    galPrev.classList.toggle('on', inGal);
+    galNext.classList.toggle('on', inGal);
+    // the workbench runs when you arrive at it, not while it is off screen
+    if (slides[at].dataset.name === 'Workbench' && window.__wbPlay) window.__wbPlay();
+  }
+
+  // a trackpad flings dozens of wheel events per swipe; the lock collapses them into one page
+  let wheelLock = 0;
+  deck.addEventListener('wheel', e => {
+    e.preventDefault();
+    if (animating || performance.now() < wheelLock) return;
+    if (Math.abs(e.deltaY) < 8) return;
+    wheelLock = performance.now() + 640;
+    goSlide(at + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+
+  let touchY = null;
+  deck.addEventListener('touchstart', e => { touchY = e.touches[0].clientY; }, { passive: true });
+  deck.addEventListener('touchend', e => {
+    if (touchY == null || animating) return;
+    const dy = touchY - (e.changedTouches[0] || {}).clientY;
+    if (Math.abs(dy) > 46) goSlide(at + (dy > 0 ? 1 : -1));
+    touchY = null;
+  }, { passive: true });
+
+  const track = document.getElementById('galTrack');
+  const items = [...track.children];
+  const bar = document.getElementById('galBar');
+  const label = document.getElementById('galLabel');
+  const NAMES = ['Seismology', 'Cardiology', 'Astronomy', 'Materials', 'Remote sensing'];
+  let g = 0;
+
+  items.forEach(() => bar.appendChild(document.createElement('i')));
+  function paintGal() {
+    track.style.transform = `translateX(${-g * 100}%)`;
+    [...bar.children].forEach((b, i) => b.classList.toggle('on', i === g));
+    label.textContent = `${String(g + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}  ${NAMES[g]}`;
+  }
+  const galGo = d => { g = (g + d + items.length) % items.length; paintGal(); };
+  galPrev.addEventListener('click', () => galGo(-1));
+  galNext.addEventListener('click', () => galGo(1));
+  paintGal();
+
+  addEventListener('keydown', e => {
+    const inGal = slides[at].id === 'gallery';
+    if (inGal && e.key === 'ArrowRight') { e.preventDefault(); galGo(1); return; }
+    if (inGal && e.key === 'ArrowLeft') { e.preventDefault(); galGo(-1); return; }
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goSlide(at + 1); }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); goSlide(at - 1); }
+    if (e.key === 'Home') goSlide(0);
+    if (e.key === 'End') goSlide(slides.length - 1);
+  });
+
+  // links name the slide they want rather than its index: slides get inserted, and an
+  // index written into the markup goes quietly wrong the moment one does
+  document.querySelectorAll('[data-go]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const want = a.dataset.go;
+      const i = /^\d+$/.test(want) ? Number(want)
+                                   : slides.findIndex(s => s.dataset.name === want);
+      if (i >= 0) goSlide(i);
+    });
+  });
+  addEventListener('resize', () => goSlide(at, true));
+
+  // the demos slide is filled from the same index the demos page reads
+  const DBLURB = {
+    stead_seismic:  'Given 1,500 seismograms split into earthquake and noise, it looked at the raw waveforms, then went after the traces the catalogue calls noise.',
+    galaxy_xsurvey: 'The same 105 galaxies, photographed by a deep survey and a shallow one. It looked at both, then tested whether the reading of a galaxy survives the change of telescope.',
+    birdaudio:      'Two thousand ten-second field recordings tagged only bird or no bird. It listened, then asked where that label is acoustically easy and where it is not.',
+  };
+  fetch('demos/index.json').then(r => r.json()).then(list => {
+    const host = document.getElementById('demorows');
+    if (!host) return;
+    list.forEach(d => {
+      const c = d.counts || {};
+      const a = document.createElement('a');
+      a.className = 'drow ' + d.modality;
+      a.href = 'replay.html?run=' + encodeURIComponent(d.run);
+      a.innerHTML = `
+        <div class="dbody">
+          <div class="dchips"><span class="dchip">${d.modality}</span><span class="dchip f">${d.field}</span></div>
+          <h3>${d.title || d.run}</h3>
+          <p>${DBLURB[d.run] || d.question || ''}</p>
+          <div class="dstats">
+            <div><b>${c.steps}</b>steps</div>
+            <div><b>${c.images}</b>looked at</div>
+            <div><b>${c.refs}</b>papers read</div>
+            <div><b>${c.code}</b>code runs</div>
+            <div class="hot"><b>${c.reject}</b>sent back</div>
+          </div>
+        </div>
+        <div class="dfig">${d.poster ? `<img src="demos/${d.poster}" alt="" loading="lazy">` : ''}</div>
+        <span class="dgo">Replay &rarr;</span>`;
+      host.appendChild(a);
+    });
+  }).catch(() => {});
+
+  fetch('assets/hero/manifest.json').then(r => r.json()).then(man => {
+    const byDisc = new Map();
+    man.forEach(e => { if (!byDisc.has(e.disc)) byDisc.set(e.disc, e); });
+    const strip = document.getElementById('tiles');
+    [...byDisc.values()].slice(0, 24).forEach(e => {
+      const f = document.createElement('figure');
+      f.innerHTML = `<img src="assets/hero/tiles/${e.f}" alt="" loading="lazy"><figcaption>${e.disc}</figcaption>`;
+      strip.appendChild(f);
+    });
+  }).catch(() => {});
+
+  const q = new URLSearchParams(location.search);
+  const want = Number(q.get('s') || 0);
+  if (want > 0) goSlide(Math.min(want, slides.length - 1), true);
+  const wantG = Number(q.get('g') || 0);
+  if (wantG > 0) { g = Math.min(wantG, items.length - 1); paintGal(); }
+  paint();
+})();
+</script>
+</body>
+</html>

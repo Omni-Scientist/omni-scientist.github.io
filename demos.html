@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demos &middot; OmniScientist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&family=Caveat:wght@600&display=swap">
+<link rel="stylesheet" href="assets/cloth.css">
+<style>
+  body { font-family: "Noto Sans", system-ui, sans-serif; color: var(--ink); margin: 0; min-height: 100%; }
+  a { color: inherit; }
+  .top {
+    display: flex; align-items: center; gap: 16px; padding: 20px 3.4vw;
+    font-size: .86rem;
+  }
+  .top a.back { text-decoration: none; display: inline-flex; align-items: center; gap: 8px; color: var(--ink-2); }
+  .top a.back:hover { color: var(--ink); }
+  .top .mark { font-family: "Noto Serif", Georgia, serif; font-weight: 700; }
+
+  .wrap { max-width: 1440px; margin: 0 auto; padding: 4px 3.4vw 40px; }
+  h1 { font-family: "Noto Serif", Georgia, serif; font-size: clamp(1.7rem, 3.2vw, 2.4rem);
+       margin: 6px 0 0; letter-spacing: -.02em; }
+  .lede { font-family: "Caveat", cursive; font-size: clamp(1.1rem, 1.9vw, 1.45rem);
+          color: var(--ink-2); margin: 6px 0 0; }
+  .note { font-size: .83rem; line-height: 1.6; color: var(--ink-2); max-width: 96ch; margin: 9px 0 0; }
+
+  /* one run per row: words on the left, the figure on the right, short enough that
+     a whole row reads at a glance instead of three tall cards sitting side by side */
+  .cards { display: flex; flex-direction: column; gap: 13px; margin-top: 18px; }
+  .card {
+    position: relative; display: grid; grid-template-columns: minmax(0,1fr) 400px; min-height: 182px;
+    align-items: stretch; text-decoration: none; overflow: hidden;
+    background: rgba(255,255,255,.94); border: 1px solid rgba(63,96,124,.18);
+    border-left: 5px solid var(--accent); border-radius: 16px; box-shadow: var(--soft);
+    transition: transform .18s, box-shadow .18s, border-color .18s;
+  }
+  .card:hover { transform: translateX(4px); box-shadow: 0 16px 38px rgba(63,86,110,.20); }
+  .card.signal { --accent: #184878; } .card.image { --accent: #934bed; } .card.audio { --accent: #00a890; }
+
+  .card .body { padding: 16px 28px 15px; display: flex; flex-direction: column; min-width: 0; }
+  .card .poster { position: relative; background: #f7f8fa; border-left: 1px solid rgba(63,96,124,.12); }
+  .card .poster img { position: absolute; inset: 0; width: 100%; height: 100%;
+                      object-fit: contain; object-position: center; display: block; padding: 12px 10px; }
+  .card .poster::after {                     /* the figure fades into the card, no hard seam */
+    content: ""; position: absolute; inset: 0;
+    background: none;   /* the posters are drawn on white already */
+  }
+
+  .chiprow { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .chip {
+    font-size: .64rem; letter-spacing: .13em; text-transform: uppercase; font-weight: 600;
+    padding: 4px 10px; border-radius: 999px; color: #fff; background: var(--accent);
+  }
+  .chip.field { color: var(--ink-2); background: rgba(63,96,124,.09); font-weight: 500; }
+  .card h2 { font-family: "Noto Serif", Georgia, serif; font-size: 1.18rem; line-height: 1.34;
+             margin: 8px 0 0; font-weight: 600;
+             display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .card p { font-size: .87rem; line-height: 1.54; color: var(--ink-2); margin: 6px 0 0; max-width: 66ch;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .stats { display: flex; gap: 28px; flex-wrap: wrap; margin-top: auto; padding-top: 12px; }
+  .stats div { font-size: .63rem; color: var(--dim); letter-spacing: .09em; text-transform: uppercase; }
+  .stats b { display: block; font-family: "Noto Serif", Georgia, serif; font-size: 1.44rem;
+             color: var(--ink); letter-spacing: 0; text-transform: none; }
+  .stats div.hot b { color: var(--omni-o); }
+  .go {
+    position: absolute; right: 22px; bottom: 20px; z-index: 2;
+    padding: 10px 22px; border-radius: 999px; background: var(--accent); color: #fff;
+    font-size: .84rem; font-weight: 600; box-shadow: 0 6px 18px rgba(24,72,120,.28);
+    transition: transform .18s;
+  }
+  .card:hover .go { transform: translateX(4px); }
+
+  @media (max-width: 860px) {
+    .card { grid-template-columns: 1fr; }
+    .card .poster { height: 150px; }
+    .card .poster::after { background: linear-gradient(0deg, rgba(255,255,255,.9), rgba(255,255,255,0) 55%); }
+    .go { position: static; margin-top: 16px; align-self: flex-start; }
+  }
+  .foot { text-align: center; font-size: .74rem; color: var(--dim); margin-top: 22px; line-height: 1.7; }
+</style>
+</head>
+<body class="cloth">
+
+<div class="top">
+  <a class="back" href="index.html">&larr; <span class="mark">OmniScientist</span></a>
+</div>
+
+<div class="wrap">
+  <h1>Watch it work</h1>
+  <p class="lede">Three real runs, replayed step by step.</p>
+  <p class="note">Each demo below is one complete run of the system, played back from its recorded trace:
+    the raw evidence it looked at, the literature it searched, every line of code it ran, every time a
+    check sent it back, and the manuscript it ended up with. Nothing is re-enacted or shortened for
+    effect. You can pause anywhere, drag the scrubber, and download the paper and the full log.</p>
+
+  <div class="cards" id="cards"></div>
+
+  <p class="foot">Replays are built from <code>engine/examples/&lt;run&gt;/stages</code> by
+    <code>webdev/tools/build_replay.py</code>.<br>Evidence images are re-rendered with the same
+    matplotlib code the perception layer used at run time.</p>
+</div>
+
+<script>
+const BLURB = {
+  stead_seismic:  'Given 1,500 seismograms split into earthquake and noise, it looked at the raw waveforms, then went after the traces the catalogue calls noise.',
+  galaxy_xsurvey: 'The same 105 galaxies, photographed by a deep survey and a shallow one. It looked at both, then tested whether the reading of a galaxy survives the change of telescope.',
+  birdaudio:      'Two thousand ten-second field recordings tagged only bird or no bird. It listened, then asked where that label is acoustically easy and where it is not.',
+};
+fetch('demos/index.json').then(r => r.json()).then(list => {
+  const host = document.getElementById('cards');
+  list.forEach(d => {
+    const a = document.createElement('a');
+    a.className = 'card ' + d.modality;
+    a.href = 'replay.html?run=' + encodeURIComponent(d.run);
+    const c = d.counts || {};
+    a.innerHTML = `
+      <div class="body">
+        <div class="chiprow">
+          <span class="chip">${d.modality}</span>
+          <span class="chip field">${d.field}</span>
+        </div>
+        <h2>${d.title || d.run}</h2>
+        <p>${BLURB[d.run] || d.question || ''}</p>
+        <div class="stats">
+          <div><b>${c.steps}</b>steps</div>
+          <div><b>${c.images}</b>looked at</div>
+          <div><b>${c.refs}</b>papers read</div>
+          <div><b>${c.code}</b>code runs</div>
+          <div class="hot"><b>${c.reject}</b>sent back</div>
+        </div>
+      </div>
+      <div class="poster">${d.poster ? `<img src="demos/${d.poster}" alt="" loading="lazy">` : ''}</div>
+      <span class="go">Replay &rarr;</span>`;
+    host.appendChild(a);
+  });
+}).catch(e => {
+  document.getElementById('cards').innerHTML =
+    '<p class="note">No replays built yet. Run <code>python3 webdev/tools/build_replay.py</code>.</p>';
+});
+</script>
+</body>
+</html>
