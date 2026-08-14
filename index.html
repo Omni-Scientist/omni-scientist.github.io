@@ -146,9 +146,15 @@
   .counts { display: flex; gap: 46px; justify-content: center; margin-top: 34px; flex-wrap: wrap; }
   .counts b { display: block; font-family: "Noto Serif", Georgia, serif; font-size: 1.7rem; font-weight: 700; }
   .counts span { font-size: .67rem; letter-spacing: .17em; text-transform: uppercase; color: var(--dim); }
-  .cta { display: flex; gap: 13px; justify-content: center; margin-top: 34px; flex-wrap: wrap; }
+  /* one row per kind of link. The labels get a column of their own and sit flush right,
+     so every row of buttons starts on the same edge however long its label is. */
+  .cta {
+    display: grid; grid-template-columns: auto auto; gap: 13px;
+    justify-content: center; align-items: center; margin-top: 34px;
+  }
   /* names the row of buttons beside it; a label, not an action */
-  .cta-label { align-self: center; margin-right: 3px; font-size: .95rem; font-weight: 600; color: var(--dim); }
+  .cta-label { justify-self: end; margin-right: 3px; font-size: .95rem; font-weight: 600; color: var(--dim); }
+  .cta-row { display: flex; gap: 13px; flex-wrap: wrap; }
   /* each button carries one of the wordmark colours instead of a flat institutional blue */
   .btn {
     --bc: var(--omni-sci);          /* always defined; a c-* class overrides it */
@@ -568,9 +574,15 @@
            A new tab, so a click never leaves the deck waiting on github to paint. -->
       <div class="cta reveal" id="rev1">
         <span class="cta-label">Install:</span>
-        <a class="btn primary c-demo" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9670;</span>Skill</a>
-        <a class="btn c-more" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9634;</span>Desktop</a>
-        <a class="btn c-code" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9654;</span>CLI</a>
+        <div class="cta-row">
+          <a class="btn primary c-demo" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9670;</span>Skill</a>
+          <a class="btn c-more" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9634;</span>Desktop</a>
+          <a class="btn c-code" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9654;</span>CLI</a>
+        </div>
+        <span class="cta-label">Paper:</span>
+        <div class="cta-row">
+          <a class="btn c-paper" href="https://arxiv.org/abs/2608.13558" target="_blank" rel="noopener"><span class="ic">&#9636;</span>Technical Reports</a>
+        </div>
       </div>
     </div>
   </section>
