@@ -555,11 +555,10 @@
       <h1 class="sign" id="sign" aria-label="OmniScientist"></h1>
       <p class="fullname" id="fullname" aria-live="polite"></p>
       <p class="hand" id="hand" aria-live="polite"></p>
-      <!-- the three ways to install it. The targets are not published yet, so each
-           button stays on this page until its link exists. -->
+      <!-- the three ways to install it, all three served out of the code repository -->
       <div class="cta reveal" id="rev1">
         <span class="cta-label">Install:</span>
-        <a class="btn primary c-demo" href="#" data-go="Title"><span class="ic">&#9670;</span>Skill</a>
+        <a class="btn primary c-demo" href="https://github.com/Omni-Scientist/OmniScientist"><span class="ic">&#9670;</span>Skill</a>
         <a class="btn c-more" href="https://github.com/Omni-Scientist/OmniScientist"><span class="ic">&#9634;</span>Desktop</a>
         <a class="btn c-code" href="https://github.com/Omni-Scientist/OmniScientist"><span class="ic">&#9654;</span>CLI</a>
       </div>
@@ -1066,21 +1065,39 @@
   addEventListener('resize', fitSign);
   mark.addEventListener('load', fitSign);   // the mark widens the sign once it arrives
 
-  /* type `text` into `host`, char by char, calling done() at the end.
-     `pace` scales the whole rhythm so the two typed lines can run at different speeds. */
-  function type(host, text, pace, done) {
+  const GAP = 50;                                 // one letter of the sign lands, then the next
+
+  /* how long a line gets: the sign is the metronome. It sweeps its own width in
+     spans.length * GAP, and the lines below sweep theirs at that same px-per-ms, so
+     equal width takes equal time and the small type never crawls behind the big.
+     Measured rather than assumed -- the faces and the viewport both move the width. */
+  function sweepMs(host, text) {
+    const probe = document.createElement('span');
+    probe.style.cssText = 'position:absolute;visibility:hidden;white-space:pre';
+    probe.textContent = text;
+    host.appendChild(probe);
+    const w = probe.offsetWidth;
+    probe.remove();
+    const speed = (sign.scrollWidth || 1) / (spans.length * GAP);
+    return Math.max(240, w / speed);
+  }
+
+  /* reveal `text` into `host` left to right, a whole word at a time. At the sign's
+     speed a single letter would land inside one frame, so letter-by-letter is both
+     invisible and slow; a word arrives as one piece and still reads. */
+  function sweep(host, text, done) {
     const body = document.createElement('span');
     const cur = document.createElement('i');
     cur.className = 'cur';
     host.append(body, cur);
-    let i = 0;
+    const words = text.match(/\S+\s*/g) || [text];
+    const ms = sweepMs(host, text);
+    let at = 0, k = 0;
     (function tick() {
-      body.textContent = text.slice(0, ++i);
-      if (i >= text.length) { host.classList.add('done'); return done(); }
-      // rests on punctuation, runs through the short words
-      const c = text[i - 1];
-      const ms = c === ',' ? 190 : c === '.' ? 230 : c === ' ' ? 44 : 24 + Math.random() * 28;
-      setTimeout(tick, ms * pace);
+      at += words[k++].length;
+      body.textContent = text.slice(0, at);
+      if (k >= words.length) { host.classList.add('done'); return done(); }
+      setTimeout(tick, ms * words[k].length / text.length);   // wide words rest longer
     })();
   }
 
@@ -1097,12 +1114,11 @@
       spans.forEach(s => { s.style.opacity = 1; s.style.transform = 'none'; });
       full.textContent = FULL; hand.textContent = LINE; reveal(); return;
     }
-    const GAP = 50;                                 // one letter lands, then the next
     setTimeout(() => mark.classList.add('set'), 130);
     spans.forEach((s, k) => setTimeout(() => s.classList.add('set'), 330 + k * GAP));
-    // sign lands -> full title runs out fast -> the sentence is written at reading pace
-    setTimeout(() => type(full, FULL, 0.35,
-      () => type(hand, LINE, 0.62, reveal)), 330 + spans.length * GAP + 190);
+    // sign lands, then both lines sweep out behind it at the sign's own speed
+    setTimeout(() => sweep(full, FULL,
+      () => sweep(hand, LINE, reveal)), 330 + spans.length * GAP + 190);
   }
   // wait for the display faces, otherwise the letters land in Georgia and then jump
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(
