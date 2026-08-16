@@ -1,0 +1,198 @@
+/* ============================================================================
+   The title-slide hero: evidence in, the five-stage loop, papers out.
+
+   It is a band under the type, and the type is never touched for it. The sign,
+   the two lines under it and the button keep the size they have always had and
+   stay the first thing anyone sees; the band takes whatever floor is left and is
+   measured to it. It runs the width of the page rather than sitting in a panel
+   in the middle of one.
+
+   Applied to a copy of index.html by _hero_patch.py, so the page it edits can be
+   re-pulled and re-patched while someone else is working on the rest of it.
+   ========================================================================== */
+
+.hero { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.hero-wires { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+/* the carrying string is lifted into this layer, above every resting record;
+   only the record being read (z 5) and the ring sit higher */
+.hero-wires.overlay { z-index: 4; }
+.wire { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+/* At rest the strings are the faintest thing on the page: there, under every
+   record, and only just. The one carrying something turns red and heavy. */
+.wire.base {
+  stroke-width: 1.1; stroke-opacity: .05;
+  transition: stroke .35s ease, stroke-width .35s ease, stroke-opacity .35s ease;
+}
+.wire.base.spine { stroke-opacity: .85; stroke-width: 8; }
+.wire.base.lit { stroke: #ef476f; stroke-width: 4; stroke-opacity: 1; }
+.wire.base.spine.lit { stroke-width: 8; }
+
+@property --evs { syntax: "<number>"; inherits: false; initial-value: 1; }
+
+/* ---------- left: the evidence field ----------------------------------- */
+.evfield, .outfield { position: absolute; inset: 0; pointer-events: none; }
+.ev {
+  position: absolute; pointer-events: auto; cursor: grab; touch-action: none;
+  z-index: 1;
+  transform: translate3d(var(--ox, 0px), var(--oy, 0px), 0)
+             rotate(var(--r, 0deg)) scale(var(--evs));
+  transition: --evs .5s cubic-bezier(.22,.9,.28,1.06),
+              width .5s cubic-bezier(.22,.9,.28,1.04), height .5s cubic-bezier(.22,.9,.28,1.04),
+              left .5s cubic-bezier(.22,.9,.28,1.04), top .5s cubic-bezier(.22,.9,.28,1.04);
+}
+.ev.drag { z-index: 6; cursor: grabbing; will-change: transform; --evs: 1.1; }
+.ev .evcard {
+  position: absolute; inset: 0; border-radius: 7px; overflow: hidden; background: #fff;
+  border: 1px solid rgba(63,96,124,.2);
+  box-shadow: 0 6px 16px rgba(63,86,110,.13), 0 1px 2px rgba(63,86,110,.09);
+  animation: evfloat var(--dur, 12s) ease-in-out var(--del, 0s) infinite alternate;
+  transition: border-color .4s, border-width .4s, box-shadow .4s;
+}
+.ev.drag .evcard { box-shadow: 0 20px 38px rgba(63,86,110,.24), 0 2px 6px rgba(63,86,110,.12); }
+.ev img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  display: block; transition: opacity .5s ease;
+}
+.ev img.out { opacity: 0; }
+/* the frosting: a sheet of white over every record not being read, so the field
+   is a soft bright haze rather than a wall of grey thumbnails. Reading one lifts
+   the sheet off it. White over the picture, never grey through it. */
+.ev .evcard::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: rgba(252,252,253,.68); opacity: 1; transition: opacity .45s ease;
+}
+.ev.read .evcard::after, .ev.drag .evcard::after { opacity: 0; }
+@keyframes evfloat {
+  from { transform: translate3d(0, -5px, 0) rotate(-.4deg); }
+  to   { transform: translate3d(0,  6px, 0) rotate(.45deg); }
+}
+/* The record being read grows, and its name sits under it in plain type. The
+   growth is real layout, not a transform: a scaled layer is re-rasterised, which
+   is what made the big card and its label look smudged, and its scaled shadow is
+   the off-square grey frame that sat behind the red one. */
+.ev.read { z-index: 5; }
+.ev.read .evcard {
+  border: 5px solid rgba(239,71,111,.92);
+  box-shadow: 0 10px 22px rgba(63,86,110,.16);
+}
+.ev .evtag {
+  position: absolute; top: 100%; left: 50%; transform: translate(-50%, 6px);
+  font-size: .5rem; font-style: normal; font-weight: 700; letter-spacing: .02em;
+  white-space: nowrap; color: var(--omni-o);
+  font-family: "Noto Sans", system-ui, sans-serif;
+  text-shadow: 0 1px 0 #fff, 0 -1px 0 #fff, 1px 0 0 #fff, -1px 0 0 #fff,
+               0 0 8px rgba(255,255,255,.9);
+  opacity: 0; transition: opacity .4s ease, font-size .4s ease;
+}
+.ev.read .evtag { opacity: 1; font-size: .92rem; }
+
+/* ---------- right: what comes out ---------------------------------------
+   One hand of papers that opens where it stands. Put the pointer on it and it
+   deals itself out; take it away and it closes. Nothing is behind a click. */
+.stackwrap { position: absolute; pointer-events: auto; z-index: 1; }
+.psheet {
+  position: absolute; border-radius: 4px; overflow: hidden; background: #fff;
+  border: 1px solid rgba(63,96,124,.18);
+  box-shadow: 0 12px 26px rgba(63,86,110,.18), 0 2px 5px rgba(63,86,110,.1);
+  transition: transform .5s cubic-bezier(.22,.88,.3,1.05), opacity .45s ease;
+}
+.psheet svg { display: block; width: 100%; height: 100%; }
+
+/* ---------- middle: the five-stage loop --------------------------------- */
+/* The ring scales with the room it has; the words do not. They are HTML sat on
+   top of it at fixed offsets, so a smaller circle never means smaller type. */
+.cycle { position: absolute; z-index: 4; }   /* over the lifted string, same layer, later in flow */
+.cycle > svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.cy-spin { animation: cyspin 44s linear infinite; transform-box: fill-box; transform-origin: 50% 50%; }
+.cy-mark { animation: cyspin 96s linear infinite reverse; transform-box: fill-box; transform-origin: 50% 50%; }
+@keyframes cyspin { to { transform: rotate(360deg); } }
+.cy-arc { fill: none; stroke-linecap: round; }
+.cy-tick { stroke: rgba(63,96,124,.30); stroke-width: 1; }
+.cy-comet { opacity: .95; }
+.cy-node .disc { transition: r .5s cubic-bezier(.2,.9,.3,1.15); }
+.cy-node .glow { opacity: 0; transition: opacity .5s ease; }
+.cy-node.on .glow { opacity: .15; }
+
+.cy-lab {
+  position: absolute; white-space: nowrap; font-family: "Noto Sans", system-ui, sans-serif;
+  font-size: .88rem; font-weight: 600; letter-spacing: .012em; color: var(--ink-2);
+  line-height: 1; opacity: .62; transition: color .45s ease, opacity .45s ease;
+  /* the strings pass this way; the words stay legible over them */
+  text-shadow: 0 1px 0 #fbfbfc, 0 -1px 0 #fbfbfc, 1px 0 0 #fbfbfc, -1px 0 0 #fbfbfc,
+               0 0 9px rgba(251,251,252,.95);
+}
+.cy-lab b { font-family: "Noto Serif", Georgia, serif; font-weight: 600;
+            font-size: .74em; color: var(--dim); margin-right: 5px; }
+.cy-lab.on { opacity: 1; color: var(--sc); }
+.cy-lab.on b { color: var(--sc); }
+.cy-name {
+  position: absolute; white-space: nowrap; text-align: center;
+  font-family: "Noto Serif", Georgia, serif; font-weight: 700; letter-spacing: -.012em;
+  transform: translate(-50%, -50%); line-height: 1;
+}
+.cy-name i { font-style: normal; }
+.cy-said {
+  position: absolute; white-space: nowrap; text-align: center;
+  font-family: "Noto Serif", Georgia, serif; font-style: italic;
+  color: var(--dim); transform: translate(-50%, 0);
+}
+
+/* ---------- the title slide keeps the top of the page -------------------
+   Sat high, but not jammed against the edge, and never resized: the block above
+   the band is exactly the one the site already had, at exactly its own size. */
+/* the type comes down a little and the band comes up to meet it; on a short
+   screen there is no slack to close, so neither moves */
+.slide.tslide { align-items: flex-start; padding-top: calc(4.6vh + 25px); }
+@media (max-height: 800px) {
+  .slide.tslide { padding-top: 4.6vh; }
+}
+/* the claim is one line now, so the two-line reservation is dead space */
+.slide.tslide .hand { min-height: 1.3em; }
+
+/* The line under the title: one sentence, plus whatever kind of record the field
+   is reading right now, gives a paper in whatever field that record belongs to.
+   The two slots are driven by the record being read below, so the line and the
+   field turn over together instead of on two clocks. */
+.eq {
+  display: inline-flex; align-items: baseline; justify-content: center;
+  flex-wrap: wrap; gap: 0 .46em; font-family: "Noto Serif", Georgia, serif;
+  font-size: clamp(1.08rem, 1.7vw, 1.45rem); font-style: normal; color: var(--ink);
+  line-height: 1.5;
+}
+.eq b { font-weight: 600; }
+.eq .op {
+  font-style: normal; font-weight: 400; color: var(--dim);
+  font-size: 1.05em; padding: 0 .1em;
+}
+.eq .arr { display: inline-flex; align-items: center; color: var(--ink-2); padding: 0 .12em; }
+.eq .arr svg { width: 2.6em; height: .9em; }
+/* the slots are plain inline boxes: overflow or flex here moves the baseline,
+   which is what had "a paper" sitting lower than the word before it */
+.eq .slot {
+  position: relative; display: inline-block; text-align: center;
+  vertical-align: baseline;
+}
+.eq .slot u {
+  display: inline-block; text-decoration: none; font-weight: 700;
+  white-space: nowrap; animation: slotin .5s cubic-bezier(.2,.9,.3,1.02);
+}
+.eq .slot svg { width: .84em; height: .84em; vertical-align: -.1em; margin-right: .3em; }
+@keyframes slotin {
+  from { opacity: 0; transform: translateY(.4em); }
+  to   { opacity: 1; transform: none; }
+}
+.eq .slot.mod u { color: var(--omni-o); }
+.eq .slot.disc u { color: var(--omni-n); }
+.eq .art { font-weight: 400; color: var(--ink); }
+.eq .slot::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -.06em; height: 1.5px;
+  border-radius: 1px; background: currentColor; opacity: .16;
+}
+
+@media (max-width: 1100px) {
+  .evfield, .outfield, .hero-wires { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cy-spin, .cy-mark, .ev .evcard { animation: none !important; }
+}
+.hero.hold .cy-spin, .hero.hold .cy-mark, .hero.hold .ev .evcard { animation-play-state: paused; }

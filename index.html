@@ -10,6 +10,7 @@
 <!-- display faces for the mixed-type wordmark, plus one handwriting face for the typed line -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bodoni+Moda:opsz,wght@6..96,700;6..96,900&family=Caveat:wght@500;600;700&family=Elsie:wght@400;900&family=Glass+Antiqua&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Playfair+Display:wght@700;900&family=Prata&family=Rye&family=Yeseva+One&display=swap">
 <link rel="stylesheet" href="assets/cloth.css">
+<link rel="stylesheet" href="assets/hero.css">
 <style>
   :root {
     --ink: #2b3540;          /* warm slate, never pure black */
@@ -662,8 +663,15 @@
 
 <div class="deck" id="deck">
 
-  <section class="slide" data-name="Title">
+  <section class="slide tslide" data-name="Title">
     <div class="halo"></div>
+    <div class="hero" id="hero" aria-hidden="true">
+      <svg class="hero-wires" id="heroWires" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="evfield" id="evField"></div>
+      <div class="outfield" id="outField"></div>
+      <svg class="hero-wires overlay" id="heroWiresTop" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="cycle" id="cycle"></div>
+    </div>
     <div class="title-block">
       <h1 class="sign" id="sign" aria-label="OmniScientist"></h1>
       <p class="fullname" id="fullname" aria-live="polite"></p>
@@ -1166,8 +1174,7 @@
     'Elsie': [1.04, 900], 'Glass Antiqua': [1.08, 400], 'Newsreader': [1.08, 600],
   };
   const FULL = 'An Omni-Modal Omni-Discipline AI Scientist';
-  const LINE = 'The omni-modal AI scientist for every discipline and the entire research '
-             + 'lifecycle, turning raw evidence into novel scientific discoveries.';
+  const LINE = 'One prompt + micrographs \u2192 a paper in astronomy.';
 
   const sign = document.getElementById('sign');
   const full = document.getElementById('fullname');
@@ -1314,6 +1321,7 @@
     galNext.classList.toggle('on', inGal);
     // the workbench runs when you arrive at it, not while it is off screen
     if (slides[at].dataset.name === 'Workbench' && window.__wbPlay) window.__wbPlay();
+    if (window.__heroLive) window.__heroLive(at === 0);
   }
 
   // a trackpad flings dozens of wheel events per swipe; the lock collapses them into one page
@@ -1547,5 +1555,6 @@
   });
 })();
 </script>
+<script src="assets/hero.js"></script>
 </body>
 </html>
