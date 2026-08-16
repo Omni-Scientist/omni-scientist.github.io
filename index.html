@@ -160,9 +160,25 @@
     touch-action: manipulation;
   }
   .go:hover { background: #262c33; }
-  .go:active { transform: scale(.985); }
+  .go:active { transform: scale(.972); transition: transform .05s; }
   .go-arr { font-size: 1.12em; line-height: 1; transition: transform .16s; }
   .go:hover .go-arr { transform: translateX(4px); }
+  /* A press that answers and then nothing else happens reads as a dead button. The
+     result belongs on the button that caused it: it settles back past its own size and
+     says what it did, rather than posting a note off to one side. */
+  .go-txt { display: inline-block; transition: opacity .1s; }
+  .go.said .go-txt { animation: go-said .34s ease-out; }
+  .go.said { animation: go-settle .38s cubic-bezier(.2,.85,.3,1.25); }
+  @keyframes go-settle {
+    0%   { transform: scale(.972); }
+    42%  { transform: scale(1.035); }
+    100% { transform: scale(1); }
+  }
+  @keyframes go-said {
+    0%   { opacity: 0; transform: translateY(3px); }
+    100% { opacity: 1; transform: none; }
+  }
+  .go .tick { font-size: 1.05em; margin-right: 7px; }
   .reads { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; }
   .read {
     display: inline-flex; align-items: center; gap: 8px;
@@ -172,6 +188,7 @@
     transition: border-color .14s, background .14s;
   }
   .read:hover { border-color: rgba(43,53,64,.52); background: #fff; }
+  .read:active { transform: scale(.978); transition: transform .05s; }
   .read svg { width: 15px; height: 15px; flex: none; }
   /* each button carries one of the wordmark colours instead of a flat institutional blue */
   .btn {
@@ -235,7 +252,9 @@
   .sheet[hidden] { display: none; }
   @keyframes sheet-in { from { opacity: 0 } to { opacity: 1 } }
   .sheet-card {
-    position: relative; width: min(720px, 100%); max-height: 88vh; overflow: auto;
+    /* hidden across, not auto: the copy button overshoots its own width for a fifth of a
+       second when it settles, and `auto` answers that by flashing a scrollbar */
+    position: relative; width: min(720px, 100%); max-height: 88vh; overflow: hidden auto;
     background: #fff; border-radius: 18px; padding: 30px 32px 26px;
     box-shadow: 0 26px 70px rgba(28,38,48,.34);
   }
@@ -251,10 +270,16 @@
   }
   /* copy sits at the bottom right, where the button that ends a dialog belongs */
   .sheet-act { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
-  .sheet-act .go { padding: 12px 24px; font-size: .92rem; border-radius: 10px; }
-  .sheet-done { font-size: .83rem; font-weight: 600; color: var(--leaf); opacity: 0; transition: opacity .15s; }
+  /* fixed width: the label changes when it is pressed, and a button that resizes under
+     the cursor is the opposite of the reassurance it is meant to give */
+  .sheet-act .go {
+    padding: 12px 24px; font-size: .92rem; border-radius: 10px;
+    min-width: 176px; justify-content: center;
+  }
+  /* success is said on the button itself; this is left for the one case the button has
+     no room to explain, which is a browser that refused the clipboard outright */
+  .sheet-done { font-size: .83rem; font-weight: 600; color: var(--clay); opacity: 0; transition: opacity .15s; }
   .sheet-done.on { opacity: 1; }
-  .sheet-done.bad { color: var(--clay); }
   .sheet-x {
     position: absolute; top: 11px; right: 13px; border: 0; background: none;
     font-size: 1.5rem; line-height: 1; color: var(--dim); cursor: pointer; padding: 4px 9px;
@@ -985,8 +1010,8 @@
     </ul>
     <pre class="sheet-code" id="sheet-code"></pre>
     <div class="sheet-act">
-      <span class="sheet-done" id="sheet-done"></span>
-      <button class="go" id="sheet-copy" type="button">Copy the prompt</button>
+      <span class="sheet-done" id="sheet-done" role="status" aria-live="polite"></span>
+      <button class="go" id="sheet-copy" type="button"><span class="go-txt" id="sheet-copy-txt">Copy the prompt</span></button>
     </div>
   </div>
 </div>
@@ -1431,7 +1456,11 @@
   const sheet = document.getElementById('sheet');
   const code  = document.getElementById('sheet-code');
   const done  = document.getElementById('sheet-done');
+  const btn   = document.getElementById('sheet-copy');
+  const btnTx = document.getElementById('sheet-copy-txt');
   const items = [...document.getElementById('opts').children];
+  const LABEL = btnTx.textContent;
+  let revert = 0;
 
   // start on the machine they are reading this from, so the common case is one click
   const ua = navigator.userAgent;
@@ -1455,23 +1484,43 @@
       ok ? res() : rej(new Error('copy refused'));
     });
   }
+  /* Say it on the button. Removing the class and forcing a reflow before adding it back
+     is what lets a second press replay the animation; without that, pressing copy again
+     on an already-copied prompt looks like nothing happened at all. */
+  function say(text, failed) {
+    clearTimeout(revert);
+    btnTx.innerHTML = '';
+    if (!failed) {
+      const t = document.createElement('span');
+      t.className = 'tick';
+      t.textContent = '✓';
+      btnTx.appendChild(t);
+    }
+    btnTx.appendChild(document.createTextNode(text));
+    btn.classList.remove('said');
+    void btn.offsetWidth;
+    btn.classList.add('said');
+    done.textContent = failed ? 'Select the line above and copy it' : 'Copied';
+    done.className = failed ? 'sheet-done on' : 'sheet-done';
+    revert = setTimeout(reset, 2000);
+  }
+  function reset() {
+    clearTimeout(revert);
+    btn.classList.remove('said');
+    btnTx.textContent = LABEL;
+    done.className = 'sheet-done';
+  }
   function mark(p) {
-    p.then(() => {
-      done.textContent = 'Copied';
-      done.className = 'sheet-done on';
-    }).catch(() => {
-      done.textContent = 'Select the text above and copy it';
-      done.className = 'sheet-done on bad';
-    });
+    p.then(() => say('Copied', false)).catch(() => say('Copy blocked', true));
   }
 
-  // choosing rewrites the line and the document link, and clears any earlier "Copied":
-  // what is on the clipboard is no longer what is on screen
+  // choosing rewrites the line, and puts the button back: what is on the clipboard is
+  // no longer what is on the screen, so it must stop claiming otherwise
   function choose(k) {
     at = k;
     items.forEach(li => li.classList.toggle('here', li.dataset.v === k));
     code.textContent = line(k);
-    done.className = 'sheet-done';
+    reset();
   }
   function show() {
     choose(at);
