@@ -1080,9 +1080,9 @@
     wires.appendChild(defs);
     const cap = el('text', { 'font-family': 'Noto Serif, Georgia, serif',
       'font-size': Math.max(12, G.sw * 0.082).toFixed(1), 'font-weight': 700,
-      'letter-spacing': '.2em', fill: 'url(#scG)',
+      'letter-spacing': '.05em', fill: 'url(#scG)',
       x: (G.sx + G.sw / 2).toFixed(1), y: ty.toFixed(1), 'text-anchor': 'middle' });
-    cap.textContent = 'SCIENTIFIC DISCOVERIES';
+    cap.textContent = 'Scientific discoveries';
     wires.appendChild(cap);
     pairs.forEach(p => wires.appendChild(p.base));
     head(inx + 2, ny, '#ef476f', .92);

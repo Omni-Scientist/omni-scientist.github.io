@@ -12,6 +12,12 @@
 <link rel="stylesheet" href="assets/cloth.css">
 <link rel="stylesheet" href="assets/hero.css">
 <style>
+  /* Half a button's height down, so the type and the picture below it close up. The
+     hero reads this off the title block's own rect, transform included, and lays its
+     band out from there, so this is the only place the offset is written. */
+  .slide.tslide .title-block { transform: translateY(20px); }
+</style>
+<style>
   :root {
     --ink: #2b3540;          /* warm slate, never pure black */
     --ink-2: #4a5764;
@@ -601,11 +607,11 @@
   /* The heading and its note sit on one line above the plate. These are dense paper
      figures whose smallest labels have to stay legible, and a full-width paragraph
      of prose above them eats the height the figure needs to render large. */
-  .fighead { display: grid; grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
-             gap: 0 3vw; align-items: baseline; }
+  /* One heading, no paragraph beside it: the plates say more than a note about them
+     could, and the height the note used goes to the plate. */
+  .fighead { display: block; }
   .fighead h2 { font-size: clamp(1.4rem, 2.35vw, 1.95rem); }
-  .fighead p.note { margin: 0; font-size: .94rem; line-height: 1.58; max-width: none; }
-  @media (max-width: 1020px) { .fighead { grid-template-columns: 1fr; gap: 10px; } }
+  .fighead h2 { margin-bottom: 0; }
 
   @media (max-width: 1020px) {
     .ovgrid { grid-template-columns: 1fr; gap: 18px; }
@@ -719,11 +725,7 @@
   <section class="slide" data-name="Workbench">
     <div class="panel fwpanel">
       <div class="fighead">
-        <h2>A workbench, not a prompt box</h2>
-        <p class="note">The desktop edition opens in the browser you already use. Sessions on the
-          left, the run in the middle with every tool call it made and how long each took, and on
-          the right the research log where the code, the figures and the finished paper collect as
-          the run produces them.</p>
+        <h2>Workbench</h2>
       </div>
       <figure class="fwfig">
         <a href="assets/site/fig_workbench.png" target="_blank" rel="noopener" title="Open the full-size screenshot">
@@ -731,35 +733,6 @@
                alt="The OmniScientist desktop workspace: session list, a run with its tool calls, and a research log holding the outputs and the finished paper">
         </a>
       </figure>
-    </div>
-  </section>
-
-  <section class="slide" data-name="Recorded run">
-    <div class="wb-wrap">
-      <div class="wbwin" id="wbwin">
-        <div class="wbbar">
-          <span class="lights"><i class="r"></i><i class="y"></i><i class="g"></i></span>
-          <span class="wbtitle">OmniScientist &mdash; workbench</span>
-          <span class="wbrun" id="wbrun"></span>
-          <button class="wbreplay" id="wbreplay" aria-label="play again" title="play again">&#8635;</button>
-        </div>
-        <div class="wbbody">
-          <aside class="wbask">
-            <div class="wbk">The ask</div>
-            <div id="wbprompt"></div>
-            <div class="wbk" style="margin-top:13px">Evidence handed over</div>
-            <div class="wbgrid" id="wbgrid"></div>
-          </aside>
-          <div class="wbcanvas" id="wbcanvas"></div>
-          <aside class="wbout">
-            <div class="wbk">What came out</div>
-            <div id="wbpaper"></div>
-          </aside>
-        </div>
-      </div>
-      <p class="wbnote">Not a mock-up. Every card is lifted from <b>one recorded run</b> &mdash; the request that
-        was sent, the images it opened, the papers it read, the check that sent it back, the code it ran and the
-        manuscript it produced.</p>
     </div>
   </section>
 
@@ -819,9 +792,6 @@
     <div class="panel fwpanel">
       <div class="fighead">
         <h2>Raw evidence in, a finished study out</h2>
-        <p class="note">Observations of every kind go in; the engine reads them, tests what it reads, and writes
-          the result up. Nothing on the way through is staged: the code runs against the real data, and a claim
-          the numbers do not carry gets sent back rather than polished.</p>
       </div>
       <figure class="fwfig">
         <a href="assets/site/fig_teaser.png" target="_blank" rel="noopener" title="Open the full-size figure">
@@ -835,9 +805,6 @@
     <div class="panel fwpanel">
       <div class="fighead">
         <h2>Which relations survive the interface</h2>
-        <p class="note">A caption or a feature vector arrives with the structure already removed. Three cases
-          start at the raw record instead, and the cues read off it are what the hypothesis is built on. The
-          band at the bottom is the interface most systems expose in its place.</p>
       </div>
       <figure class="fwfig">
         <a href="assets/site/fig_interface.png" target="_blank" rel="noopener" title="Open the full-size figure">
@@ -852,9 +819,6 @@
     <div class="panel fwpanel">
       <div class="fighead">
         <h2>One command, the whole research lifecycle</h2>
-        <p class="note">Evidence enters in its native form, and a deterministic pipeline routes the run through
-          ideation, experiment and writeup, reporting only what the execution record supports. Perception stays
-          available to every stage, and a new discipline takes a specification file, not a new engine.</p>
       </div>
       <figure class="fwfig">
         <a href="assets/site/fig_pipeline.png" target="_blank" rel="noopener" title="Open the full-size figure">
@@ -869,9 +833,6 @@
     <div class="panel fwpanel">
       <div class="fighead">
         <h2>Only what the record carries becomes a claim</h2>
-        <p class="note">The rigour check asks whether the code really ran, whether every attempted test is
-          accounted for, and whether the headline rests on an analysis that supports it. The claim check then
-          matches every number and every sentence against the analysis that produced it.</p>
       </div>
       <figure class="fwfig">
         <a href="assets/site/fig_checks.png" target="_blank" rel="noopener" title="Open the full-size figure">
@@ -1366,10 +1327,6 @@
     const inGal = slides[at].id === 'gallery';
     galPrev.classList.toggle('on', inGal);
     galNext.classList.toggle('on', inGal);
-    // the recorded run plays when you arrive at it, not while it is off screen. The name
-    // is matched, not the index: the screenshot slide was inserted ahead of it and an
-    // index written in here would have gone quietly wrong the moment it was.
-    if (slides[at].dataset.name === 'Recorded run' && window.__wbPlay) window.__wbPlay();
     if (window.__heroLive) window.__heroLive(at === 0);
   }
 
