@@ -973,8 +973,9 @@
     <h3 id="sheet-h">Choose where to install it</h3>
     <p class="sheet-note">Then copy the line below into Claude Code, Cursor, Codex, or
       anything else with a shell. It reads the
-      <a id="sheet-doc" href="#" target="_blank" rel="noopener">setup document</a> for that
-      machine, runs the install, and reports back what it did.</p>
+      <a id="sheet-doc" href="https://omni-scientist.github.io/setup/install.md" target="_blank" rel="noopener">setup document</a>,
+      works out the rest from what the line asks for, runs the install, and reports back
+      what it did.</p>
     <ul class="opts" id="opts" role="listbox" aria-label="Where to install it">
       <li role="option" data-v="mac-desktop"><b>Mac desktop</b><span>browser workspace, menu bar app</span></li>
       <li role="option" data-v="windows-desktop"><b>Windows desktop</b><span>browser workspace, Start menu entry</span></li>
@@ -1413,6 +1414,11 @@
    just chose, not what the page guessed for them. */
 (function () {
   const BASE = 'https://omni-scientist.github.io/setup/';
+  // One address, always. What the choice changes is the sentence after it, and the
+  // routing document reads that sentence to decide which of the five procedures to
+  // follow. So there is a single URL to publish, quote, and keep alive, and no link
+  // anywhere that is only correct for one kind of machine.
+  const ENTRY = BASE + 'install.md';
   const ASK = {
     'mac-desktop':     'install and configure OmniScientist Desktop on this Mac',
     'windows-desktop': 'install and configure OmniScientist Desktop on this Windows machine',
@@ -1420,11 +1426,10 @@
     'cli':             'install and configure the OmniScientist terminal agent here',
     'skill':           'install and configure the OmniScientist skill for this agent',
   };
-  const line = k => `Read ${BASE}${k}.md and ${ASK[k]}, following the steps.`;
+  const line = k => `Read ${ENTRY} and ${ASK[k]}, following the steps.`;
 
   const sheet = document.getElementById('sheet');
   const code  = document.getElementById('sheet-code');
-  const doc   = document.getElementById('sheet-doc');
   const done  = document.getElementById('sheet-done');
   const items = [...document.getElementById('opts').children];
 
@@ -1466,7 +1471,6 @@
     at = k;
     items.forEach(li => li.classList.toggle('here', li.dataset.v === k));
     code.textContent = line(k);
-    doc.href = BASE + k + '.md';
     done.className = 'sheet-done';
   }
   function show() {

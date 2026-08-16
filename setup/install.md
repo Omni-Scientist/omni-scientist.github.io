@@ -1,62 +1,75 @@
 # Install OmniScientist
 
-You are an AI agent installing OmniScientist for the person you are talking to. This
-document does not install anything. It works out **which** of five procedures applies,
-and then you go and follow that one from its first step.
+You are an AI agent installing OmniScientist for the person you are talking to.
 
-Do the two steps below, then stop reading this file and read the one it sent you to.
+**This document installs nothing.** It works out *which* of five procedures applies, and
+sends you to that one. Do the steps below, then stop reading this file and follow the
+document it names, from that document's own first step.
 
-## Step 1 — read the machine
+## Step 1 — the request usually already says which one
+
+Read what the person actually asked for. Most requests name the target, because the
+project page and the README hand out a sentence that does. Match it here first:
+
+| If the request says | Go to |
+|---|---|
+| Desktop **on this Mac**, macOS desktop, the browser workspace on a Mac | <https://omni-scientist.github.io/setup/mac-desktop.md> |
+| Desktop **on this Windows machine**, Windows desktop | <https://omni-scientist.github.io/setup/windows-desktop.md> |
+| Desktop **on this Linux machine**, Linux desktop | <https://omni-scientist.github.io/setup/linux-desktop.md> |
+| the **terminal agent**, CLI, `omnisci` on the command line, headless, CI, Docker | <https://omni-scientist.github.io/setup/cli.md> |
+| the **skill**, "for this agent", "inside Claude Code", no API key | <https://omni-scientist.github.io/setup/skill.md> |
+
+If one of those matches, go to Step 3 now. Do not ask a question you already have the
+answer to.
+
+One check before you do: if the request names a platform that is not the platform you
+are on, the machine wins, not the sentence. `uname -s` printing `Linux` while the
+request says "on this Mac" means they pasted a line meant for another machine. Say so in
+one line, take the Linux document instead, and carry on rather than stopping.
+
+## Step 2 — only if the request did not say
 
 ```bash
 uname -s -m 2>/dev/null || echo "windows"
 [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && echo "graphical session" || echo "no display"
 ```
 
-On Windows this fails and you are in PowerShell; that is the answer, not an error.
-Note what you got. `Darwin` is macOS, `Linux` is Linux, anything else with PowerShell is
-Windows.
+On Windows the first command fails and you are in PowerShell; that is the answer, not an
+error. `Darwin` is macOS, `Linux` is Linux.
 
-## Step 2 — work out which edition
-
-Four editions run the same research loop. They differ in what does the seeing and whose
-key pays for it. Decide in this order and do not ask more than one question.
-
-**If you are a harness that loads skills** (you read them from `~/.claude/skills/` or an
-equivalent), and the person has not asked for something standalone, **the skill is the
-right answer.** It needs no API key of any kind: you do the perceiving and the writing
-yourself, and the Python that ships with it does the rendering, the analysis runs, the
-references, and the gates. Say that is what you are doing and why, then go to
-<https://omni-scientist.github.io/setup/skill.md>.
-
-**Otherwise, if step 1 said `no display`** (a server, a container, an SSH session, a CI
-runner), the desktop edition has no browser to open and is not an option. Go to
+**If that printed `no display`** (a server, a container, an SSH session, a CI runner),
+the desktop edition has no browser to open and is not an option. Go to
 <https://omni-scientist.github.io/setup/cli.md>.
 
-**Otherwise ask one question**, in your own words: do they want a browser workspace they
-open from the Dock, Start menu, or application menu, or a terminal agent they run where
-they already work? Then:
+**Otherwise ask exactly one question**, in your own words, and give them enough to answer
+it:
 
-| They said | Step 1 said | Go to |
-|---|---|---|
-| browser workspace | `Darwin` | <https://omni-scientist.github.io/setup/mac-desktop.md> |
-| browser workspace | `Linux` | <https://omni-scientist.github.io/setup/linux-desktop.md> |
-| browser workspace | Windows | <https://omni-scientist.github.io/setup/windows-desktop.md> |
-| terminal | any | <https://omni-scientist.github.io/setup/cli.md> |
+- a **browser workspace** they open from the Dock, Start menu, or application menu;
+- a **terminal agent**, one executable, which is also what runs in CI;
+- a **skill** inside the agent they are talking to right now, which needs **no API key at
+  all**, because you do the perceiving and the writing yourself.
 
-The fifth case is the reference implementation in `engine/`, which is a Python package
-for reproducing the technical report rather than something to install. If that is what
-they want, send them to
+Then take the matching document: mac, Windows, or Linux desktop by what Step 2 printed,
+otherwise `cli.md` or `skill.md`.
+
+Do not decide this for them because one answer is cheaper. The skill costs nothing to
+run and is the right answer surprisingly often, but somebody setting up a shared machine
+for a lab wants the desktop edition, and installing the wrong one wastes more of their
+time than the question does.
+
+The reference implementation in `engine/` is the fifth thing in the repository, but it is
+a Python package for reproducing the technical report rather than an edition to install.
+If that is what they want, send them to
 <https://github.com/Omni-Scientist/OmniScientist/blob/main/docs/INSTALL.md#engine>
-instead of guessing at it here.
+instead of improvising it here.
 
 ## Step 3 — follow that document
 
 Read it and do what it says, in order, starting at its own Step 0. It repeats the
-platform check you just did, which is deliberate: it is written to work whether or not
-anyone came through this file.
+platform check you may have just done, which is deliberate: each one is written to work
+whether or not anybody came through this file.
 
-Three things carry over into every one of them, so they are worth knowing now:
+Three things carry over into all five, so they are worth knowing now:
 
 - **Never invent, guess, or reuse an API key.** Ask the person and wait. Only the skill
   edition needs none.
