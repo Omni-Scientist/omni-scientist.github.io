@@ -146,15 +146,33 @@
   .counts { display: flex; gap: 46px; justify-content: center; margin-top: 34px; flex-wrap: wrap; }
   .counts b { display: block; font-family: "Noto Serif", Georgia, serif; font-size: 1.7rem; font-weight: 700; }
   .counts span { font-size: .67rem; letter-spacing: .17em; text-transform: uppercase; color: var(--dim); }
-  /* one row per kind of link. The labels get a column of their own and sit flush right,
-     so every row of buttons starts on the same edge however long its label is. */
-  .cta {
-    display: grid; grid-template-columns: auto auto; gap: 13px;
-    justify-content: center; align-items: center; margin-top: 34px;
+  /* One action, then the two things there are to read. The action needs no label saying
+     it is the action, and the two links underneath are deliberately quieter than it. */
+  .cta { margin-top: 36px; display: flex; flex-direction: column; align-items: center; gap: 21px; }
+  /* black, squared off, flat. No gradient and no coloured glow: it should read as the
+     one thing to press, not as decoration. */
+  .go {
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 18px 34px; border: 0; border-radius: 12px; cursor: pointer;
+    font-family: inherit; font-size: 1.06rem; font-weight: 600; letter-spacing: .01em;
+    background: #000; color: #fff;
+    transition: background .14s, transform .08s;
+    touch-action: manipulation;
   }
-  /* names the row of buttons beside it; a label, not an action */
-  .cta-label { justify-self: end; margin-right: 3px; font-size: .95rem; font-weight: 600; color: var(--dim); }
-  .cta-row { display: flex; gap: 13px; flex-wrap: wrap; }
+  .go:hover { background: #262c33; }
+  .go:active { transform: scale(.985); }
+  .go-arr { font-size: 1.12em; line-height: 1; transition: transform .16s; }
+  .go:hover .go-arr { transform: translateX(4px); }
+  .reads { display: flex; gap: 11px; flex-wrap: wrap; justify-content: center; }
+  .read {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 17px; border-radius: 10px; text-decoration: none;
+    font-size: .87rem; font-weight: 600; color: var(--ink);
+    border: 1px solid rgba(43,53,64,.17); background: rgba(255,255,255,.55);
+    transition: border-color .14s, background .14s;
+  }
+  .read:hover { border-color: rgba(43,53,64,.52); background: #fff; }
+  .read svg { width: 15px; height: 15px; flex: none; }
   /* each button carries one of the wordmark colours instead of a flat institutional blue */
   .btn {
     --bc: var(--omni-sci);          /* always defined; a c-* class overrides it */
@@ -192,58 +210,23 @@
   }
   .btn.primary:hover { filter: brightness(1.06); color: #fff; }
 
-  /* ---------- the one-line install ---------- */
-  /* The picker is a button, not a form control. A native select drops an operating
-     system menu on top of the page, in the system's own font and corners, and no amount
-     of styling makes that belong here. So it is the same pill as every other button and
-     the list underneath is drawn in the page's own hand. */
-  .pick { position: relative; display: inline-flex; }
-  .pick-btn { --bc: var(--ink-2); min-width: 208px; justify-content: space-between; }
-  .pick-caret {
-    width: 7px; height: 7px; flex: none; margin-left: 5px;
-    border-right: 1.7px solid currentColor; border-bottom: 1.7px solid currentColor;
-    transform: translateY(-2px) rotate(45deg); opacity: .58; transition: transform .16s;
+  /* ---------- choosing where to install ---------- */
+  /* Picking happens inside the sheet rather than on the slide, so there is no menu that
+     has to open on top of something else, and each row has room to say what it is
+     instead of leaving "CLI" sitting next to "Windows desktop" explaining nothing. */
+  .opts { margin: 0 0 18px; padding: 0; list-style: none; display: grid; gap: 6px; }
+  .opts li {
+    display: flex; align-items: baseline; gap: 12px; text-align: left;
+    padding: 11px 14px; border-radius: 11px; cursor: pointer;
+    border: 1px solid transparent; transition: background .12s, border-color .12s;
   }
-  .pick.open .pick-caret { transform: translateY(1px) rotate(225deg); }
-  /* while the list is open the trigger must not float away from the list it opened */
-  .pick.open .pick-btn, .pick.open .pick-btn:hover { transform: none; }
-  /* the trigger keeps its outline on hover; a filled dark pill next to an open white
-     list is the heaviest thing on the slide and it does not need to be */
-  .pick-btn:hover {
-    background: #fff; color: var(--ink);
-    border-color: color-mix(in srgb, var(--ink-2) 46%, transparent);
-    box-shadow: 0 12px 26px rgba(63,86,110,.18);
-  }
-  .pick-menu {
-    position: absolute; top: calc(100% + 10px); left: 0; z-index: 25;
-    margin: 0; padding: 7px; list-style: none; min-width: 100%; white-space: nowrap;
-    background: #fff; border-radius: 15px; border: 1px solid var(--sky-line);
-    box-shadow: 0 22px 50px rgba(63,86,110,.28), 0 2px 6px rgba(63,86,110,.10);
-    transform-origin: top center; animation: pick-in .14s ease-out;
-  }
-  @keyframes pick-in {
-    from { opacity: 0; transform: translateY(-6px) scale(.97) }
-    to   { opacity: 1; transform: none }
-  }
-  /* An open list has to cover the row beneath it; there is nowhere else for it to go.
-     So that row steps back while it is open, and the overlap reads as one layer above
-     another instead of two things colliding. */
-  .cta-dim { transition: opacity .15s; }
-  body.pick-on .cta-dim { opacity: .14; pointer-events: none; }
-  .pick-menu[hidden] { display: none; }
-  .pick-menu li {
-    padding: 10px 17px; border-radius: 10px; cursor: pointer;
-    font-size: .9rem; font-weight: 600; color: var(--ink-2);
-  }
-  .pick-menu li:hover, .pick-menu li.here {
-    background: color-mix(in srgb, var(--omni-sci) 9%, transparent); color: var(--omni-sci);
-  }
-  /* the mark that says "an agent does this part" earns more room than a bullet */
-  .btn .ic.big { font-size: 1.45em; }
-  .btn.c-auto { --bc: var(--omni-n); }
+  .opts li:hover { background: #f4f6f8; }
+  .opts li.here { background: #f2f5f7; border-color: rgba(43,53,64,.26); }
+  .opts b { font-size: .93rem; font-weight: 600; color: var(--ink); min-width: 132px; flex: none; }
+  .opts span { font-size: .82rem; color: var(--dim); line-height: 1.45; }
 
   /* The sheet exists because a prompt you cannot read before pasting is a prompt
-     nobody pastes. The copy already happened on the click; this shows what was copied. */
+     nobody pastes. Choose, read what it will say, then copy. */
   .sheet {
     position: fixed; inset: 0; z-index: 60; display: grid; place-items: center;
     padding: 5vh 5vw; background: rgba(28,38,48,.44); backdrop-filter: blur(3px);
@@ -257,16 +240,18 @@
     box-shadow: 0 26px 70px rgba(28,38,48,.34);
   }
   .sheet-card h3 { margin: 0 0 7px; font-size: 1.2rem; }
-  .sheet-note { margin: 0 0 17px; font-size: .87rem; color: var(--dim); line-height: 1.62; }
+  .sheet-note { margin: 0 0 18px; font-size: .87rem; color: var(--dim); line-height: 1.62; }
+  .sheet-note a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
   .sheet-code {
-    margin: 0 0 18px; padding: 16px 18px; border-radius: 12px;
+    margin: 0 0 16px; padding: 16px 18px; border-radius: 12px;
     background: #f5f7f9; border: 1px solid var(--sky-line);
     font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
     font-size: .84rem; line-height: 1.66; color: var(--ink);
     white-space: pre-wrap; word-break: break-word; user-select: all;
   }
-  .sheet-act { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
-  .sheet-act .btn { padding: 11px 22px; font-size: .89rem; }
+  /* copy sits at the bottom right, where the button that ends a dialog belongs */
+  .sheet-act { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: flex-end; }
+  .sheet-act .go { padding: 12px 24px; font-size: .92rem; border-radius: 10px; }
   .sheet-done { font-size: .83rem; font-weight: 600; color: var(--leaf); opacity: 0; transition: opacity .15s; }
   .sheet-done.on { opacity: 1; }
   .sheet-done.bad { color: var(--clay); }
@@ -637,10 +622,10 @@
   @media (max-width: 980px) {
     .slide { padding: 62px 6vw 88px; }
     .gal-item { grid-template-columns: 1fr; gap: 16px; }
-    .cta { grid-template-columns: 1fr; gap: 8px 0; }
-    .cta-label { justify-self: center; margin: 10px 0 0; }
-    .cta-row { justify-content: center; }
+    .go { padding: 16px 26px; font-size: .98rem; }
     .sheet-card { padding: 26px 20px 22px; }
+    .opts li { flex-direction: column; gap: 3px; }
+    .opts b { min-width: 0; }
     .said { padding: 18px 8px; }
     .edge-arrow { width: 46px; height: 46px; left: 8px; } .edge-arrow.r { right: 8px; }
     .panel { padding: 22px 18px; }
@@ -658,31 +643,17 @@
       <h1 class="sign" id="sign" aria-label="OmniScientist"></h1>
       <p class="fullname" id="fullname" aria-live="polite"></p>
       <p class="hand" id="hand" aria-live="polite"></p>
-      <!-- Installing is one line handed to an agent, so the slide carries one control and
-           one action, not a menu of download links. The second row is only the two things
-           there are to read. Three buttons on the whole slide, in a new tab so a click
-           never leaves the deck waiting on github to paint. -->
+      <!-- One button. Everything about choosing a machine and reading the prompt happens
+           inside the sheet it opens, so the slide says what you get rather than making
+           you assemble it. The two links below are the only other things to press, and a
+           new tab so a click never leaves the deck waiting on github or arxiv to paint. -->
       <div class="cta reveal" id="rev1">
-        <span class="cta-label">Install:</span>
-        <div class="cta-row">
-          <div class="pick" id="pick">
-            <button class="btn pick-btn" id="pick-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
-              <span id="pick-label">Mac desktop</span><i class="pick-caret"></i>
-            </button>
-            <ul class="pick-menu" id="pick-menu" role="listbox" aria-label="The machine you are installing on" hidden>
-              <li role="option" data-v="mac-desktop">Mac desktop</li>
-              <li role="option" data-v="windows-desktop">Windows desktop</li>
-              <li role="option" data-v="linux-desktop">Linux desktop</li>
-              <li role="option" data-v="cli">CLI</li>
-              <li role="option" data-v="skill">Skill for agent</li>
-            </ul>
-          </div>
-          <button class="btn c-auto" id="plat-go" type="button"><span class="ic big">&#10022;</span>Copy the prompt</button>
-        </div>
-        <span class="cta-label cta-dim">Resources:</span>
-        <div class="cta-row cta-dim">
-          <a class="btn c-paper" href="https://arxiv.org/abs/2608.13558" target="_blank" rel="noopener"><span class="ic">&#9636;</span>Technical Report</a>
-          <a class="btn c-code" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9670;</span>Source code</a>
+        <button class="go" id="plat-go" type="button">Install with your agent<span class="go-arr">&#8594;</span></button>
+        <div class="reads">
+          <a class="read" href="https://arxiv.org/abs/2608.13558" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M9.2 1.4H4.6a1.2 1.2 0 0 0-1.2 1.2v10.8a1.2 1.2 0 0 0 1.2 1.2h6.8a1.2 1.2 0 0 0 1.2-1.2V5z"/><path d="M9.2 1.4V5h3.4"/><path d="M6 8.6h4M6 11.1h4"/></svg>Technical Report</a>
+          <a class="read" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>Source code</a>
         </div>
       </div>
     </div>
@@ -999,15 +970,22 @@
 <div class="sheet" id="sheet" hidden>
   <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
     <button class="sheet-x" id="sheet-x" type="button" aria-label="Close">&times;</button>
-    <h3 id="sheet-h">Paste this into your agent</h3>
-    <p class="sheet-note">Claude Code, Cursor, Codex, or anything else with a shell.
-      It reads the setup document for <b id="sheet-plat"></b>, runs the install, and reports
-      what it did. Nothing here needs an API key until the document asks for one.</p>
+    <h3 id="sheet-h">Choose where to install it</h3>
+    <p class="sheet-note">Then copy the line below into Claude Code, Cursor, Codex, or
+      anything else with a shell. It reads the
+      <a id="sheet-doc" href="#" target="_blank" rel="noopener">setup document</a> for that
+      machine, runs the install, and reports back what it did.</p>
+    <ul class="opts" id="opts" role="listbox" aria-label="Where to install it">
+      <li role="option" data-v="mac-desktop"><b>Mac desktop</b><span>browser workspace, menu bar app</span></li>
+      <li role="option" data-v="windows-desktop"><b>Windows desktop</b><span>browser workspace, Start menu entry</span></li>
+      <li role="option" data-v="linux-desktop"><b>Linux desktop</b><span>browser workspace, application menu entry</span></li>
+      <li role="option" data-v="cli"><b>CLI</b><span>one executable in your terminal, and in CI</span></li>
+      <li role="option" data-v="skill"><b>Skill</b><span>inside the agent you already use, no API key</span></li>
+    </ul>
     <pre class="sheet-code" id="sheet-code"></pre>
     <div class="sheet-act">
-      <button class="btn c-auto" id="sheet-copy" type="button"><span class="ic">&#10697;</span>Copy</button>
-      <a class="btn c-code" id="sheet-doc" href="#" target="_blank" rel="noopener"><span class="ic">&#9636;</span>Read the document</a>
       <span class="sheet-done" id="sheet-done"></span>
+      <button class="go" id="sheet-copy" type="button">Copy the prompt</button>
     </div>
   </div>
 </div>
@@ -1350,10 +1328,9 @@
   paintGal();
 
   addEventListener('keydown', e => {
-    // the sheet and the picker both sit on top of the deck; while either is open the
-    // space bar and the arrows belong to it, not to paging
+    // the install sheet sits on top of the deck; while it is open the space bar and the
+    // arrows belong to it, not to paging
     if (document.body.classList.contains('sheet-on')) return;
-    if (document.body.classList.contains('pick-on')) return;
     const inGal = slides[at].id === 'gallery';
     if (inGal && e.key === 'ArrowRight') { e.preventDefault(); galGo(1); return; }
     if (inGal && e.key === 'ArrowLeft') { e.preventDefault(); galGo(-1); return; }
@@ -1431,28 +1408,25 @@
 /* ---------- the one-line install ----------
    Five targets, five documents, one sentence each. The prompt is the whole product:
    whatever agent they already have reads the document and performs the install, so the
-   only thing this page has to get exactly right is the URL it hands over. */
+   only thing this page has to get exactly right is the URL it hands over. Nothing is
+   copied until the copy button is pressed: the clipboard should hold what the person
+   just chose, not what the page guessed for them. */
 (function () {
   const BASE = 'https://omni-scientist.github.io/setup/';
-  const SETUP = {
-    'mac-desktop':     ['Mac desktop',       'install and configure OmniScientist Desktop on this Mac'],
-    'windows-desktop': ['Windows desktop',   'install and configure OmniScientist Desktop on this Windows machine'],
-    'linux-desktop':   ['Linux desktop',     'install and configure OmniScientist Desktop on this Linux machine'],
-    'cli':             ['CLI',              'install and configure the OmniScientist terminal agent here'],
-    'skill':           ['Skill for agent',  'install and configure the OmniScientist skill for this agent'],
+  const ASK = {
+    'mac-desktop':     'install and configure OmniScientist Desktop on this Mac',
+    'windows-desktop': 'install and configure OmniScientist Desktop on this Windows machine',
+    'linux-desktop':   'install and configure OmniScientist Desktop on this Linux machine',
+    'cli':             'install and configure the OmniScientist terminal agent here',
+    'skill':           'install and configure the OmniScientist skill for this agent',
   };
-  const line = k => `Read ${BASE}${k}.md and ${SETUP[k][1]}, following the steps.`;
+  const line = k => `Read ${BASE}${k}.md and ${ASK[k]}, following the steps.`;
 
-  const pick  = document.getElementById('pick');
-  const trig  = document.getElementById('pick-btn');
-  const menu  = document.getElementById('pick-menu');
-  const label = document.getElementById('pick-label');
   const sheet = document.getElementById('sheet');
   const code  = document.getElementById('sheet-code');
-  const who   = document.getElementById('sheet-plat');
   const doc   = document.getElementById('sheet-doc');
   const done  = document.getElementById('sheet-done');
-  const items = [...menu.children];
+  const items = [...document.getElementById('opts').children];
 
   // start on the machine they are reading this from, so the common case is one click
   const ua = navigator.userAgent;
@@ -1486,29 +1460,19 @@
     });
   }
 
-  function fill() {
-    who.textContent = SETUP[at][0];
-    code.textContent = line(at);
-    doc.href = BASE + at + '.md';
-  }
+  // choosing rewrites the line and the document link, and clears any earlier "Copied":
+  // what is on the clipboard is no longer what is on screen
   function choose(k) {
     at = k;
-    label.textContent = SETUP[k][0];
     items.forEach(li => li.classList.toggle('here', li.dataset.v === k));
-    if (!sheet.hidden) { fill(); done.className = 'sheet-done'; }
-  }
-  function openMenu(yes) {
-    pick.classList.toggle('open', yes);
-    menu.hidden = !yes;
-    trig.setAttribute('aria-expanded', String(yes));
-    document.body.classList.toggle('pick-on', yes);
+    code.textContent = line(k);
+    doc.href = BASE + k + '.md';
+    done.className = 'sheet-done';
   }
   function show() {
-    fill();
-    done.className = 'sheet-done';
+    choose(at);
     sheet.hidden = false;
     document.body.classList.add('sheet-on');
-    mark(copy(line(at)));             // still inside the click, so the gesture counts
   }
   function hide() {
     sheet.hidden = true;
@@ -1517,26 +1481,20 @@
 
   choose(at);
 
-  trig.addEventListener('click', e => { e.stopPropagation(); openMenu(menu.hidden); });
-  items.forEach(li => li.addEventListener('click', () => { choose(li.dataset.v); openMenu(false); }));
-  document.addEventListener('click', e => { if (!pick.contains(e.target)) openMenu(false); });
-
+  items.forEach(li => li.addEventListener('click', () => choose(li.dataset.v)));
   document.getElementById('plat-go').addEventListener('click', show);
   document.getElementById('sheet-copy').addEventListener('click', () => mark(copy(line(at))));
   document.getElementById('sheet-x').addEventListener('click', hide);
   sheet.addEventListener('click', e => { if (e.target === sheet) hide(); });
 
   addEventListener('keydown', e => {
-    if (!menu.hidden) {
+    if (sheet.hidden) return;
+    if (e.key === 'Escape') { hide(); return; }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
       const i = items.findIndex(li => li.dataset.v === at);
-      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        choose(items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].dataset.v);
-      } else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMenu(false); }
-      else if (e.key === 'Escape') openMenu(false);
-      return;
+      choose(items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].dataset.v);
     }
-    if (e.key === 'Escape' && !sheet.hidden) hide();
   });
 })();
 </script>
