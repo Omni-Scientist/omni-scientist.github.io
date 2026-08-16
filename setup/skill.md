@@ -1,4 +1,4 @@
-# OmniScientist as a Claude Code skill
+# OmniScientist as an agent skill
 
 You are an AI agent installing OmniScientist into your own harness, for the person you
 are talking to. Work through the steps below in order.
@@ -30,12 +30,16 @@ ls -d ~/.claude/skills 2>/dev/null || echo "no personal skills directory yet"
 the repository. Personal is the right default. If the person has a reason to want it
 project local, use that path everywhere below instead.
 
-If they wanted a standalone terminal agent rather than something inside Claude Code,
-they want a different edition:
+That directory is Claude Code's, and it is also where the other harnesses that read the
+same skill format look. If yours keeps skills somewhere else, install to that path
+instead; nothing below depends on the location except the paths you type.
+
+If they wanted a standalone terminal agent rather than something inside this one, they
+want a different edition:
 [macOS](https://omni-scientist.github.io/setup/mac-desktop.md),
 [Windows](https://omni-scientist.github.io/setup/windows-desktop.md),
 [Linux](https://omni-scientist.github.io/setup/linux-desktop.md),
-[headless or CI](https://omni-scientist.github.io/setup/ci.md).
+[terminal or headless](https://omni-scientist.github.io/setup/cli.md).
 
 ## Step 1 — install the skill
 
@@ -144,8 +148,8 @@ it cannot find an evidence layer.
 ## Step 5 — make it available in the session
 
 Skills are read when a session starts. If `/omnisci` is not offered in the current one,
-start a new Claude Code session and it will be there. Do not reinstall, and do not
-edit `SKILL.md` to try to force it.
+start a new session and it will be there. Do not reinstall, and do not edit `SKILL.md`
+to try to force it.
 
 One thing worth reading once, if you are the agent that will run it: the skill's
 `SKILL.md` warns that `--task` accepts a bare name that resolves under `$OMNISCI_CASES`
@@ -160,8 +164,8 @@ own folder.**
 Say only this, with the placeholders filled in from what you actually observed:
 
 > The OmniScientist skill is installed at `~/.claude/skills/omnisci`. No API key is
-> involved: I do the perceiving and the writing myself, and the skill's Python does the
-> rendering, the analysis runs, the references, and the gates.
+> involved anywhere: I do the perceiving and the writing myself, and the skill's Python
+> does the rendering, the analysis runs, the references, and the gates.
 >
 > Python dependencies: `<already present / installed into --user>`.
 > tectonic: `<present / installed / skipped, runs will stop at the .tex>`.

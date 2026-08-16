@@ -35,14 +35,14 @@ $PSVersionTable.PSVersion.ToString(); $env:PROCESSOR_ARCHITECTURE
 If this is not Windows, stop and use the matching document:
 [macOS](https://omni-scientist.github.io/setup/mac-desktop.md),
 [Linux desktop](https://omni-scientist.github.io/setup/linux-desktop.md),
-[headless or CI](https://omni-scientist.github.io/setup/ci.md).
+[terminal or headless](https://omni-scientist.github.io/setup/cli.md).
 
 If `PROCESSOR_ARCHITECTURE` is **`ARM64`**: only the x64 package is published. Windows
 on ARM does run x64 binaries under emulation, but nobody has confirmed this one does.
 Tell the person that before you continue, and if step 4 fails, move to step 7 rather
 than hunting for an ARM build that does not exist.
 
-If they are inside Claude Code and want no API key at all, the skill edition is a
+If they are inside an agent already and want no API key at all, the skill edition is a
 better fit: <https://omni-scientist.github.io/setup/skill.md>.
 
 ## Step 1 — find the package in the latest release

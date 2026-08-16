@@ -31,8 +31,8 @@ uname -s; [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && echo "graphical session" 
 
 If it printed **`no display`**, this is a server, a container, or an SSH session
 without X or Wayland forwarding. The desktop edition opens a browser and has nothing to
-open one with. Stop here and use <https://omni-scientist.github.io/setup/ci.md>, which
-is the headless path and is what the person actually wants. Say so plainly rather than
+open one with. Stop here and use <https://omni-scientist.github.io/setup/cli.md>, which
+is the terminal and headless path and is what the person actually wants. Say so plainly rather than
 installing something that cannot start.
 
 ## Step 1 — read the machine

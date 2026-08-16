@@ -193,28 +193,54 @@
   .btn.primary:hover { filter: brightness(1.06); color: #fff; }
 
   /* ---------- the one-line install ---------- */
-  /* A select that reads as one more button rather than a form control: same pill, same
-     border, same hover. The chevron is drawn here because the native one cannot be
-     recoloured, and appearance:none takes it away. */
+  /* The picker is a button, not a form control. A native select drops an operating
+     system menu on top of the page, in the system's own font and corners, and no amount
+     of styling makes that belong here. So it is the same pill as every other button and
+     the list underneath is drawn in the page's own hand. */
   .pick { position: relative; display: inline-flex; }
-  .pick::after {
-    content: ""; position: absolute; right: 19px; top: 50%; width: 7px; height: 7px;
-    border-right: 1.6px solid var(--omni-i); border-bottom: 1.6px solid var(--omni-i);
-    transform: translateY(-70%) rotate(45deg); pointer-events: none; opacity: .7;
+  .pick-btn { --bc: var(--ink-2); min-width: 208px; justify-content: space-between; }
+  .pick-caret {
+    width: 7px; height: 7px; flex: none; margin-left: 5px;
+    border-right: 1.7px solid currentColor; border-bottom: 1.7px solid currentColor;
+    transform: translateY(-2px) rotate(45deg); opacity: .58; transition: transform .16s;
   }
-  .pick select {
-    -webkit-appearance: none; appearance: none;
-    font: inherit; font-size: .95rem; font-weight: 600; color: var(--omni-i);
-    padding: 13px 44px 13px 23px; border-radius: 999px; cursor: pointer;
-    background: #fff; border: 1.5px solid color-mix(in srgb, var(--omni-i) 36%, transparent);
-    box-shadow: 0 4px 14px color-mix(in srgb, var(--omni-i) 15%, transparent);
-    transition: border-color .1s, box-shadow .1s;
+  .pick.open .pick-caret { transform: translateY(1px) rotate(225deg); }
+  /* while the list is open the trigger must not float away from the list it opened */
+  .pick.open .pick-btn, .pick.open .pick-btn:hover { transform: none; }
+  /* the trigger keeps its outline on hover; a filled dark pill next to an open white
+     list is the heaviest thing on the slide and it does not need to be */
+  .pick-btn:hover {
+    background: #fff; color: var(--ink);
+    border-color: color-mix(in srgb, var(--ink-2) 46%, transparent);
+    box-shadow: 0 12px 26px rgba(63,86,110,.18);
   }
-  .pick select:hover, .pick select:focus-visible {
-    outline: none; border-color: color-mix(in srgb, var(--omni-i) 64%, transparent);
-    box-shadow: 0 10px 22px color-mix(in srgb, var(--omni-i) 26%, transparent);
+  .pick-menu {
+    position: absolute; top: calc(100% + 10px); left: 0; z-index: 25;
+    margin: 0; padding: 7px; list-style: none; min-width: 100%; white-space: nowrap;
+    background: #fff; border-radius: 15px; border: 1px solid var(--sky-line);
+    box-shadow: 0 22px 50px rgba(63,86,110,.28), 0 2px 6px rgba(63,86,110,.10);
+    transform-origin: top center; animation: pick-in .14s ease-out;
   }
-  .btn.c-auto { --bc: var(--omni-i); }
+  @keyframes pick-in {
+    from { opacity: 0; transform: translateY(-6px) scale(.97) }
+    to   { opacity: 1; transform: none }
+  }
+  /* An open list has to cover the row beneath it; there is nowhere else for it to go.
+     So that row steps back while it is open, and the overlap reads as one layer above
+     another instead of two things colliding. */
+  .cta-dim { transition: opacity .15s; }
+  body.pick-on .cta-dim { opacity: .14; pointer-events: none; }
+  .pick-menu[hidden] { display: none; }
+  .pick-menu li {
+    padding: 10px 17px; border-radius: 10px; cursor: pointer;
+    font-size: .9rem; font-weight: 600; color: var(--ink-2);
+  }
+  .pick-menu li:hover, .pick-menu li.here {
+    background: color-mix(in srgb, var(--omni-sci) 9%, transparent); color: var(--omni-sci);
+  }
+  /* the mark that says "an agent does this part" earns more room than a bullet */
+  .btn .ic.big { font-size: 1.45em; }
+  .btn.c-auto { --bc: var(--omni-n); }
 
   /* The sheet exists because a prompt you cannot read before pasting is a prompt
      nobody pastes. The copy already happened on the click; this shows what was copied. */
@@ -632,35 +658,31 @@
       <h1 class="sign" id="sign" aria-label="OmniScientist"></h1>
       <p class="fullname" id="fullname" aria-live="polite"></p>
       <p class="hand" id="hand" aria-live="polite"></p>
-      <!-- Two ways in. Automatic hands a one-line prompt to whatever agent they already
-           have, which reads the setup document for their machine and does the install.
-           Manual is the same three editions as before, served out of the code repository,
-           in a new tab so a click never leaves the deck waiting on github to paint.
-           The labels sit in their own flush-right column, so both rows of controls start
-           on the same edge however long the label is. -->
+      <!-- Installing is one line handed to an agent, so the slide carries one control and
+           one action, not a menu of download links. The second row is only the two things
+           there are to read. Three buttons on the whole slide, in a new tab so a click
+           never leaves the deck waiting on github to paint. -->
       <div class="cta reveal" id="rev1">
-        <span class="cta-label">Auto install:</span>
+        <span class="cta-label">Install:</span>
         <div class="cta-row">
-          <div class="pick">
-            <select id="plat" aria-label="The machine you are installing on">
-              <option value="mac-desktop">Mac desktop</option>
-              <option value="windows-desktop">Windows desktop</option>
-              <option value="linux-desktop">Linux desktop</option>
-              <option value="ci">CI / headless</option>
-              <option value="skill">Claude Code skill</option>
-            </select>
+          <div class="pick" id="pick">
+            <button class="btn pick-btn" id="pick-btn" type="button" aria-haspopup="listbox" aria-expanded="false">
+              <span id="pick-label">Mac desktop</span><i class="pick-caret"></i>
+            </button>
+            <ul class="pick-menu" id="pick-menu" role="listbox" aria-label="The machine you are installing on" hidden>
+              <li role="option" data-v="mac-desktop">Mac desktop</li>
+              <li role="option" data-v="windows-desktop">Windows desktop</li>
+              <li role="option" data-v="linux-desktop">Linux desktop</li>
+              <li role="option" data-v="cli">CLI</li>
+              <li role="option" data-v="skill">Skill for agent</li>
+            </ul>
           </div>
-          <button class="btn primary c-auto" id="plat-go" type="button"><span class="ic">&#10022;</span>Copy the prompt</button>
+          <button class="btn c-auto" id="plat-go" type="button"><span class="ic big">&#10022;</span>Copy the prompt</button>
         </div>
-        <span class="cta-label">Manual install:</span>
-        <div class="cta-row">
-          <a class="btn c-demo" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9670;</span>Skill</a>
-          <a class="btn c-more" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9634;</span>Desktop</a>
-          <a class="btn c-code" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9654;</span>CLI</a>
-        </div>
-        <span class="cta-label">Paper:</span>
-        <div class="cta-row">
-          <a class="btn c-paper" href="https://arxiv.org/abs/2608.13558" target="_blank" rel="noopener"><span class="ic">&#9636;</span>Technical Reports</a>
+        <span class="cta-label cta-dim">Resources:</span>
+        <div class="cta-row cta-dim">
+          <a class="btn c-paper" href="https://arxiv.org/abs/2608.13558" target="_blank" rel="noopener"><span class="ic">&#9636;</span>Technical Report</a>
+          <a class="btn c-code" href="https://github.com/Omni-Scientist/OmniScientist" target="_blank" rel="noopener"><span class="ic">&#9670;</span>Source code</a>
         </div>
       </div>
     </div>
@@ -983,7 +1005,7 @@
       what it did. Nothing here needs an API key until the document asks for one.</p>
     <pre class="sheet-code" id="sheet-code"></pre>
     <div class="sheet-act">
-      <button class="btn primary c-auto" id="sheet-copy" type="button"><span class="ic">&#10697;</span>Copy</button>
+      <button class="btn c-auto" id="sheet-copy" type="button"><span class="ic">&#10697;</span>Copy</button>
       <a class="btn c-code" id="sheet-doc" href="#" target="_blank" rel="noopener"><span class="ic">&#9636;</span>Read the document</a>
       <span class="sheet-done" id="sheet-done"></span>
     </div>
@@ -1328,8 +1350,10 @@
   paintGal();
 
   addEventListener('keydown', e => {
-    // the prompt sheet is on top of the deck; space and the arrows belong to it while it is open
+    // the sheet and the picker both sit on top of the deck; while either is open the
+    // space bar and the arrows belong to it, not to paging
     if (document.body.classList.contains('sheet-on')) return;
+    if (document.body.classList.contains('pick-on')) return;
     const inGal = slides[at].id === 'gallery';
     if (inGal && e.key === 'ArrowRight') { e.preventDefault(); galGo(1); return; }
     if (inGal && e.key === 'ArrowLeft') { e.preventDefault(); galGo(-1); return; }
@@ -1414,24 +1438,28 @@
     'mac-desktop':     ['Mac desktop',       'install and configure OmniScientist Desktop on this Mac'],
     'windows-desktop': ['Windows desktop',   'install and configure OmniScientist Desktop on this Windows machine'],
     'linux-desktop':   ['Linux desktop',     'install and configure OmniScientist Desktop on this Linux machine'],
-    'ci':              ['CI / headless',     'set up OmniScientist to run headless in Docker here'],
-    'skill':           ['Claude Code skill', 'install and configure the OmniScientist skill for Claude Code'],
+    'cli':             ['CLI',              'install and configure the OmniScientist terminal agent here'],
+    'skill':           ['Skill for agent',  'install and configure the OmniScientist skill for this agent'],
   };
   const line = k => `Read ${BASE}${k}.md and ${SETUP[k][1]}, following the steps.`;
 
-  const sel   = document.getElementById('plat');
+  const pick  = document.getElementById('pick');
+  const trig  = document.getElementById('pick-btn');
+  const menu  = document.getElementById('pick-menu');
+  const label = document.getElementById('pick-label');
   const sheet = document.getElementById('sheet');
   const code  = document.getElementById('sheet-code');
   const who   = document.getElementById('sheet-plat');
   const doc   = document.getElementById('sheet-doc');
   const done  = document.getElementById('sheet-done');
+  const items = [...menu.children];
 
   // start on the machine they are reading this from, so the common case is one click
   const ua = navigator.userAgent;
-  sel.value = /Windows/i.test(ua) ? 'windows-desktop'
-            : /Mac OS X|Macintosh/i.test(ua) ? 'mac-desktop'
-            : /Linux|X11|CrOS/i.test(ua) ? 'linux-desktop'
-            : 'mac-desktop';
+  let at = /Windows/i.test(ua) ? 'windows-desktop'
+         : /Mac OS X|Macintosh/i.test(ua) ? 'mac-desktop'
+         : /Linux|X11|CrOS/i.test(ua) ? 'linux-desktop'
+         : 'mac-desktop';
 
   // the async clipboard needs a secure context, and this page gets opened from a file
   // path often enough that the old path has to stay
@@ -1459,29 +1487,57 @@
   }
 
   function fill() {
-    const k = sel.value;
-    who.textContent = SETUP[k][0];
-    code.textContent = line(k);
-    doc.href = BASE + k + '.md';
+    who.textContent = SETUP[at][0];
+    code.textContent = line(at);
+    doc.href = BASE + at + '.md';
+  }
+  function choose(k) {
+    at = k;
+    label.textContent = SETUP[k][0];
+    items.forEach(li => li.classList.toggle('here', li.dataset.v === k));
+    if (!sheet.hidden) { fill(); done.className = 'sheet-done'; }
+  }
+  function openMenu(yes) {
+    pick.classList.toggle('open', yes);
+    menu.hidden = !yes;
+    trig.setAttribute('aria-expanded', String(yes));
+    document.body.classList.toggle('pick-on', yes);
   }
   function show() {
     fill();
     done.className = 'sheet-done';
     sheet.hidden = false;
     document.body.classList.add('sheet-on');
-    mark(copy(line(sel.value)));      // still inside the click, so the gesture counts
+    mark(copy(line(at)));             // still inside the click, so the gesture counts
   }
   function hide() {
     sheet.hidden = true;
     document.body.classList.remove('sheet-on');
   }
 
+  choose(at);
+
+  trig.addEventListener('click', e => { e.stopPropagation(); openMenu(menu.hidden); });
+  items.forEach(li => li.addEventListener('click', () => { choose(li.dataset.v); openMenu(false); }));
+  document.addEventListener('click', e => { if (!pick.contains(e.target)) openMenu(false); });
+
   document.getElementById('plat-go').addEventListener('click', show);
-  document.getElementById('sheet-copy').addEventListener('click', () => mark(copy(line(sel.value))));
+  document.getElementById('sheet-copy').addEventListener('click', () => mark(copy(line(at))));
   document.getElementById('sheet-x').addEventListener('click', hide);
   sheet.addEventListener('click', e => { if (e.target === sheet) hide(); });
-  sel.addEventListener('change', () => { if (!sheet.hidden) { fill(); done.className = 'sheet-done'; } });
-  addEventListener('keydown', e => { if (e.key === 'Escape' && !sheet.hidden) hide(); });
+
+  addEventListener('keydown', e => {
+    if (!menu.hidden) {
+      const i = items.findIndex(li => li.dataset.v === at);
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        choose(items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].dataset.v);
+      } else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openMenu(false); }
+      else if (e.key === 'Escape') openMenu(false);
+      return;
+    }
+    if (e.key === 'Escape' && !sheet.hidden) hide();
+  });
 })();
 </script>
 </body>

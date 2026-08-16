@@ -33,11 +33,13 @@ If it does not print `Darwin`, stop and point the person at the right one:
 | It printed | Use instead |
 |---|---|
 | `Linux` with a desktop session | <https://omni-scientist.github.io/setup/linux-desktop.md> |
-| `Linux` on a server, container, or CI runner | <https://omni-scientist.github.io/setup/ci.md> |
+| `Linux` on a server, container, or CI runner | <https://omni-scientist.github.io/setup/cli.md> |
 | `MINGW`, `MSYS`, or you are in PowerShell | <https://omni-scientist.github.io/setup/windows-desktop.md> |
 
-If the person is inside Claude Code and wants no API key at all, the skill edition is
-the better fit: <https://omni-scientist.github.io/setup/skill.md>.
+If the person is inside an agent already and wants no API key at all, the skill edition
+is the better fit: <https://omni-scientist.github.io/setup/skill.md>. If they want a
+terminal agent rather than a browser workspace, that is
+<https://omni-scientist.github.io/setup/cli.md>.
 
 ## Step 1 — read the machine
 
