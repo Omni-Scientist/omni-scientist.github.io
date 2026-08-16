@@ -268,6 +268,10 @@
   .sheet-card h3 { margin: 0 0 7px; font-size: 1.2rem; }
   .sheet-note { margin: 0 0 18px; font-size: .87rem; color: var(--dim); line-height: 1.62; }
   .sheet-note a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .sheet-note b { color: var(--ink); font-weight: 600; }
+  /* only present when the sheet was opened from the picture of the thing itself */
+  .sheet-lead { margin: 0 0 12px; font-size: .93rem; line-height: 1.6; color: var(--ink); }
+  .sheet-lead[hidden] { display: none; }
   .sheet-code {
     margin: 0 0 16px; padding: 16px 18px; border-radius: 12px;
     background: #f5f7f9; border: 1px solid var(--sky-line);
@@ -749,7 +753,7 @@
         <h2>Workbench</h2>
       </div>
       <figure class="fwfig">
-        <a href="#" data-install role="button" title="Install it on your own machine">
+        <a href="#" data-install="workbench" role="button" title="Get your own workbench">
           <img src="assets/site/fig_workbench.png" loading="lazy"
                alt="The OmniScientist desktop workspace: session list, a run with its tool calls, and a research log holding the outputs and the finished paper">
         </a>
@@ -1024,8 +1028,10 @@
   <div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="sheet-h">
     <button class="sheet-x" id="sheet-x" type="button" aria-label="Close">&times;</button>
     <h3 id="sheet-h">Choose where to install it</h3>
-    <p class="sheet-note">Then copy the line below into Claude Code, Cursor, Codex, or
-      anything else with a shell. It reads the
+    <p class="sheet-lead" id="sheet-lead" hidden></p>
+    <p class="sheet-note">Then copy the line below into <b>Claude Code</b>, <b>Codex</b>,
+      <b>Hermes Agent</b>, <b>WorkBuddy</b>, or any other agent that can run commands on
+      your machine. It reads the
       <a id="sheet-doc" href="https://omni-scientist.github.io/setup/install.md" target="_blank" rel="noopener">setup document</a>,
       works out the rest from what the line asks for, runs the install, and reports back
       what it did.</p>
@@ -1492,6 +1498,8 @@
   const code  = document.getElementById('sheet-code');
   const done  = document.getElementById('sheet-done');
   const btn    = document.getElementById('sheet-copy');
+  const head   = document.getElementById('sheet-h');
+  const leadEl = document.getElementById('sheet-lead');
   const doneTx = document.getElementById('sheet-done-txt');
   const items  = [...document.getElementById('opts').children];
   let revert = 0;
@@ -1553,7 +1561,20 @@
     code.textContent = line(k);
     reset();
   }
-  function show() {
+  /* The heading answers whichever question brought you here. From the button it is a
+     platform question; from the screenshot on the second slide it is "can I have that",
+     and opening on "choose where to install it" would answer something else first. */
+  const HEAD = {
+    '': ['Choose where to install it', ''],
+    workbench: ['Get your own workbench',
+                'What you just clicked is a screenshot of the real thing, running on '
+                + 'somebody\u2019s own machine. Here is how to have it on yours.'],
+  };
+  function show(kind) {
+    const [title, lead] = HEAD[kind] || HEAD[''];
+    head.textContent = title;
+    leadEl.textContent = lead;
+    leadEl.hidden = !lead;
     choose(at);
     sheet.hidden = false;
     document.body.classList.add('sheet-on');
@@ -1569,7 +1590,7 @@
   /* Anything marked data-install opens the sheet, so the screenshot of the workbench
      is a way into installing it rather than a bigger copy of the same picture. */
   document.querySelectorAll('[data-install]').forEach(el =>
-    el.addEventListener('click', e => { e.preventDefault(); show(); }));
+    el.addEventListener('click', e => { e.preventDefault(); show(el.dataset.install); }));
   document.getElementById('sheet-copy').addEventListener('click', () => mark(copy(line(at))));
   document.getElementById('sheet-x').addEventListener('click', hide);
   sheet.addEventListener('click', e => { if (e.target === sheet) hide(); });
