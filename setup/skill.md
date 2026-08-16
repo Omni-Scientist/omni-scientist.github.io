@@ -26,7 +26,7 @@ of Python command line tools you call with `bash`. Nothing in it is specific to 
 harness, and nothing below depends on where it sits, so put it wherever your harness
 reads skills from and move on.
 
-Pick the first line that applies to you, and export it. Every later command uses it.
+Every later command uses it.
 
 ```bash
 # If your harness keeps skills of its own somewhere, name that directory on the line
