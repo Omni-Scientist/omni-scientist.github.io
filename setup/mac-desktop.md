@@ -76,17 +76,23 @@ dest=/Applications
 [ -w "$dest" ] || { dest="$HOME/Applications"; mkdir -p "$dest"; }
 tar -xzf "$tmp/$asset" -C "$dest"
 
+# The app is ad-hoc signed rather than notarized, so a copy that carries the
+# quarantine attribute opens as "damaged". Clearing it here means the install works
+# the same way no matter how the tarball arrived.
+xattr -dr com.apple.quarantine "$dest/OmniScientist.app" 2>/dev/null || true
+
 echo "installed: $dest/OmniScientist.app"
 ```
 
 Expected: a line ending in `: OK` from the checksum check, then the `installed:` line.
 Record which `dest` it printed; step 4 needs it.
 
-**Install through the terminal, never through a browser download.** The quarantine
-attribute is set by whatever does the downloading, and `curl` does not set it, so
-Gatekeeper is never consulted and there is no "unidentified developer" dialog to talk
-the person through. If they have already downloaded the tarball in a browser, throw it
-away and run the block above instead of trying to clear the attribute.
+Install through the terminal. The quarantine attribute is set by whatever does the
+downloading, and `curl` does not set it, so Gatekeeper stays out of the way. The
+`xattr` line above covers the other case: if the person already has a copy that came
+from a browser, the same command clears it, so
+`xattr -dr com.apple.quarantine /Applications/OmniScientist.app` is the whole fix for
+an app that opens as "damaged".
 
 ## Step 3 — credentials
 

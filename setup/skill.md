@@ -11,28 +11,41 @@ viewable, run code, fetch real references, assemble the LaTeX, and enforce the g
 
 ## Ground rules
 
-1. Run each command as written. Do not substitute a different download URL or install
-   location you remember.
+1. Run each command as written, with one substitution: `SKILLS_DIR`, which Step 0 sets.
+   Do not substitute a different download URL.
 2. **On failure, stop.** Report the command and its exact output, and say which step
    failed. Do not retry a failed download and do not improvise around it.
 3. **No `sudo` for the skill itself.** Step 3 is the only place a system install can
    come up, and it is optional.
 4. Stay quiet until the final step, except where a step tells you to ask a question.
 
-## Step 0 — decide where it goes
+## Step 0 — set SKILLS_DIR
+
+What gets installed is one directory: a `SKILL.md` describing the workflow, and a `bin/`
+of Python command line tools you call with `bash`. Nothing in it is specific to any one
+harness, and nothing below depends on where it sits, so put it wherever your harness
+reads skills from and move on.
+
+Pick the first line that applies to you, and export it. Every later command uses it.
 
 ```bash
-ls -d ~/.claude/skills 2>/dev/null || echo "no personal skills directory yet"
+# If your harness keeps skills of its own somewhere, name that directory on the line
+# below. Leaving it alone is correct for Claude Code and for anything unsure.
+SKILLS_DIR=${SKILLS_DIR:-$HOME/.claude/skills}
+
+mkdir -p "$SKILLS_DIR" && echo "installing into $SKILLS_DIR"
 ```
 
-`~/.claude/skills/` makes it available in every project. A project-local
-`.claude/skills/` inside a repository makes it available only there and travels with
-the repository. Personal is the right default. If the person has a reason to want it
-project local, use that path everywhere below instead.
+Run that as it stands and you get `~/.claude/skills`. To send it elsewhere, set
+`SKILLS_DIR` to your own path first, and every later command follows.
 
-That directory is Claude Code's, and it is also where the other harnesses that read the
-same skill format look. If yours keeps skills somewhere else, install to that path
-instead; nothing below depends on the location except the paths you type.
+If the person wants it scoped to one repository rather than to their account, set
+`SKILLS_DIR` to `<repo>/.claude/skills` (or your harness's project-local equivalent)
+instead. Account-wide is the right default.
+
+If your harness audits skills before installing them, run that audit now on the
+unpacked directory from Step 1 and report it as your harness requires; the rest of these
+steps are unaffected.
 
 If they wanted a standalone terminal agent rather than something inside this one, they
 want a different edition:
@@ -55,15 +68,14 @@ if [ -s "$tmp/omnisci-skill.zip.sha256" ]; then
       || shasum -a 256 -c omnisci-skill.zip.sha256; } )
 fi
 
-mkdir -p ~/.claude/skills
-unzip -oq "$tmp/omnisci-skill.zip" -d ~/.claude/skills/
-ls ~/.claude/skills/omnisci
+unzip -oq "$tmp/omnisci-skill.zip" -d "$SKILLS_DIR/"
+ls "$SKILLS_DIR/omnisci"
 ```
 
 Expected: `SKILL.md`, `INSTALL.md`, `requirements.txt`, `bin`.
 
 If they already have the repository cloned, the directory in it is the same thing and
-`cp -r skill/omnisci ~/.claude/skills/` is equivalent. Do not do both.
+`cp -r skill/omnisci "$SKILLS_DIR/"` is equivalent. Do not do both.
 
 ## Step 2 — the Python the skill drives
 
@@ -80,7 +92,7 @@ If that prints `all present`, skip the rest of this step.
 Otherwise install into the user site directory, which leaves the system tree alone:
 
 ```bash
-python3 -m pip install --user -r ~/.claude/skills/omnisci/requirements.txt
+python3 -m pip install --user -r "$SKILLS_DIR/omnisci/requirements.txt"
 ```
 
 If pip refuses with `externally-managed-environment`, that is PEP 668: the interpreter
@@ -88,7 +100,7 @@ belongs to the OS or to Homebrew. A user level install is still the right answer
 just has to say so out loud:
 
 ```bash
-python3 -m pip install --user --break-system-packages -r ~/.claude/skills/omnisci/requirements.txt
+python3 -m pip install --user --break-system-packages -r "$SKILLS_DIR/omnisci/requirements.txt"
 ```
 
 If the person already works inside a virtualenv or a conda environment, install there
@@ -128,7 +140,7 @@ that instead and skip the `sudo`.
 The skill's tools live in `bin/` and everything is driven through them:
 
 ```bash
-export OMNISCI=~/.claude/skills/omnisci/bin
+export OMNISCI="$SKILLS_DIR/omnisci/bin"
 python3 $OMNISCI/evidence_cli.py --help
 ```
 
@@ -139,7 +151,7 @@ tracebacks on an import, step 2 installed into a different interpreter than the 
 If the person has a folder of real data handy, the useful second check reads it:
 
 ```bash
-python3 $OMNISCI/case_cli.py inspect --dir <their folder>
+python3 $OMNISCI/case_cli.py inspect --dir /path/to/their/data
 ```
 
 It prints the modalities and labels it found, and names the directory it looked in if
@@ -163,7 +175,7 @@ own folder.**
 
 Say only this, with the placeholders filled in from what you actually observed:
 
-> The OmniScientist skill is installed at `~/.claude/skills/omnisci`. No API key is
+> The OmniScientist skill is installed at `$SKILLS_DIR/omnisci`. No API key is
 > involved anywhere: I do the perceiving and the writing myself, and the skill's Python
 > does the rendering, the analysis runs, the references, and the gates.
 >
