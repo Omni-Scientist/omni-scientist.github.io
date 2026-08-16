@@ -177,6 +177,18 @@
   white-space: nowrap; animation: slotin .5s cubic-bezier(.2,.9,.3,1.02);
 }
 .eq .slot svg { width: .84em; height: .84em; vertical-align: -.1em; margin-right: .3em; }
+/* The discipline sits at the left of its box and takes the rule with it, so the line
+   under it is the length of the word rather than the length of the longest word the slot
+   will ever hold. The box keeps its measured width, which is the thing that stops the
+   whole sentence shuffling left and right on every turn. The modality on the other side
+   is unchanged: centred, with the rule across the full box. */
+.eq .slot.disc { text-align: left; }
+.eq .slot.disc::after { content: none; }
+.eq .slot.disc u { position: relative; }
+.eq .slot.disc u::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -.06em; height: 1.5px;
+  border-radius: 1px; background: currentColor; opacity: .16;
+}
 @keyframes slotin {
   from { opacity: 0; transform: translateY(.4em); }
   to   { opacity: 1; transform: none; }
