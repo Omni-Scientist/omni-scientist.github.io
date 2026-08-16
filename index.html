@@ -291,9 +291,17 @@
      A window rather than a panel, because what it shows is a machine at work. The
      three stage columns are the engine's three stages; cards land in them in the
      order the run produced them. */
-  .wb-wrap { width: 100%; max-width: 1560px; position: relative; z-index: 2; }
+  /* The wrapper takes the full height of the slide and the window takes what is left
+     after the note, rather than the window sizing itself to its contents and leaving a
+     band of empty cloth above and below it. */
+  .wb-wrap { width: 100%; max-width: 1560px; position: relative; z-index: 2;
+             display: flex; flex-direction: column; justify-content: center; }
+  /* Its contents settle at 582px, which read as cramped. A floor of 700 gives the cards
+     room to land in without leaving a band of empty canvas under them, and it still
+     shrinks on a short viewport rather than pushing the note off the slide. */
   .wbwin {
-    display: flex; flex-direction: column; max-height: calc(100vh - 168px);
+    display: flex; flex-direction: column; flex: 0 0 auto;
+    min-height: min(700px, calc(100vh - 200px)); max-height: calc(100vh - 168px);
     background: #fbfcfd; border: 1px solid rgba(63,96,124,.17); border-radius: 15px;
     box-shadow: 0 26px 60px rgba(63,86,110,.20), 0 3px 10px rgba(63,86,110,.08);
     overflow: hidden; opacity: 0; transform: translateY(16px) scale(.988);
@@ -422,6 +430,7 @@
     font-size: .7rem; font-weight: 600; padding: 8px 10px; border-radius: 999px;
     color: #fff; background: var(--omni-sci); box-shadow: 0 5px 14px rgba(24,72,120,.24);
   }
+  .wb-wrap .wbnote { flex: 0 0 auto; }
   .wbnote { text-align: center; font-size: .74rem; color: var(--dim); margin: 13px 0 0; line-height: 1.6; }
   .wbnote b { color: var(--ink-2); font-weight: 600; }
 
@@ -538,18 +547,18 @@
                max-height: 72vh; object-fit: contain; }
   .ovfig figcaption { margin-top: 12px; font-size: .8rem; line-height: 1.65; color: var(--dim);
                       font-style: italic; }
-  .ovnews h2 { display: flex; align-items: center; gap: 10px; margin: 0 0 4px;
-               font-size: clamp(1.3rem, 2.2vw, 1.8rem); }
+  .ovnews h2 { display: flex; align-items: center; gap: 12px; margin: 0 0 4px;
+               font-size: clamp(1.5rem, 2.5vw, 2.05rem); }
   .newsemoji { font-size: .9em; }
-  .newslist { list-style: none; margin: 12px 0 0; padding: 0; }
+  .newslist { list-style: none; margin: 16px 0 0; padding: 0; }
   .newslist li {
-    display: grid; grid-template-columns: 58px 1fr; gap: 11px; align-items: baseline;
-    padding: 9px 0; border-top: 1px solid rgba(63,96,124,.14);
-    font-size: .855rem; line-height: 1.62; color: var(--ink-2);
+    display: grid; grid-template-columns: 76px 1fr; gap: 16px; align-items: baseline;
+    padding: 13px 0; border-top: 1px solid rgba(63,96,124,.14);
+    font-size: 1rem; line-height: 1.66; color: var(--ink-2);
   }
   .newslist li:first-child { border-top: 0; }
   .newslist time {
-    font-size: .7rem; letter-spacing: .06em; color: var(--omni-sci); font-weight: 600;
+    font-size: .82rem; letter-spacing: .06em; color: var(--omni-sci); font-weight: 600;
     font-variant-numeric: tabular-nums;
   }
   .newslist li:first-child time { color: var(--omni-o); }
@@ -557,17 +566,25 @@
   .newslist a { color: var(--sky-blue); text-decoration: none; border-bottom: 1px solid rgba(63,127,179,.34); }
 
   /* ---------- about: the byline the title page no longer carries, beside the news ---------- */
-  .aboutpanel { max-width: 1480px; padding: 6px 26px; }
-  .aboutgrid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr);
-               gap: 3vw; align-items: start; }
-  .aboutwho { text-align: left; }
-  .eyebrow-s { font-size: .66rem; letter-spacing: .26em; text-transform: uppercase; color: var(--dim); }
-  .aboutwho h2 { margin: 9px 0 0; font-size: clamp(1.15rem, 1.9vw, 1.6rem); line-height: 1.3; }
-  /* the shared byline styles centre themselves for the title page; here they read left */
-  .aboutwho .authors { margin-top: 22px; font-size: 1.06rem; justify-content: flex-start; gap: 2px 22px; }
-  .aboutwho .affil, .aboutwho .contact, .aboutwho .counts { justify-content: flex-start; }
-  .aboutwho .counts { gap: 38px; margin-top: 26px; }
-  @media (max-width: 1020px) { .aboutgrid { grid-template-columns: 1fr; gap: 20px; } }
+  /* Who wrote it, then what has happened since, stacked and centred. Side by side, the
+     byline and the news list were two narrow columns of small type that each looked like
+     a leftover of the other; one column lets both take the width they want. */
+  /* .panel is declared further down at the same specificity, so this has to outrank it
+     by name or its 1620px wins and the byline stretches the width of the slide. */
+  .panel.aboutpanel { max-width: 1120px; padding: 6px 26px; }
+  .aboutgrid { display: block; }
+  .aboutwho { text-align: center; }
+  .eyebrow-s { font-size: .7rem; letter-spacing: .26em; text-transform: uppercase; color: var(--dim); }
+  .aboutwho h2 { margin: 11px 0 0; font-size: clamp(1.35rem, 2.3vw, 1.95rem); line-height: 1.32; }
+  .aboutwho .authors { margin-top: 24px; font-size: 1.12rem; justify-content: center; gap: 4px 26px; }
+  .aboutwho .affil, .aboutwho .contact { justify-content: center; }
+  .aboutwho .contact { margin-top: 12px; }
+  /* the rule is the join between the two halves, so the news needs no heading rule of its own */
+  .ovnews {
+    margin-top: 40px; padding-top: 30px; text-align: left;
+    border-top: 1px solid rgba(63,96,124,.16);
+  }
+  @media (max-width: 1020px) { .ovnews { margin-top: 26px; padding-top: 22px; } }
 
   /* ---------- framework: give the figure the whole slide ----------
      max-height on the panel is what makes the figure shrinkable: without a bounded
@@ -618,10 +635,14 @@
   tbody tr:hover { background: rgba(255,255,255,.5); }
   .best { color: var(--sky-blue); font-weight: 700; } .snd { color: var(--leaf); font-weight: 600; }
   .res { font-weight: 700; }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 10px; margin-top: 22px; }
+  /* Eight across and three down. At 86px a spectrogram and a point cloud were two grey
+     smudges; the point of the slide is that you can tell them apart. */
+  .tiles { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 16px 14px; margin-top: 26px; }
   .tiles figure { margin: 0; }
-  .tiles img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 9px; display: block; box-shadow: 0 4px 12px rgba(63,86,110,.16); }
-  .tiles figcaption { font-size: .63rem; color: var(--dim); margin-top: 5px; text-align: center; }
+  .tiles img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 11px; display: block; box-shadow: 0 5px 15px rgba(63,86,110,.17); }
+  .tiles figcaption { font-size: .72rem; color: var(--dim); margin-top: 7px; text-align: center; }
+  @media (max-width: 1280px) { .tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+  @media (max-width: 900px)  { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   pre {
     background: rgba(43,53,64,.9); border-radius: 14px; padding: 16px 18px; color: #eaf1f6;
     font: .79rem/1.7 ui-monospace, Menlo, monospace; overflow-x: auto; margin: 18px 0 0;
@@ -692,7 +713,28 @@
     </div>
   </section>
 
+  <!-- The product itself, before any diagram of it: a session on the left, the run in
+       the middle with every tool call it made, the research log and the finished paper
+       on the right. It is a screenshot, so nothing here is a claim about the design. -->
   <section class="slide" data-name="Workbench">
+    <div class="panel fwpanel">
+      <div class="fighead">
+        <h2>A workbench, not a prompt box</h2>
+        <p class="note">The desktop edition opens in the browser you already use. Sessions on the
+          left, the run in the middle with every tool call it made and how long each took, and on
+          the right the research log where the code, the figures and the finished paper collect as
+          the run produces them.</p>
+      </div>
+      <figure class="fwfig">
+        <a href="assets/site/fig_workbench.png" target="_blank" rel="noopener" title="Open the full-size screenshot">
+          <img src="assets/site/fig_workbench.png" loading="lazy"
+               alt="The OmniScientist desktop workspace: session list, a run with its tool calls, and a research log holding the outputs and the finished paper">
+        </a>
+      </figure>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Recorded run">
     <div class="wb-wrap">
       <div class="wbwin" id="wbwin">
         <div class="wbbar">
@@ -754,11 +796,6 @@
             <span class="dot">&middot;</span>
             <span><a href="mailto:haofei7419@gmail.com">haofei7419@gmail.com</a>
               <em class="corr">(<span class="star">*</span> corresponding author)</em></span>
-          </div>
-          <div class="counts">
-            <div><b>10</b><span>evidence modalities</span></div>
-            <div><b>20+</b><span>disciplines</span></div>
-            <div><b>34</b><span>end-to-end cases</span></div>
           </div>
         </div>
         <div class="ovnews">
@@ -1329,8 +1366,10 @@
     const inGal = slides[at].id === 'gallery';
     galPrev.classList.toggle('on', inGal);
     galNext.classList.toggle('on', inGal);
-    // the workbench runs when you arrive at it, not while it is off screen
-    if (slides[at].dataset.name === 'Workbench' && window.__wbPlay) window.__wbPlay();
+    // the recorded run plays when you arrive at it, not while it is off screen. The name
+    // is matched, not the index: the screenshot slide was inserted ahead of it and an
+    // index written in here would have gone quietly wrong the moment it was.
+    if (slides[at].dataset.name === 'Recorded run' && window.__wbPlay) window.__wbPlay();
     if (window.__heroLive) window.__heroLive(at === 0);
   }
 
