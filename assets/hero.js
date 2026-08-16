@@ -338,10 +338,11 @@
     if (!hand || hand.dataset.eq) return;
     hand.dataset.eq = '1';
     hand.innerHTML = `<span class="eq"><b>One prompt</b><i class="op">+</i>`
-      + `<span class="slot mod"></span>`
+      + `<span class="slot mod"></span><b>data</b>`
       + `<i class="arr"><svg viewBox="0 0 40 14" aria-hidden="true"><path fill="currentColor"
            d="M0 5.1h26.4V0.9L40 7l-13.6 6.1V8.9H0z"/></svg></i>`
-      + `<b class="art">a</b><span class="slot disc"></span><b>paper</b></span>`;
+      + `<b class="art">A scientific paper with</b><span class="slot disc"></span>`
+      + `<b>discoveries</b></span>`;
     const mSlot = hand.querySelector('.slot.mod'), dSlot = hand.querySelector('.slot.disc');
     const mods = Object.keys(MODWORD).filter(k => byMod[k] && byMod[k].length);
     if (!mods.length || !DISCS.length) return;

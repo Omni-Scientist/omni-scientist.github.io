@@ -147,7 +147,7 @@
   .slide.tslide { padding-top: 4.6vh; }
 }
 /* the claim is one line now, so the two-line reservation is dead space */
-.slide.tslide .hand { min-height: 1.3em; }
+.slide.tslide .hand { min-height: 1.3em; max-width: min(1240px, 94vw); }
 
 /* The line under the title: one sentence, plus whatever kind of record the field
    is reading right now, gives a paper in whatever field that record belongs to.
@@ -156,7 +156,7 @@
 .eq {
   display: inline-flex; align-items: baseline; justify-content: center;
   flex-wrap: wrap; gap: 0 .46em; font-family: "Noto Serif", Georgia, serif;
-  font-size: clamp(1.08rem, 1.7vw, 1.45rem); font-style: normal; color: var(--ink);
+  font-size: clamp(1.02rem, 1.55vw, 1.38rem); font-style: normal; color: var(--ink);
   line-height: 1.5;
 }
 .eq b { font-weight: 600; }

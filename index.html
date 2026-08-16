@@ -9,6 +9,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif:ital,wght@0,400;0,600;0,700;1,400&family=Noto+Sans:wght@400;500;600;700&display=swap">
 <!-- display faces for the mixed-type wordmark, plus one handwriting face for the typed line -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Bodoni+Moda:opsz,wght@6..96,700;6..96,900&family=Caveat:wght@500;600;700&family=Elsie:wght@400;900&family=Glass+Antiqua&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Playfair+Display:wght@700;900&family=Prata&family=Rye&family=Yeseva+One&display=swap">
+<link rel="icon" href="assets/omni-logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/site/omni-icon-180.png">
 <link rel="stylesheet" href="assets/cloth.css">
 <link rel="stylesheet" href="assets/hero.css">
 <style>
@@ -656,6 +658,20 @@
   }
 
   /* ---------- chrome ---------- */
+  /* Sits above the footer strip and below the dot rail, on the same right margin as
+     both. Hidden on the first slide, where it would be a button back to where you are. */
+  .totop {
+    position: fixed; right: 14px; bottom: 58px; z-index: 26;
+    width: 38px; height: 38px; border-radius: 11px; cursor: pointer;
+    border: 1px solid rgba(43,53,64,.18); background: rgba(255,255,255,.86);
+    color: var(--ink); font-size: 1.02rem; line-height: 1;
+    display: none; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(63,86,110,.14);
+    transition: background .14s, border-color .14s, transform .06s;
+  }
+  .totop.on { display: flex; }
+  .totop:hover { border-color: rgba(43,53,64,.5); background: #fff; }
+  .totop:active { transform: scale(.94); }
   .side { position: fixed; right: 22px; top: 50%; transform: translateY(-50%); z-index: 25; display: flex; flex-direction: column; gap: 10px; }
   .side button { width: 9px; height: 9px; border-radius: 50%; border: 1px solid rgba(63,96,124,.3); padding: 0; background: rgba(255,255,255,.7); cursor: pointer; transition: background .2s, transform .2s; }
   .side button.on { background: var(--sky-blue); border-color: var(--sky-blue); transform: scale(1.3); }
@@ -709,7 +725,7 @@
            you assemble it. The two links below are the only other things to press, and a
            new tab so a click never leaves the deck waiting on github or arxiv to paint. -->
       <div class="cta reveal" id="rev1">
-        <button class="go" id="plat-go" type="button">Install with your agent<span class="go-arr">&#8594;</span></button>
+        <button class="go" id="plat-go" type="button" data-install>Install with your agent<span class="go-arr">&#8594;</span></button>
         <div class="reads">
           <a class="read" href="https://arxiv.org/abs/2608.13558" target="_blank" rel="noopener">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M9.2 1.4H4.6a1.2 1.2 0 0 0-1.2 1.2v10.8a1.2 1.2 0 0 0 1.2 1.2h6.8a1.2 1.2 0 0 0 1.2-1.2V5z"/><path d="M9.2 1.4V5h3.4"/><path d="M6 8.6h4M6 11.1h4"/></svg>Technical Report</a>
@@ -729,7 +745,7 @@
         <h2>Workbench</h2>
       </div>
       <figure class="fwfig">
-        <a href="assets/site/fig_workbench.png" target="_blank" rel="noopener" title="Open the full-size screenshot">
+        <a href="#" data-install role="button" title="Install it on your own machine">
           <img src="assets/site/fig_workbench.png" loading="lazy"
                alt="The OmniScientist desktop workspace: session list, a run with its tool calls, and a research log holding the outputs and the finished paper">
         </a>
@@ -997,6 +1013,7 @@
 <button class="edge-arrow l" id="galPrev" aria-label="previous finding">&#8249;</button>
 <button class="edge-arrow r" id="galNext" aria-label="next finding">&#8250;</button>
 <div class="side" id="side"></div>
+<button class="totop" id="totop" type="button" title="Back to the top" aria-label="Back to the top">&#8593;</button>
 <div class="foot"><b>OmniScientist</b><span>An Omni-Modal Omni-Discipline AI Scientist</span><span class="counter" id="counter"></span></div>
 
 <div class="sheet" id="sheet" hidden>
@@ -1283,6 +1300,7 @@
   const counter = document.getElementById('counter');
   const galPrev = document.getElementById('galPrev');
   const galNext = document.getElementById('galNext');
+  const topBtn = document.getElementById('totop');
   let at = 0;
 
   slides.forEach((s, i) => {
@@ -1319,6 +1337,7 @@
     const inGal = slides[at].id === 'gallery';
     galPrev.classList.toggle('on', inGal);
     galNext.classList.toggle('on', inGal);
+    topBtn.classList.toggle('on', at > 0);
     if (window.__heroLive) window.__heroLive(at === 0);
   }
 
@@ -1355,6 +1374,7 @@
     label.textContent = `${String(g + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}  ${NAMES[g]}`;
   }
   const galGo = d => { g = (g + d + items.length) % items.length; paintGal(); };
+  topBtn.addEventListener('click', () => goSlide(0));
   galPrev.addEventListener('click', () => galGo(-1));
   galNext.addEventListener('click', () => galGo(1));
   paintGal();
@@ -1537,7 +1557,10 @@
   choose(at);
 
   items.forEach(li => li.addEventListener('click', () => choose(li.dataset.v)));
-  document.getElementById('plat-go').addEventListener('click', show);
+  /* Anything marked data-install opens the sheet, so the screenshot of the workbench
+     is a way into installing it rather than a bigger copy of the same picture. */
+  document.querySelectorAll('[data-install]').forEach(el =>
+    el.addEventListener('click', e => { e.preventDefault(); show(); }));
   document.getElementById('sheet-copy').addEventListener('click', () => mark(copy(line(at))));
   document.getElementById('sheet-x').addEventListener('click', hide);
   sheet.addEventListener('click', e => { if (e.target === sheet) hide(); });
