@@ -163,17 +163,9 @@
   .go:active { transform: scale(.983); transition: transform .05s; }
   .go-arr { font-size: 1.12em; line-height: 1; transition: transform .16s; }
   .go:hover .go-arr { transform: translateX(4px); }
-  /* A press that answers and then nothing else happens reads as a dead button, so the
-     result lands on the button that caused it. The label never changes: a tick appears
-     in a slot that is always there, so nothing reflows and nothing has to be read twice
-     to notice it moved. */
-  .go .tick {
-    display: inline-block; width: 1.05em; margin-right: 1px; text-align: center;
-    font-size: 1.42em; line-height: 1; color: #63d19a;
-    opacity: 0; transform: scale(.8);
-    transition: opacity .16s ease-out, transform .22s cubic-bezier(.25,.85,.35,1.12);
-  }
-  .go.said .tick { opacity: 1; transform: none; }
+  /* A press that answers and then nothing else happens reads as a dead button, so it
+     settles back through its own size once. The label itself never changes; what was
+     copied is said beside it. */
   .go.said { animation: go-settle .38s cubic-bezier(.25,.85,.35,1.12); }
   @keyframes go-settle {
     0%   { transform: scale(.983); }
@@ -275,10 +267,19 @@
     padding: 12px 24px; font-size: .92rem; border-radius: 10px;
     gap: 9px; justify-content: center;
   }
-  /* success is said on the button itself; this is left for the one case the button has
-     no room to explain, which is a browser that refused the clipboard outright */
-  .sheet-done { font-size: .83rem; font-weight: 600; color: var(--clay); opacity: 0; transition: opacity .15s; }
-  .sheet-done.on { opacity: 1; }
+  /* Said beside the button, not on it. The markup is always present so its width is
+     already accounted for: nothing moves when it appears, it only fades in from a few
+     pixels to the right of where it lands. */
+  .sheet-done {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: .88rem; font-weight: 600; color: var(--leaf);
+    opacity: 0; transform: translateX(6px);
+    transition: opacity .18s ease-out, transform .22s cubic-bezier(.25,.85,.35,1.12);
+  }
+  .sheet-done.on { opacity: 1; transform: none; }
+  .sheet-done .tick { font-size: 1.5em; line-height: 1; }
+  .sheet-done.bad { color: var(--clay); }
+  .sheet-done.bad .tick { display: none; }
   .sheet-x {
     position: absolute; top: 11px; right: 13px; border: 0; background: none;
     font-size: 1.5rem; line-height: 1; color: var(--dim); cursor: pointer; padding: 4px 9px;
@@ -1009,8 +1010,8 @@
     </ul>
     <pre class="sheet-code" id="sheet-code"></pre>
     <div class="sheet-act">
-      <span class="sheet-done" id="sheet-done" role="status" aria-live="polite"></span>
-      <button class="go" id="sheet-copy" type="button"><span class="tick" aria-hidden="true">&#10003;</span>Copy the prompt</button>
+      <span class="sheet-done" id="sheet-done" role="status" aria-live="polite"><span class="tick" aria-hidden="true">&#10003;</span><span id="sheet-done-txt">Copied</span></span>
+      <button class="go" id="sheet-copy" type="button">Copy the prompt</button>
     </div>
   </div>
 </div>
@@ -1455,8 +1456,9 @@
   const sheet = document.getElementById('sheet');
   const code  = document.getElementById('sheet-code');
   const done  = document.getElementById('sheet-done');
-  const btn   = document.getElementById('sheet-copy');
-  const items = [...document.getElementById('opts').children];
+  const btn    = document.getElementById('sheet-copy');
+  const doneTx = document.getElementById('sheet-done-txt');
+  const items  = [...document.getElementById('opts').children];
   let revert = 0;
 
   // start on the machine they are reading this from, so the common case is one click
@@ -1489,20 +1491,22 @@
     btn.classList.remove('said');
     void btn.offsetWidth;
     btn.classList.add('said');
-    done.textContent = 'Copied';
-    done.className = 'sheet-done';
+    doneTx.textContent = 'Copied';
+    done.className = 'sheet-done on';
     revert = setTimeout(reset, 2000);
   }
   function reset() {
     clearTimeout(revert);
     btn.classList.remove('said');
     done.className = 'sheet-done';
+    doneTx.textContent = 'Copied';
   }
   function mark(p) {
     p.then(said).catch(() => {
-      reset();
-      done.textContent = 'Select the line above and copy it';
-      done.className = 'sheet-done on';
+      clearTimeout(revert);
+      btn.classList.remove('said');
+      doneTx.textContent = 'Select the line above and copy it';
+      done.className = 'sheet-done on bad';
     });
   }
 
