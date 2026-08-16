@@ -187,7 +187,7 @@
 .eq .slot.disc u { position: relative; }
 .eq .slot.disc u::after {
   content: ""; position: absolute; left: 0; right: 0; bottom: -.06em; height: 1.5px;
-  border-radius: 1px; background: currentColor; opacity: .16;
+  border-radius: 1px; background: var(--ink); opacity: .16;
 }
 @keyframes slotin {
   from { opacity: 0; transform: translateY(.4em); }
