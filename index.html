@@ -1266,9 +1266,19 @@
     }
     setTimeout(() => mark.classList.add('set'), 130);
     spans.forEach((s, k) => setTimeout(() => s.classList.add('set'), 330 + k * GAP));
-    // sign lands, then both lines sweep out behind it at the sign's own speed
-    setTimeout(() => sweep(full, FULL,
-      () => sweep(hand, LINE, reveal)), 330 + spans.length * GAP + 190);
+    // The sign lands and both lines are simply there. They used to sweep out word by
+    // word, which worked while the slide held nothing else; with the hero below arriving
+    // whole, one half of the page still ticking away while the other half had finished
+    // read as a fault rather than an effect.
+    //
+    // `done` still has to be set on the second line. The hero watches for that class
+    // before it swaps the line for the rotating equation, so dropping it here would
+    // leave that line frozen on its plain text for good.
+    setTimeout(() => {
+      full.textContent = FULL; full.classList.add('done');
+      hand.textContent = LINE; hand.classList.add('done');
+      reveal();
+    }, 330 + spans.length * GAP + 190);
   }
   // wait for the display faces, otherwise the letters land in Georgia and then jump
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(
