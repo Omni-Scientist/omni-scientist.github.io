@@ -156,7 +156,7 @@
 .eq {
   display: inline-flex; align-items: baseline; justify-content: center;
   flex-wrap: wrap; gap: 0 .46em; font-family: "Noto Serif", Georgia, serif;
-  font-size: clamp(1.02rem, 1.55vw, 1.38rem); font-style: normal; color: var(--ink);
+  font-size: clamp(1.08rem, 1.7vw, 1.45rem); font-style: normal; color: var(--ink);
   line-height: 1.5;
 }
 .eq b { font-weight: 600; }

@@ -96,6 +96,10 @@
     letter-spacing: -.015em; color: var(--omni-sci);
     margin: 8px 0 0; min-height: 1.35em;
   }
+  /* the same two inks as the slots in the line below: modality reads in one, discipline
+     in the other, so the subtitle and the sentence name the same two axes */
+  .fullname .mo { color: var(--omni-o); }
+  .fullname .di { color: var(--omni-n); }
   h1.sign span {
     display: inline-block; opacity: 0; transform: translateY(-.36em) rotate(-4deg);
     will-change: transform, opacity;
@@ -1190,6 +1194,11 @@
     'Elsie': [1.04, 900], 'Glass Antiqua': [1.08, 400], 'Newsreader': [1.08, 600],
   };
   const FULL = 'An Omni-Modal Omni-Discipline AI Scientist';
+  /* the two words the slots below are colour-coded to; derived from FULL so a change
+     to the wording cannot leave the mark-up naming something that is no longer there */
+  const FULL_HTML = FULL
+    .replace('Modal', '<span class="mo">Modal</span>')
+    .replace('Discipline', '<span class="di">Discipline</span>');
   const LINE = 'One prompt + micrographs \u2192 a paper in astronomy.';
 
   const sign = document.getElementById('sign');
@@ -1283,7 +1292,7 @@
   function run() {
     mark.style.opacity = 1; mark.style.transform = 'none';
     spans.forEach(s => { s.style.opacity = 1; s.style.transform = 'none'; });
-    full.textContent = FULL; full.classList.add('done');
+    full.innerHTML = FULL_HTML; full.classList.add('done');
     hand.textContent = LINE; hand.classList.add('done');
     reveal();
   }
