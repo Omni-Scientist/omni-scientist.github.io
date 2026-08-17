@@ -182,6 +182,8 @@
    will ever hold. The box keeps its measured width, which is the thing that stops the
    whole sentence shuffling left and right on every turn. The modality on the other side
    is unchanged: centred, with the rule across the full box. */
+/* the word sits against the words before it, not adrift in the middle of its box */
+.eq .slot.disc { text-align: left; }
 .eq .slot.disc::after { content: none; }
 .eq .slot.disc u { position: relative; }
 .eq .slot.disc u::after {
