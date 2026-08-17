@@ -349,15 +349,26 @@
        word is centred in it. Sized to the content instead, every turn would shove the
        words either side of it a few pixels left and right for ever. */
     const gauge = (el, list, ic) => {
-      let w = 0;
+      let w = 0, sum = 0;
       list.forEach((t, i) => {
         el.innerHTML = `<u>${glyph(ic[i])}${esc(t)}</u>`;
-        w = Math.max(w, el.scrollWidth);
+        const at = el.scrollWidth;
+        w = Math.max(w, at);
+        sum += at;
       });
       el.style.width = (w + 4) + 'px';
+      return { box: w + 4, avg: list.length ? sum / list.length : w };
     };
     gauge(mSlot, mods.map(m => MODWORD[m]), mods.map(m => (MOD[m] || MOD.image)[1]));
-    gauge(dSlot, DISCS, DISCS.map(icoOf));
+    const dg = gauge(dSlot, DISCS, DISCS.map(icoOf));
+    /* The last slot is as wide as the longest discipline and the word sits at its left,
+       so the ink runs short of the box by whatever the word is short by, and the line
+       only looks centred when the longest one is up. Shift it right by the average
+       shortfall and the balance point lands on the average word instead: short ones sit
+       left of the axis, long ones right of it, and what you watch reads centred. One
+       constant, so the line still never moves between turns. */
+    const eqBox = hand.querySelector('.eq');
+    if (eqBox) eqBox.style.marginLeft = Math.max(0, dg.box - dg.avg).toFixed(1) + 'px';
     /* the line answers to the field: whichever record lights up below is the
        pair of words that appears up here, on the same beat */
     eqShow = (mod, disc) => {
