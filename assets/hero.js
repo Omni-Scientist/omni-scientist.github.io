@@ -341,7 +341,7 @@
       + `<span class="slot mod"></span>`
       + `<i class="arr"><svg viewBox="0 0 40 14" aria-hidden="true"><path fill="currentColor"
            d="M0 5.1h26.4V0.9L40 7l-13.6 6.1V8.9H0z"/></svg></i>`
-      + `<b class="art">a scientific paper in</b><span class="slot disc"></span></span>`;
+      + `<b class="art">a verified finding in</b><span class="slot disc"></span></span>`;
     const mSlot = hand.querySelector('.slot.mod'), dSlot = hand.querySelector('.slot.disc');
     const mods = Object.keys(MODWORD).filter(k => byMod[k] && byMod[k].length);
     if (!mods.length || !DISCS.length) return;
@@ -1082,7 +1082,7 @@
       'font-size': Math.max(12, G.sw * 0.082).toFixed(1), 'font-weight': 700,
       'letter-spacing': '.05em', fill: 'url(#scG)',
       x: (G.sx + G.sw / 2).toFixed(1), y: ty.toFixed(1), 'text-anchor': 'middle' });
-    cap.textContent = 'Scientific discoveries';
+    cap.textContent = 'A paper you can check';
     wires.appendChild(cap);
     pairs.forEach(p => wires.appendChild(p.base));
     head(inx + 2, ny, '#ef476f', .92);
