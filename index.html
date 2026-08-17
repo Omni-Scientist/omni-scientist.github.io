@@ -1240,12 +1240,27 @@
     const want = Math.min(innerWidth * 0.90, 1560);
     sign.style.fontSize = '100px';
     const at100 = sign.scrollWidth || 1;
-    const px = Math.max(34, Math.min(196, 100 * want / at100));
+    let px = Math.max(34, Math.min(196, 100 * want / at100));
+    /* A short window is the binding constraint, not a narrow one: a 13-inch laptop is
+       nearly as wide as a desktop and a hundred pixels shorter, and the sign, the two
+       lines under it and the buttons still have to leave the picture below room to be
+       a picture. At 1000px tall this cap is 210 and never binds. */
+    px = Math.min(px, innerHeight * 0.21);
     sign.style.fontSize = px + 'px';
   }
   fitSign();
   addEventListener('resize', fitSign);
   mark.addEventListener('load', fitSign);   // the mark widens the sign once it arrives
+  /* The eight display faces arrive one at a time and every one of them changes the
+     width this measures. A single measurement lands on whichever had loaded at that
+     instant, which is why the sign came out at a different size from one load to the
+     next. Re-fit as each batch finishes, and once more after, for the faces a browser
+     reports late. */
+  if (document.fonts) {
+    document.fonts.ready.then(fitSign);
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitSign);
+  }
+  setTimeout(fitSign, 900);
 
   const GAP = 50;                                 // one letter of the sign lands, then the next
 
