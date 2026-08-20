@@ -167,16 +167,22 @@
      one thing to press, not as decoration. */
   .go {
     display: inline-flex; align-items: center; gap: 14px;
-    padding: 18px 34px; border: 0; border-radius: 12px; cursor: pointer;
+    padding: 9px 17px; border: 0; border-radius: 12px; cursor: pointer;
     font-family: inherit; font-size: 1.06rem; font-weight: 600; letter-spacing: .01em;
     background: #000; color: #fff;
     transition: background .14s, transform .08s;
     touch-action: manipulation;
   }
+  /* Both columns 1fr in a grid that sizes to its content: each track comes out as wide
+     as the wider of the two labels, so the pair stays matched without a hard-coded
+     width that a reworded button would then be wrong about. */
+  .cta-top { display: inline-grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 12px; }
+  .cta-top .go { width: 100%; justify-content: center; }
   .go:hover { background: #262c33; }
   .go:active { transform: scale(.983); transition: transform .05s; }
   .go-arr { font-size: 1.12em; line-height: 1; transition: transform .16s; }
   .go:hover .go-arr { transform: translateX(4px); }
+  .go.dl:hover .go-arr.dn { transform: translateY(3px); }
   /* A press that answers and then nothing else happens reads as a dead button, so it
      settles back through its own size once. The label itself never changes; what was
      copied is said beside it. */
@@ -665,6 +671,55 @@
     font: .79rem/1.7 ui-monospace, Menlo, monospace; overflow-x: auto; margin: 18px 0 0;
   }
 
+
+  /* ---------- downloads ---------- */
+  /* Five cards, one per edition, quiet until the pointer is over one. The card is the
+     button: a black chip sitting inside a bordered tile fought the black button on the
+     title slide for the eye, and there is only one thing to press per platform anyway. */
+  .dlpanel { max-width: 1240px; }
+  .dlgrid { margin-top: 40px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+  .dlcard {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    padding: 32px 16px 26px; border-radius: 15px; text-decoration: none;
+    color: var(--ink); text-align: center; cursor: pointer;
+    border: 1px solid rgba(43,53,64,.17); background: rgba(255,255,255,.55);
+    transition: background .14s, border-color .14s, color .14s, transform .07s;
+  }
+  .dlcard:hover { background: #000; color: #fff; border-color: transparent; }
+  .dlcard:active { transform: scale(.982); }
+  .dlic { width: 34px; height: 34px; }
+  .dlic svg { width: 100%; height: 100%; display: block; }
+  .dlcard b { font-size: 1.04rem; font-weight: 600; letter-spacing: .01em; }
+  .dlgo { display: inline-flex; align-items: baseline; gap: 7px; font-size: .84rem; font-weight: 600; color: var(--ink-2); }
+  .dlcard:hover .dlgo { color: #fff; }
+  .dlgo .a { line-height: 1; transition: transform .16s; }
+  .dlcard:hover .dlgo .a { transform: translateY(3px); }
+  .dlcard:hover .dlgo .a.r { transform: translateX(4px); }
+  /* both always in the markup, so no card changes height when the release answers.
+     The filename is there because it is what you check the checksum against. */
+  .dlmeta { font-size: .75rem; color: var(--dim); min-height: 1.15em; margin-top: 2px; }
+  .dlcard:hover .dlmeta { color: rgba(255,255,255,.7); }
+  .dlname {
+    font-size: .67rem; line-height: 1.5; color: var(--dim); opacity: .72;
+    min-height: 2em; word-break: break-word;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  .dlcard:hover .dlname { color: rgba(255,255,255,.62); opacity: 1; }
+  .dlfoot { margin-top: 24px; font-size: .87rem; color: var(--ink-2); }
+  .dlfoot a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  .dlfoot code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .93em; }
+  @media (max-width: 1100px) { .dlgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 700px)  { .dlgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  /* three rows of full-size cards do not fit a phone; the filename is the first thing
+     that can go, because on a phone nobody is checking it against a checksum */
+  @media (max-width: 560px) {
+    .dlgrid { gap: 10px; margin-top: 24px; }
+    .dlcard { padding: 18px 10px 15px; gap: 7px; }
+    .dlic { width: 26px; height: 26px; }
+    .dlcard b { font-size: .95rem; }
+    .dlname { display: none; }
+  }
+
   /* ---------- chrome ---------- */
   /* Sits above the footer strip and below the dot rail, on the same right margin as
      both. Hidden on the first slide, where it would be a button back to where you are. */
@@ -701,7 +756,6 @@
   @media (max-width: 980px) {
     .slide { padding: 62px 6vw 88px; }
     .gal-item { grid-template-columns: 1fr; gap: 16px; }
-    .go { padding: 16px 26px; font-size: .98rem; }
     .sheet-card { padding: 26px 20px 22px; }
     .opts li { flex-direction: column; gap: 3px; }
     .opts b { min-width: 0; }
@@ -734,7 +788,13 @@
            you assemble it. The two links below are the only other things to press, and a
            new tab so a click never leaves the deck waiting on github or arxiv to paint. -->
       <div class="cta reveal" id="rev1">
-        <button class="go" id="plat-go" type="button" data-install>Install with your agent<span class="go-arr">&#8594;</span></button>
+        <!-- Two ways in, the same size, side by side: let an agent do it, or go and get
+             the file. The one on the right goes to the download slide rather than to
+             github, so the choice of edition still happens here. -->
+        <div class="cta-top">
+          <button class="go" id="plat-go" type="button" data-install>Install with agent<span class="go-arr">&#8594;</span></button>
+          <button class="go dl" id="dl-go" type="button" data-go="Download">Install manually<span class="go-arr dn">&#8595;</span></button>
+        </div>
         <div class="reads">
           <a class="read" href="https://arxiv.org/abs/2608.13558" target="_blank" rel="noopener">
             <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.35" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M9.2 1.4H4.6a1.2 1.2 0 0 0-1.2 1.2v10.8a1.2 1.2 0 0 0 1.2 1.2h6.8a1.2 1.2 0 0 0 1.2-1.2V5z"/><path d="M9.2 1.4V5h3.4"/><path d="M6 8.6h4M6 11.1h4"/></svg>Technical Report</a>
@@ -770,6 +830,59 @@
         Pause anywhere, drag the scrubber, take the paper and the log with you.</p>
       <div class="demorows" id="demorows"></div>
       <a class="btn primary c-demo demoall" href="demos.html"><span class="ic">&#9654;</span>Open all three demos</a>
+    </div>
+  </section>
+
+  <!-- Prebuilt, from the latest release. The hrefs below name no version: GitHub's
+       `latest` redirect resolves them, so cutting a release is the only thing anybody
+       has to do to make this page current. -->
+  <section class="slide" data-name="Download">
+    <div class="panel dlpanel">
+      <h2>Download</h2>
+      <p class="note">The first three are the desktop workbench, unpack and open. The skill installs into
+        the agent you are already talking to and is the one edition that needs no API key at all. The CLI
+        is the same engine as a single executable, for a terminal, a server, or CI.</p>
+      <div class="dlgrid">
+        <a class="dlcard" data-dl="windows" href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">
+          <span class="dlic"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10.5 4.4v7.1H3V5.5Zm8.6-1.3L21 2.8v8.7h-9.4V4.2ZM3 12.5h7.5v7.1L3 18.5v-6Zm8.6 0H21v8.7l-9.4-1.3v-7.4Z"/></svg></span>
+          <b>Windows</b>
+          <span class="dlgo">Download<span class="a" aria-hidden="true">&#8595;</span></span>
+          <span class="dlmeta"></span>
+          <span class="dlname"></span>
+        </a>
+        <a class="dlcard" data-dl="mac" href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">
+          <span class="dlic"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.5 12.6c-.03-2.63 2.14-3.89 2.24-3.95-1.22-1.79-3.12-2.03-3.8-2.06-1.62-.16-3.16.95-3.98.95-.83 0-2.09-.93-3.44-.9-1.77.02-3.4 1.03-4.31 2.61-1.84 3.19-.47 7.92 1.32 10.51.87 1.27 1.91 2.7 3.28 2.65 1.31-.05 1.81-.85 3.4-.85 1.59 0 2.04.85 3.43.83 1.42-.03 2.32-1.3 3.19-2.57 1-1.47 1.42-2.9 1.44-2.97-.03-.01-2.77-1.06-2.8-4.21Z"/><path fill="currentColor" d="M13.93 4.62c.73-.88 1.22-2.11 1.08-3.33-1.05.04-2.31.7-3.06 1.58-.67.78-1.26 2.02-1.1 3.22 1.17.09 2.36-.6 3.08-1.47Z"/></svg></span>
+          <b>macOS</b>
+          <span class="dlgo">Download<span class="a" aria-hidden="true">&#8595;</span></span>
+          <span class="dlmeta"></span>
+          <span class="dlname"></span>
+        </a>
+        <a class="dlcard" data-dl="linux" href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">
+          <span class="dlic"><svg viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor"><ellipse cx="8.5" cy="20.4" rx="2.7" ry="1.5"/><ellipse cx="15.5" cy="20.4" rx="2.7" ry="1.5"/><path fill-rule="evenodd" d="M12 1.5c-2.6 0-4.4 2-4.4 4.7 0 1-.02 1.7-.3 2.4-.55 1.35-1.85 2.6-2.6 4.25-.6 1.3-.8 2.6-.35 3.5.2.42.55.64.98.72-.1.6-.4 1.2-.85 1.75-.42.5-.3 1.05.26 1.42 1.9 1.24 4.4 1.86 7.26 1.86s5.36-.62 7.26-1.86c.56-.37.68-.92.26-1.42-.45-.55-.75-1.15-.85-1.75.43-.08.78-.3.98-.72.45-.9.25-2.2-.35-3.5-.75-1.65-2.05-2.9-2.6-4.25-.28-.7-.3-1.4-.3-2.4 0-2.7-1.8-4.7-4.4-4.7Zm-1.75 3.3c.63 0 1.05.66 1.05 1.45 0 .8-.42 1.45-1.05 1.45S9.2 7.05 9.2 6.25c0-.79.42-1.45 1.05-1.45Zm3.5 0c.63 0 1.05.66 1.05 1.45 0 .8-.42 1.45-1.05 1.45s-1.05-.65-1.05-1.45c0-.79.42-1.45 1.05-1.45ZM12 8.15c1.1 0 2 .5 2 1.12 0 .62-.9 1.13-2 1.13s-2-.5-2-1.13c0-.61.9-1.12 2-1.12Z"/></g></svg></span>
+          <b>Linux</b>
+          <span class="dlgo">Download<span class="a" aria-hidden="true">&#8595;</span></span>
+          <span class="dlmeta"></span>
+          <span class="dlname"></span>
+        </a>
+        <!-- No file: it opens the same sheet the title slide opens, already on skill. -->
+        <a class="dlcard" href="#" data-install="skill" role="button">
+          <span class="dlic"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M9.5 1.9c1.72 0 3.1 1.16 3.1 2.62 0 .48-.15.93-.4 1.32h3.44c.72 0 1.3.58 1.3 1.3v3.4c.4-.24.86-.38 1.35-.38 1.47 0 2.63 1.39 2.63 3.11s-1.16 3.11-2.63 3.11c-.49 0-.95-.14-1.35-.39v3.42c0 .72-.58 1.3-1.3 1.3h-3.5c.26-.4.42-.87.42-1.38 0-1.46-1.38-2.62-3.1-2.62S6.4 17.87 6.4 19.33c0 .51.16.98.42 1.38h-3.5c-.72 0-1.3-.58-1.3-1.3v-3.5c.4.26.88.42 1.39.42 1.46 0 2.62-1.39 2.62-3.11S4.87 10.11 3.41 10.11c-.51 0-.99.16-1.39.42v-3.4c0-.71.58-1.29 1.3-1.29h3.44a2.3 2.3 0 0 1-.4-1.32C6.36 3.06 7.74 1.9 9.5 1.9Z"/></svg></span>
+          <b>Skill</b>
+          <span class="dlgo">Copy the prompt<span class="a r" aria-hidden="true">&#8594;</span></span>
+          <span class="dlmeta">no API key</span>
+          <span class="dlname">runs inside your agent</span>
+        </a>
+        <a class="dlcard" data-dl="cli" href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">
+          <span class="dlic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.1" y="4" width="19.8" height="16" rx="3.1"/><path d="m6.9 9.6 3 2.5-3 2.5M12.7 15h4.5"/></svg></span>
+          <b>CLI</b>
+          <span class="dlgo">Download<span class="a" aria-hidden="true">&#8595;</span></span>
+          <span class="dlmeta"></span>
+          <span class="dlname"></span>
+        </a>
+      </div>
+      <p class="dlfoot">Straight from the latest release<span id="dl-tag"></span>. Other architectures, the
+        terminal agent for every platform and <code>SHA256SUMS</code> are on the
+        <a href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">release page</a>.</p>
     </div>
   </section>
 
@@ -1237,30 +1350,44 @@
   // set the sign as large as the viewport takes, measured rather than guessed:
   // thirteen different faces make the natural width impossible to predict from vw alone
   function fitSign() {
-    const want = Math.min(innerWidth * 0.90, 1560);
     sign.style.fontSize = '100px';
+    /* Measured at its own width, not at the box's. This is a flex row, and in a box
+       narrower than the letters the items shrink and scrollWidth comes back short: the
+       same measurement then gives a different answer depending on how much room there
+       happened to be, which is half of why the sign changed size from load to load. */
+    sign.style.width = 'max-content';
     const at100 = sign.scrollWidth || 1;
-    let px = Math.max(34, Math.min(196, 100 * want / at100));
+    sign.style.width = '';
+    /* How wide the wordmark should come out. Two thirds of the window, up to 1152,
+       which is what the block it sits in allows. The old numbers here were 90% and
+       1560, calibrated against a measurement that over-reported the sign's width by a
+       third; correcting the measurement without correcting these made the wordmark a
+       third too big and it sat on the 196 ceiling at every size. */
+    const want = Math.min(innerWidth * 0.665, 1152);
+    let px = Math.max(28, Math.min(196, 100 * want / at100));
     /* A short window is the binding constraint, not a narrow one: a 13-inch laptop is
        nearly as wide as a desktop and a hundred pixels shorter, and the sign, the two
        lines under it and the buttons still have to leave the picture below room to be
-       a picture. At 1000px tall this cap is 210 and never binds. */
+       a picture. */
     px = Math.min(px, innerHeight * 0.21);
     sign.style.fontSize = px + 'px';
   }
+  /* The other half of it: the eight display faces arrive one at a time, and until they
+     are all in, every measurement of the sign is of a different sign. hero.js lays the
+     picture out against the height of the block above it, once, at load, and never
+     again, so it was laying it out against a sign that was about to change size. Refit
+     when the faces are done and tell the picture to do itself over; without that second
+     part the sign settles and the picture stays wrong, differently on every reload. */
+  function settle() { fitSign(); dispatchEvent(new Event('resize')); }
   fitSign();
   addEventListener('resize', fitSign);
-  mark.addEventListener('load', fitSign);   // the mark widens the sign once it arrives
-  /* The eight display faces arrive one at a time and every one of them changes the
-     width this measures. A single measurement lands on whichever had loaded at that
-     instant, which is why the sign came out at a different size from one load to the
-     next. Re-fit as each batch finishes, and once more after, for the faces a browser
-     reports late. */
+  mark.addEventListener('load', settle);    // the mark widens the sign once it arrives
   if (document.fonts) {
-    document.fonts.ready.then(fitSign);
-    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', fitSign);
+    document.fonts.ready.then(settle);
+    if (document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', settle);
   }
-  setTimeout(fitSign, 900);
+  setTimeout(settle, 900);
+  setTimeout(settle, 2200);                 // for the faces a browser reports late
 
   const GAP = 50;                                 // one letter of the sign lands, then the next
 
@@ -1323,6 +1450,15 @@
     () => { fitSign(); run(); }, () => { fitSign(); run(); });
 })();
 
+
+/* A browser zoom does not always fire resize, and the slide then keeps the size it
+   had before the zoom until something else happens to nudge it. The observer does not
+   miss it, and everything on this page that cares is already on the resize path. */
+(function () {
+  const bump = () => dispatchEvent(new Event('resize'));
+  if (window.ResizeObserver) new ResizeObserver(bump).observe(document.documentElement);
+  if (window.visualViewport) visualViewport.addEventListener('resize', bump);
+})();
 
 (function () {
   const deck = document.getElementById('deck');
@@ -1585,8 +1721,15 @@
     workbench: ['Get your own workbench',
                 'What you just clicked is a screenshot of the real thing, running on '
                 + 'somebody\u2019s own machine. Here is how to have it on yours.'],
+    skill: ['Install the skill',
+            'There is nothing to download. The skill runs inside the agent you are '
+            + 'already talking to, which is why it is the one edition that needs no '
+            + 'API key at all.'],
   };
   function show(kind) {
+    // opened from something that already names an edition: start on that one rather
+    // than on whatever machine they happen to be reading this from
+    if (ASK[kind]) at = kind;
     const [title, lead] = HEAD[kind] || HEAD[''];
     head.textContent = title;
     leadEl.textContent = lead;
@@ -1620,6 +1763,61 @@
       choose(items[(i + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].dataset.v);
     }
   });
+})();
+
+/* ---------- what the download cards point at ----------
+   The markup ships pointing at the `latest` redirect, which is already correct and stays
+   correct. This is the upgrade on top of it: name the exact asset, say how big it is, and
+   drop target=_blank once the href is a file, so the download starts without leaving a
+   blank tab behind. If the API is rate limited, offline, or blocked, every card is still
+   a working link to the release it belongs to. */
+(function () {
+  const cards = [...document.querySelectorAll('[data-dl]')];
+  if (!cards.length) return;
+
+  const ua = navigator.userAgent;
+  const os = /Windows/i.test(ua) ? 'win' : /Linux|X11|CrOS/i.test(ua) ? 'linux' : 'mac';
+  const arm = /arm64|aarch64/i.test(ua);
+  // one executable per platform, so the CLI card has to know which machine is asking
+  const CLI = os === 'win'  ? 'omnisci-windows-x86_64.exe'
+            : os === 'mac'  ? 'omnisci-darwin-arm64'
+            : arm           ? 'omnisci-linux-arm64'
+                            : 'omnisci-linux-x86_64';
+  const PICK = {
+    windows: n => /^OmniScientist-.*windows.*\.zip$/i.test(n),
+    mac:     n => /^OmniScientist-.*mac(os)?.*\.tar\.gz$/i.test(n),
+    linux:   n => /^OmniScientist-.*linux.*x86_64.*\.tar\.gz$/i.test(n),
+    cli:     n => n === CLI,
+  };
+  const size = b => b >= 1048576 ? (b / 1048576).toFixed(1).replace(/\.0$/, '') + ' MB'
+                                 : Math.max(1, Math.round(b / 1024)) + ' KB';
+  const arch = n => ((n.match(/(arm64|aarch64|x86_64|amd64|x64)/i) || [])[1] || '').toLowerCase();
+
+  /* One call per tab, not one per reload. Unauthenticated the API allows 60 an hour
+     per address, and a deck somebody is flipping through, or a share link opened by an
+     office behind one address, can walk into that. Rate limited it still falls through
+     to the release page; this just makes that far less likely. */
+  const KEY = 'omni-rel-latest';
+  const cached = (() => { try { return JSON.parse(sessionStorage.getItem(KEY)); } catch (e) { return null; } })();
+  (cached ? Promise.resolve(cached)
+          : fetch('https://api.github.com/repos/Omni-Scientist/OmniScientist/releases/latest')
+              .then(r => r.ok ? r.json() : Promise.reject(r.status))
+              .then(rel => { try { sessionStorage.setItem(KEY, JSON.stringify(rel)); } catch (e) {} return rel; }))
+    .then(rel => {
+      const assets = rel.assets || [];
+      cards.forEach(c => {
+        const a = assets.find(x => PICK[c.dataset.dl](x.name));
+        if (!a) return;                       // leave it on the release page
+        c.href = a.browser_download_url;
+        c.removeAttribute('target');
+        c.title = a.name;
+        c.querySelector('.dlmeta').textContent = [arch(a.name), size(a.size)].filter(Boolean).join(' \u00b7 ');
+        c.querySelector('.dlname').textContent = a.name;
+      });
+      const tag = document.getElementById('dl-tag');
+      if (tag && rel.tag_name) tag.textContent = ', ' + rel.tag_name;
+    })
+    .catch(() => {});
 })();
 </script>
 <script src="assets/hero.js"></script>

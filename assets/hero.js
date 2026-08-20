@@ -880,7 +880,12 @@
        either side of the ring can both be true. */
     const tb = slide.querySelector('.title-block');
     const hr = hero.getBoundingClientRect();
-    const top = tb ? tb.getBoundingClientRect().bottom - hr.top + 10 : H * 0.56;
+    /* The slide is a fixed stage scaled to fit the window, so anything measured off the
+       page comes back multiplied by that scale while W and H are stage pixels. Divide it
+       back out once, here, and the rest of this function stays in one unit. */
+    const k = hr.width / W || 1;
+    const upX = x => (x - hr.left) / k, upY = y => (y - hr.top) / k;
+    const top = tb ? upY(tb.getBoundingClientRect().bottom) + 10 : H * 0.56;
     /* The ring gets to stand in the footer strip: its lower two words sit in the
        middle of the page and the footer only has type at its two ends. That is
        forty pixels of radius on a laptop, which is the difference between a ring
@@ -897,7 +902,13 @@
     /* Solved off the words, not guessed: the ring's centre hangs 1.229R above
        botRing, so the top of the word over it sits at botRing - 2.229R - 45.
        Requiring that to clear the type above is the whole constraint. */
-    const R = Math.max(56, Math.min((botRing - top - 48) / 2.229,
+    /* The gap between the type above and the word over the ring. It used to be 48, and
+       the ring then took every pixel the type did not, which makes its size a function
+       of how tall the title block happens to be: pin the sign and the ring grows by a
+       third. A real margin here keeps the ring the same size as the field beside it
+       rather than letting it swell into whatever room is going. */
+    const CLEAR = 105;
+    const R = Math.max(56, Math.min((botRing - top - CLEAR) / 2.229,
                                     (W - 2 * edge) * 0.088, 152));
     const half = R + 106;                       // the ring plus the room its words take
     const cy = botRing - 1.229 * R - 4;         // low, in the empty middle of the footer
@@ -908,7 +919,6 @@
        of them is set by the height of the band. They come out close to the same size
        on their own, and the margins land close to equal without being made to. */
     const gap = Math.min(66, Math.max(28, (W - 2 * edge) * 0.028));
-    const avail = Math.max(150, cx - half - gap - edge);
     cyBox.style.left = (cx - R) + 'px';
     cyBox.style.top = (cy - R) + 'px';
     cyBox.style.width = cyBox.style.height = (R * 2) + 'px';
@@ -935,23 +945,37 @@
     /* Both sides get the same width, so the margins match, and it is set by the room
        there is rather than by how tall the records can be: tying it to the height is
        what made a 900-pixel-tall window come out as a narrow strip in a wide page. */
-    const groupW = Math.min(avail, 640);
-    G.ew = groupW;
-    G.ex = cx - half - gap - groupW;
-
-    /* And they float up past the band into the space either side of the button, which
-       is much narrower than the sign above it. Only if they actually clear it: on a
-       narrow page they stay under the type where they belong. */
-    /* Measured off the button and the two links themselves, not off the box they sit
+    /* And they float up past the band into the space either side of the buttons, which
+       is much narrower than the sign above it. */
+    /* Measured off the buttons and the two links themselves, not off the box they sit
        in: that box is as wide as the title block, so testing against it says the sides
        never clear and they never float at all. */
     const bits = [...slide.querySelectorAll('.cta .go, .cta .read')].map(e => e.getBoundingClientRect());
     const hand = slide.querySelector('.hand'), hb = hand && hand.getBoundingClientRect();
-    const cl = bits.length ? Math.min.apply(null, bits.map(r => r.left)) - hr.left : 0;
-    const cR = bits.length ? Math.max.apply(null, bits.map(r => r.right)) - hr.left : W;
-    const rx = cx + half + gap;
-    const clear = bits.length && hb && (G.ex + groupW < cl - 18) && (rx > cR + 18);
-    const sideTop = clear ? Math.max(hb.bottom - hr.top - 12, H * 0.25) : top;
+    const cl = bits.length ? Math.min.apply(null, bits.map(r => upX(r.left))) : W;
+    const cR = bits.length ? Math.max.apply(null, bits.map(r => upX(r.right))) : 0;
+
+    /* Two things say how far in each side may come: the room the ring's own words need,
+       and the call to action standing above them. The tighter one wins, and the side
+       gives up width rather than giving up on floating. Dropping both heaps under the
+       whole title block instead, which is what a failed clearance test used to do,
+       reads on screen as the picture shrinking because a button got wider. */
+    const lRing = cx - half - gap, rRing = cx + half + gap;
+    const lStop = Math.min(lRing, cl - 18), rStop = Math.max(rRing, cR + 18);
+    const roomy    = Math.max(150, Math.min(lRing - edge, W - edge - rRing));
+    const squeezed = Math.max(150, Math.min(lStop - edge, W - edge - rStop));
+    // below this the squeeze has taken so much that a heap would read as a column, and
+    // sitting under the type is the better of the two bad answers
+    const clear = bits.length > 0 && !!hb && squeezed > 200;
+    const groupW = Math.min(clear ? squeezed : roomy, 640);
+    G.ew = groupW;
+    G.ex = (clear ? lStop : lRing) - groupW;
+    const rx = clear ? rStop : rRing;
+    /* Under the line, not into it. The -12 this used to be was set when the hand
+       reserved three lines of space and only ever used one, so it landed in the empty
+       part; the line is one line tall now, and the same -12 put the heap and the pile
+       through the words. */
+    const sideTop = clear ? Math.max(upY(hb.bottom) + 60, H * 0.25) : top;
 
     G.lift = 0;                                 // both sides sit level
     /* Both sides finish on the same line, and the line is half a background cell
@@ -995,7 +1019,11 @@
        The sheets sit 24-scaled below G.sy inside their wrap and the back ones
        are turned a few degrees, so the room under them is measured from the
        true bottom corner, not from the box. */
-    G.sy = (H - 103) - 40 - 24 * G.sk - G.sh;
+    /* Its bottom used to stop 103 above the page, which left the pile sitting a good
+       deal higher than the field opposite and put its middle above the ring entirely.
+       60 brings it down to within 30 of the line the field finishes on, and its caption
+       still clears the footer strip. */
+    G.sy = (H - 60) - 40 - 24 * G.sk - G.sh;
     stackWrap.style.left = rx + 'px';
     stackWrap.style.top = (G.sy - 24 * G.sk) + 'px';
     stackWrap.style.width = side + 'px';
@@ -1072,7 +1100,12 @@
        another paper comes off the press. */
     const span = (G.sx - 30) - outx;
     const a1 = outx + span * .22, a2 = outx + span * .64;
-    pairs.push(lay(`M${a1.toFixed(1)} ${py.toFixed(1)}L${a2.toFixed(1)} ${py.toFixed(1)}`,
+    /* At the middle of the pile, not at the node it leaves. The pile is bottom-anchored
+       so its caption clears the footer, and the ring stands low, which puts the Report
+       node most of the way down the paper: an arrow drawn at the node points at the
+       bottom corner of the thing it is meant to be pointing at. */
+    const ay = G.sy + G.sh / 2;
+    pairs.push(lay(`M${a1.toFixed(1)} ${ay.toFixed(1)}L${a2.toFixed(1)} ${ay.toFixed(1)}`,
       null, 'spine'));
     // a solid arrowhead where each run finishes, so the way round is never in doubt
     const head = (x, y, c, o, s) => {
@@ -1097,7 +1130,7 @@
     wires.appendChild(cap);
     pairs.forEach(p => wires.appendChild(p.base));
     head(inx + 2, ny, '#ef476f', .92);
-    if (outWires[0]) outWires[0].head = head(a2 + 30, py, GREY, .92, 2.3);
+    if (outWires[0]) outWires[0].head = head(a2 + 30, ay, GREY, .92, 2.3);
     if (litKey != null) light(litKey);
   }
   /* Worked out from where the record is known to be, not measured off the page:
