@@ -560,6 +560,31 @@
     padding: 7px 16px; border-radius: 999px; background: var(--accent); color: #fff;
     font-size: .75rem; font-weight: 600; box-shadow: 0 5px 14px rgba(24,72,120,.26); }
   .demoall { margin-top: 14px; }
+  .film-panel { max-width: 1720px; }
+  .film-panel h2 {
+    font-size: clamp(1.15rem, 1.75vw, 1.65rem); font-weight: 600;
+    letter-spacing: -.012em; margin: 0; text-align: center;
+  }
+  .film-frame {
+    position: relative; width: min(92vw, 1600px); aspect-ratio: 16 / 9; margin: 18px auto 0;
+    overflow: hidden; border: 1px solid rgba(63,96,124,.18); border-radius: 13px; background: #182634;
+    box-shadow: 0 12px 28px rgba(63,86,110,.18);
+  }
+  .film-frame iframe { display: block; width: 100%; height: 100%; border: 0; pointer-events: none; }
+  .film-frame.is-active iframe { pointer-events: auto; }
+  .film-hit {
+    position: absolute; inset: 0; z-index: 2; border: 0; padding: 0; cursor: pointer;
+    background: transparent;
+  }
+  .film-hit::after {
+    content: "\25B6"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    width: 58px; height: 58px; border-radius: 50%; display: grid; place-items: center;
+    padding-left: 3px; color: #fff; background: rgba(24,72,120,.82);
+    box-shadow: 0 8px 24px rgba(0,0,0,.24); font-size: 1.35rem; opacity: .9;
+    transition: transform .16s, opacity .16s;
+  }
+  .film-hit:hover::after { transform: translate(-50%, -50%) scale(1.08); opacity: 1; }
+  .film-frame.is-active .film-hit { display: none; }
 
   /* ---------- overview: the teaser carries the page, news runs beside it ---------- */
   .ovgrid { display: grid; grid-template-columns: minmax(0, 2.05fr) minmax(330px, 1fr);
@@ -818,6 +843,21 @@
           <img src="assets/site/fig_workbench.png" loading="lazy"
                alt="The OmniScientist desktop workspace: session list, a run with its tool calls, and a research log holding the outputs and the finished paper">
         </a>
+      </figure>
+    </div>
+  </section>
+
+  <section class="slide" data-name="Film">
+    <div class="panel film-panel">
+      <h2>OmniScientist in action</h2>
+      <figure class="film-frame">
+        <iframe src="https://www.youtube.com/embed/yOuMDbBLILk?enablejsapi=1"
+                title="OmniScientist in action on YouTube"
+                loading="lazy"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allowfullscreen></iframe>
+        <button class="film-hit" type="button" aria-label="Play video"></button>
       </figure>
     </div>
   </section>
@@ -1818,6 +1858,23 @@
       if (tag && rel.tag_name) tag.textContent = ', ' + rel.tag_name;
     })
     .catch(() => {});
+})();
+</script>
+<script>
+/* The YouTube frame is pass-through while the page is being navigated. A click enters
+   video-control mode; leaving the frame hands the wheel back to the deck. */
+(function () {
+  const frame = document.querySelector('.film-frame');
+  if (!frame) return;
+  const iframe = frame.querySelector('iframe');
+  const hit = frame.querySelector('.film-hit');
+  hit.addEventListener('click', () => {
+    frame.classList.add('is-active');
+    setTimeout(() => iframe.contentWindow.postMessage(JSON.stringify({
+      event: 'command', func: 'playVideo', args: []
+    }), '*'), 80);
+  });
+  frame.addEventListener('mouseleave', () => frame.classList.remove('is-active'));
 })();
 </script>
 <script src="assets/hero.js"></script>
