@@ -4,8 +4,9 @@ You are an AI agent setting up OmniScientist for the person you are talking to.
 Work through the steps below in order. This document is the whole procedure; you do
 not need anything you remember from elsewhere.
 
-When you are done they will have `OmniScientist.app` installed, a menu bar icon, and a
-research workspace open in their own browser at `127.0.0.1`.
+When you are done they will have `OmniScientist.app` installed and a research
+workspace open in its own native window. Everything runs locally; the service behind
+the window binds `127.0.0.1` only.
 
 ## Ground rules
 
@@ -38,7 +39,7 @@ If it does not print `Darwin`, stop and point the person at the right one:
 
 If the person is inside an agent already and wants no API key at all, the skill edition
 is the better fit: <https://omni-scientist.github.io/setup/skill.md>. If they want a
-terminal agent rather than a browser workspace, that is
+terminal agent rather than a desktop app, that is
 <https://omni-scientist.github.io/setup/cli.md>.
 
 ## Step 1 — read the machine
@@ -47,38 +48,36 @@ terminal agent rather than a browser workspace, that is
 uname -m && sw_vers -productVersion
 ```
 
-`arm64` is Apple silicon, `x86_64` is an Intel Mac. Both are published. Keep the
-macOS version for your final report; the desktop edition was accepted on macOS 15.7.7
-on an M3, and a report from an older release is useful to the project.
+`arm64` is Apple silicon and is what is published. **Intel Macs (`x86_64`) are not
+published** — that is a decision, not an accident. On an Intel Mac, stop here and
+point the person at the skill edition
+(<https://omni-scientist.github.io/setup/skill.md>), which runs anywhere their agent
+runs. Keep the macOS version for your final report.
 
 ## Step 2 — download, verify, install
 
-One block. It picks the architecture, checks the checksum, unpacks into
+One block. It downloads the app and the release checksum list, verifies, unpacks into
 `/Applications`, and falls back to `~/Applications` if that directory is not writable.
 
 ```bash
 set -eu
-case "$(uname -m)" in
-  arm64)  arch=arm64 ;;
-  x86_64) arch=x86_64 ;;
-  *) echo "no macOS build for $(uname -m)" >&2; exit 1 ;;
-esac
-asset="OmniScientist-macos-$arch.tar.gz"
+[ "$(uname -m)" = arm64 ] || { echo "only Apple silicon is published" >&2; exit 1; }
+asset="OmniSci-Desktop-macOS.zip"
 base="https://github.com/Omni-Scientist/OmniScientist/releases/latest/download"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 
 curl -fsSL --retry 3 -o "$tmp/$asset" "$base/$asset"
-curl -fsSL --retry 3 -o "$tmp/$asset.sha256" "$base/$asset.sha256"
-( cd "$tmp" && shasum -a 256 -c "$asset.sha256" )
+curl -fsSL --retry 3 -o "$tmp/SHA256SUMS" "$base/SHA256SUMS"
+( cd "$tmp" && grep " $asset\$" SHA256SUMS | shasum -a 256 -c )
 
 dest=/Applications
 [ -w "$dest" ] || { dest="$HOME/Applications"; mkdir -p "$dest"; }
-tar -xzf "$tmp/$asset" -C "$dest"
+ditto -x -k "$tmp/$asset" "$dest"
 
 # The app is ad-hoc signed rather than notarized, so a copy that carries the
 # quarantine attribute opens as "damaged". Clearing it here means the install works
-# the same way no matter how the tarball arrived.
+# the same way no matter how the zip arrived.
 xattr -dr com.apple.quarantine "$dest/OmniScientist.app" 2>/dev/null || true
 
 echo "installed: $dest/OmniScientist.app"
@@ -135,12 +134,12 @@ your report. The app starts without them and its interface offers to set them.
 open -a OmniScientist || open "$HOME/Applications/OmniScientist.app"
 ```
 
-A menu bar icon appears and the browser opens by itself. The service binds `127.0.0.1`
-only, takes a free port, and hands the browser a one-time token in the URL, which the
-server immediately exchanges for an `HttpOnly` cookie and redirects, so the token does
-not linger in the address bar or in history.
+A native window opens, shows a short loading screen, then the workspace. Behind it a
+local service binds `127.0.0.1` only, takes a free port, and hands the window a
+one-time token that is immediately exchanged for an `HttpOnly` cookie, so nothing on
+the network can reach the session. Quit it like any Mac app.
 
-Confirm it really came up rather than trusting the icon:
+Confirm it really came up rather than trusting the window:
 
 ```bash
 for _ in $(seq 1 60); do [ -f ~/.omnisci/desktop.lock ] && break; sleep 0.5; done
@@ -151,7 +150,7 @@ curl -fsS "http://127.0.0.1:$port/api/health"
 Expected, on one line:
 
 ```json
-{"ok":true,"version":"0.1.0","port":54321,"workspace":"/Users/<name>/OmniScientist"}
+{"ok":true,"version":"0.2.0","port":54321,"workspace":"/Users/<name>/OmniScientist"}
 ```
 
 If `desktop.lock` never appears, the service did not start. The logs are in
@@ -185,30 +184,28 @@ Say only this, with the placeholders filled in from what you actually observed:
 > Workspace: `<workspace from the health check>`. Credentials: `<written / skipped>`.
 > Python `<version or missing>`, tectonic `<present or missing>`.
 >
-> The workbench is open in your browser. Drop a folder of raw data into the workspace
-> and tell it a research direction. If it asks to install Python or tectonic on the
-> first run, say yes: those two are what turn a finished analysis into a PDF.
->
-> Quit from the menu bar icon when you are done.
+> The workbench is open in its own window. Drop a folder of raw data into the
+> workspace and tell it a research direction. If it asks to install Python or tectonic
+> on the first run, say yes: those two are what turn a finished analysis into a PDF.
 
 If any step failed, say which one, paste the exact output, and stop. Do not report a
 partial install as a success.
 
 ## Troubleshooting
 
-**`curl: (22) ... 404`** on the tarball. There is no published release for that
-architecture yet. Report it; do not substitute a different asset name.
+**`curl: (22) ... 404`** on the zip. There is no published asset by that name in the
+latest release. Report it; do not substitute a different asset name.
 
 **The checksum line does not end in `OK`.** The download is wrong. Delete it and stop.
 Do not install it anyway.
 
 **"OmniScientist is damaged and can't be opened"** or an unidentified developer dialog.
-The tarball was downloaded in a browser, so it carries the quarantine attribute. Delete
+The zip was downloaded in a browser, so it carries the quarantine attribute. Delete
 the app and reinstall with the `curl` block in step 2.
 
-**The browser page says it needs the launcher.** The page was opened at
-`127.0.0.1:<port>` without the one-time token, or the cookie expired after a day.
-Reopen it from the menu bar icon.
+**The window stays on the loading screen.** A cold first start can take twenty seconds
+or so and the screen says as much. If it never moves on, quit the app, read the newest
+file in `~/.omnisci/logs/`, and report what it says.
 
 **A Python import fails partway through a run.** Package versions move, and recent
 pandas and matplotlib have removed arguments older analysis code still passes. The run

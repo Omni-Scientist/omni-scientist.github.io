@@ -4,16 +4,10 @@ You are an AI agent setting up OmniScientist for the person you are talking to.
 Work through the steps below in order. Everything here is PowerShell. This document is
 the whole procedure; you do not need anything you remember from elsewhere.
 
-When you are done they will have `OmniScientist.exe` under
-`%LOCALAPPDATA%\Programs\OmniScientist`, a Start menu entry, and a research workspace
-open in their own browser at `127.0.0.1`. No step needs an administrator.
-
-**Read this before you start.** The Windows desktop package is built and smoke tested
-on a real Windows runner in CI: the package is produced, it contains a GUI subsystem
-executable, it starts, it publishes a session and it answers `/api/health`. What has
-**not** happened is a full paper run on Windows by a person. Treat this as a first
-install, tell the person so in your report, and pass back what actually worked. If it
-does not come up, the terminal edition is the tested fallback and step 7 says how.
+When you are done they will have OmniScientist installed under
+`%LOCALAPPDATA%\OmniScientist`, a Start menu entry, and a research workspace open in
+its own native window. No step needs an administrator: the installer is per-user by
+design.
 
 ## Ground rules
 
@@ -37,73 +31,56 @@ If this is not Windows, stop and use the matching document:
 [Linux desktop](https://omni-scientist.github.io/setup/linux-desktop.md),
 [terminal or headless](https://omni-scientist.github.io/setup/cli.md).
 
-If `PROCESSOR_ARCHITECTURE` is **`ARM64`**: only the x64 package is published. Windows
-on ARM does run x64 binaries under emulation, but nobody has confirmed this one does.
-Tell the person that before you continue, and if step 4 fails, move to step 7 rather
-than hunting for an ARM build that does not exist.
+If `PROCESSOR_ARCHITECTURE` is **`ARM64`**: only the x64 installer is published.
+Windows on ARM runs x64 binaries through its emulation layer; tell the person that
+before you continue, and if step 4 fails, move to step 6 rather than hunting for an
+ARM build that does not exist.
 
 If they are inside an agent already and want no API key at all, the skill edition is a
 better fit: <https://omni-scientist.github.io/setup/skill.md>.
 
-## Step 1 — find the package in the latest release
+## Step 1 — download and verify
 
-The desktop zip carries its version in the filename, so there is no fixed
-`latest/download` URL for it. Ask the release API which file to take:
+The installer has a fixed name, so the latest release is one URL away. Download it and
+the release checksum list, then compare:
 
 ```powershell
 $ErrorActionPreference = 'Stop'
-$rel = Invoke-RestMethod 'https://api.github.com/repos/Omni-Scientist/OmniScientist/releases/latest'
-$asset = $rel.assets | Where-Object { $_.name -like 'OmniScientist-*-windows-*.zip' } | Select-Object -First 1
-if (-not $asset) { throw 'this release has no Windows desktop package' }
-$sum = $rel.assets | Where-Object { $_.name -eq ($asset.name + '.sha256') } | Select-Object -First 1
-"$($rel.tag_name)  $($asset.name)  $([math]::Round($asset.size/1MB,1)) MB"
-```
-
-If it throws `this release has no Windows desktop package`, the desktop zip is attached
-only to tagged releases. Report that and go to step 7; do not download a CLI asset and
-call it the desktop.
-
-## Step 2 — download and verify
-
-```powershell
+$base = 'https://github.com/Omni-Scientist/OmniScientist/releases/latest/download'
 $work = Join-Path $env:TEMP 'omniscientist-install'
 Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
 New-Item -ItemType Directory -Force $work | Out-Null
-$zip = Join-Path $work $asset.name
-Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $zip -UseBasicParsing
+$setup = Join-Path $work 'OmniSci-Desktop-Windows-x64-setup.exe'
+Invoke-WebRequest -Uri "$base/OmniSci-Desktop-Windows-x64-setup.exe" -OutFile $setup -UseBasicParsing
 
-if ($sum) {
-  $want = ((Invoke-WebRequest -Uri $sum.browser_download_url -UseBasicParsing).Content -split '\s+')[0]
-  $got  = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLower()
-  if ($got -ne $want.ToLower()) { throw "checksum mismatch: got $got, expected $want" }
-  'checksum ok'
-} else { 'no checksum published for this asset, skipped' }
+$sums = (Invoke-WebRequest -Uri "$base/SHA256SUMS" -UseBasicParsing).Content
+$line = $sums -split "`n" | Where-Object { $_ -match 'OmniSci-Desktop-Windows-x64-setup\.exe' } | Select-Object -First 1
+if (-not $line) { throw 'SHA256SUMS has no entry for the installer' }
+$want = ($line -split '\s+')[0]
+$got = (Get-FileHash -Algorithm SHA256 $setup).Hash.ToLower()
+if ($got -ne $want.ToLower()) { throw "checksum mismatch: got $got, expected $want" }
+'checksum ok'
 ```
 
 If the checksum does not match, delete the file and stop. Do not install it anyway.
 
-## Step 3 — install for the current user
-
-The zip unpacks to a single folder named after the version, holding
-`OmniScientist.exe`, `install.ps1`, `uninstall.ps1`, and a `README.txt`.
+## Step 2 — install for the current user
 
 ```powershell
-Expand-Archive -Path $zip -DestinationPath $work -Force
-$pkg = Get-ChildItem -Directory $work | Where-Object { $_.Name -like 'OmniScientist-*-windows-*' } | Select-Object -First 1
-powershell -ExecutionPolicy Bypass -File (Join-Path $pkg.FullName 'install.ps1')
+Start-Process -FilePath $setup -ArgumentList '/S' -Wait
+Test-Path (Join-Path $env:LOCALAPPDATA 'OmniScientist\OmniScientist.exe')
 ```
 
-That copies the executable to `%LOCALAPPDATA%\Programs\OmniScientist\OmniScientist.exe`
-and creates a Start menu shortcut. It touches nothing else and needs no elevation.
+Expected: `True`. `/S` runs the installer silently; it copies the app to
+`%LOCALAPPDATA%\OmniScientist`, writes a Start menu entry and an uninstaller, and
+needs no elevation.
 
-`-ExecutionPolicy Bypass` is scoped to that one child process and does not change the
-machine's policy. Do not run `Set-ExecutionPolicy` instead.
+The binary carries publisher and version metadata but is not signed with a purchased
+certificate, so Windows Defender SmartScreen may interpose a warning. If it does, show
+it to the person and let them decide; do not click through on their behalf. Once the
+person confirms the install works, `Remove-Item -Recurse -Force $work` is safe.
 
-Keep `$pkg` for now; step 7 and the uninstall instructions refer to it. Once the person
-confirms it works, `Remove-Item -Recurse -Force $work` is safe, and uninstalling later
-only needs `install.ps1 -Uninstall` from a fresh copy of the package.
-
-## Step 4 — credentials
+## Step 3 — credentials
 
 The desktop edition sends text to DeepSeek and pixels to a vision model. Ask the
 person for what they have, in your own words:
@@ -138,15 +115,16 @@ $lines = @(
 If the person would rather not hand over keys now, skip this and say so in your report.
 The app starts without them and its interface offers to set them.
 
-## Step 5 — first launch
+## Step 4 — first launch
 
 ```powershell
-Start-Process (Join-Path $env:LOCALAPPDATA 'Programs\OmniScientist\OmniScientist.exe')
+Start-Process (Join-Path $env:LOCALAPPDATA 'OmniScientist\OmniScientist.exe')
 ```
 
-The service binds `127.0.0.1` only, takes a free port, and hands the browser a one-time
-token in the URL, which the server immediately exchanges for an `HttpOnly` cookie and
-redirects, so the token does not stay in the address bar or in history.
+A native window opens, shows a short loading screen, then the workspace. Behind it a
+local service binds `127.0.0.1` only, takes a free port, and hands the window a
+one-time token that is immediately exchanged for an `HttpOnly` cookie, so nothing on
+the network can reach the session.
 
 Confirm it really came up rather than trusting the window:
 
@@ -158,21 +136,14 @@ $port = (Get-Content $lock -Raw | ConvertFrom-Json).port
 Invoke-RestMethod "http://127.0.0.1:$port/api/health"
 ```
 
-Expected: an object with `ok = True`, a version, the port, and the workspace, which
-defaults to `%USERPROFILE%\OmniScientist`.
+Expected: an object with `ok = True`, version `0.2.0` or later, the port, and the
+workspace, which defaults to `%USERPROFILE%\OmniScientist`.
 
 If the lock file never appears, the service did not start. The logs are in
 `%USERPROFILE%\.omnisci\logs`; read the newest one and report what it says. Do not
-launch it a second time, the lock file exists precisely to stop a second service. If
-Windows Defender SmartScreen blocked it, say so explicitly in your report: the
-executable carries publisher and version metadata but is not signed with a purchased
-certificate, and that is a fact the person should decide about, not something you
-should click through on their behalf.
+launch it a second time, the lock file exists precisely to stop a second service.
 
-Useful flags if a default is wrong: `-w, --workspace <dir>`, `-p, --port <n>`,
-`--no-open` to print the address instead of opening a browser, `-v, --verbose`.
-
-## Step 6 — the two things that live outside the app, and the shell
+## Step 5 — the two things that live outside the app, and the shell
 
 A run reaches a compiled PDF only with **Python 3.10 or newer** (numpy, pandas,
 matplotlib, scipy, scikit-learn, sympy, imageio, soundfile) and
@@ -195,9 +166,9 @@ if (Get-Command tectonic -ErrorAction SilentlyContinue) { 'tectonic: present' } 
 wsl --status 2>&1 | Select-Object -First 1
 ```
 
-## Step 7 — if the desktop package will not run
+## Step 6 — if the desktop app will not run
 
-The terminal edition is the tested Windows path and installs in one line:
+The terminal edition is the fallback and installs in one line:
 
 ```powershell
 irm https://raw.githubusercontent.com/Omni-Scientist/OmniScientist/main/install.ps1 | iex
@@ -205,18 +176,18 @@ irm https://raw.githubusercontent.com/Omni-Scientist/OmniScientist/main/install.
 
 It puts `omnisci.exe` in `%LOCALAPPDATA%\OmniScientist\bin` and adds it to the user
 `PATH`, which takes effect in a new terminal. It reads the same
-`%USERPROFILE%\.omnisci\env` you wrote in step 4, so nothing there is wasted. Verify
+`%USERPROFILE%\.omnisci\env` you wrote in step 3, so nothing there is wasted. Verify
 with `omnisci --help`.
 
-Use this only if the desktop package genuinely failed, and say in your report that you
+Use this only if the desktop app genuinely failed, and say in your report that you
 fell back and why.
 
-## Step 8 — report
+## Step 7 — report
 
 Say only this, with the placeholders filled in from what you actually observed:
 
 > OmniScientist Desktop is installed at
-> `%LOCALAPPDATA%\Programs\OmniScientist\OmniScientist.exe` and running.
+> `%LOCALAPPDATA%\OmniScientist\OmniScientist.exe` and running.
 > Workspace: `<workspace from the health check>`. Credentials: `<written / skipped>`.
 > Python `<version or missing>`, tectonic `<present or missing>`.
 >
@@ -225,31 +196,28 @@ Say only this, with the placeholders filled in from what you actually observed:
 > tectonic on the first run, say yes: those two are what turn a finished analysis into
 > a PDF.
 >
-> One caveat worth knowing: the Windows build passes its automated checks on a Windows
-> runner, but no one has driven a full paper run on Windows yet. If something breaks,
-> that report is genuinely useful to the project.
->
-> To uninstall: run `install.ps1 -Uninstall` from the package folder. Add `-PurgeData`
-> to also delete the managed dependencies and `%USERPROFILE%\.omnisci`.
+> To uninstall: Settings, Apps, OmniScientist, or run
+> `%LOCALAPPDATA%\OmniScientist\uninstall.exe`.
 
 If any step failed, say which one, paste the exact output, and stop. Do not report a
 partial install as a success.
 
 ## Troubleshooting
 
-**`this release has no Windows desktop package`.** The zip is attached to tagged
-releases only. Use step 7.
+**`Invoke-WebRequest` returns 404.** There is no published asset by that name in the
+latest release. Report it; do not substitute a different asset name. The terminal
+edition in step 6 still works.
 
-**`Expand-Archive` fails or the folder is empty.** The download is incomplete. Delete
-`$env:TEMP\omniscientist-install` and redo step 2 once. If it fails again, stop.
+**The checksum does not match.** The download is wrong. Delete it and stop. Do not
+install it anyway.
 
-**A black console window flashes on launch.** That is a console subsystem build, which
-the release pipeline rejects. It means the executable did not come from a release.
-Report it and reinstall from step 1.
+**SmartScreen blocks the installer or the app.** The binary is not signed with a
+purchased certificate. That is a fact for the person to decide about; show them the
+dialog and let them choose "More info", then "Run anyway", themselves.
 
-**The browser page says it needs the launcher.** The page was opened at
-`127.0.0.1:<port>` without the one-time token, or the cookie expired after a day.
-Reopen from the Start menu.
+**The window stays on the loading screen.** A cold first start can take twenty seconds
+or so and the screen says as much. If it never moves on, quit the app, read the newest
+file in `%USERPROFILE%\.omnisci\logs`, and report what it says.
 
 **A Python import fails partway through a run.** Package versions move, and recent
 pandas and matplotlib have removed arguments older analysis code still passes. The run
