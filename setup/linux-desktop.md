@@ -57,6 +57,8 @@ Ubuntu, Mint and friends). Two cases to stop on:
 ```bash
 set -eu
 [ "$(uname -m)" = x86_64 ] || { echo "only x86_64 is published for the desktop" >&2; exit 1; }
+pgrep -x OmniScientist >/dev/null && {
+  echo "OmniScientist is currently running; ask the person to quit it, then rerun" >&2; exit 1; }
 asset="OmniSci-Desktop-Linux-x64.deb"
 base="https://github.com/Omni-Scientist/OmniScientist/releases/latest/download"
 work="$HOME/.cache/omniscientist-install"
@@ -73,7 +75,7 @@ stop. Do not install it anyway.
 ## Step 3 — install the package
 
 ```bash
-sudo apt install "$HOME/.cache/omniscientist-install/OmniSci-Desktop-Linux-x64.deb"
+sudo apt install -y "$HOME/.cache/omniscientist-install/OmniSci-Desktop-Linux-x64.deb"
 ```
 
 `apt` resolves the desktop dependencies (webkit2gtk and friends) at the same time,
@@ -160,9 +162,9 @@ matplotlib, scipy, scikit-learn, sympy, imageio, soundfile) and
 **[tectonic](https://tectonic-typesetting.github.io/)**, which compiles the LaTeX.
 Without tectonic a run still produces the `.tex`, says so, and stops there.
 
-The desktop edition detects both on first use and offers to install them under its own
-data directory, touching nothing else. **Let it.** Do not install them through the
-distribution package manager on the person's behalf.
+The desktop edition detects both at first launch and installs what is missing under
+its own data directory automatically, touching nothing else. **Let it work.** Do not
+install them through the distribution package manager on the person's behalf.
 
 For your report, record what is already there:
 
@@ -180,8 +182,8 @@ Say only this, with the placeholders filled in from what you actually observed:
 >
 > It is in your application menu as OmniScientist, and the workbench is open in its
 > own window. Drop a folder of raw data into the workspace and tell it a research
-> direction. If it offers to install Python or tectonic on the first run, say yes:
-> those two are what turn a finished analysis into a PDF.
+> direction. On first use it sets up its own Python environment and LaTeX compiler,
+> so the first run takes a few extra minutes.
 >
 > To remove it later: `sudo apt remove omni-scientist`.
 
@@ -204,6 +206,12 @@ a re-login. `OmniScientist` on the command line works regardless.
 **The window stays on the loading screen.** A cold first start can take twenty seconds
 or so and the screen says as much. If it never moves on, quit the app, read the newest
 file in `~/.omnisci/logs/`, and report what it says.
+
+**Inside WSL2, the health check times out while the log looks perfectly healthy.**
+WSL2's mirrored networking mode can wedge IPv4 loopback for the whole distro (even a
+listener cannot connect to itself). That is an environment fault, not an install
+fault; `wsl --shutdown` from the Windows side and reopening the distro usually clears
+it.
 
 **A Python import fails partway through a run.** Package versions move, and recent
 pandas and matplotlib have removed arguments older analysis code still passes. The run

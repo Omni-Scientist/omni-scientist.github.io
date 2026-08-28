@@ -62,6 +62,8 @@ One block. It downloads the app and the release checksum list, verifies, unpacks
 ```bash
 set -eu
 [ "$(uname -m)" = arm64 ] || { echo "only Apple silicon is published" >&2; exit 1; }
+pgrep -x OmniScientist >/dev/null && {
+  echo "OmniScientist is currently running; ask the person to quit it, then rerun" >&2; exit 1; }
 asset="OmniSci-Desktop-macOS.zip"
 base="https://github.com/Omni-Scientist/OmniScientist/releases/latest/download"
 tmp=$(mktemp -d)
@@ -130,8 +132,12 @@ your report. The app starts without them and its interface offers to set them.
 
 ## Step 4 — first launch
 
+Launch by the path step 2 printed, not by name: `open -a` resolves through Launch
+Services, and on a machine with an older copy elsewhere it can silently start the
+wrong one.
+
 ```bash
-open -a OmniScientist || open "$HOME/Applications/OmniScientist.app"
+open "/Applications/OmniScientist.app" 2>/dev/null || open "$HOME/Applications/OmniScientist.app"
 ```
 
 A native window opens, shows a short loading screen, then the workspace. Behind it a
@@ -143,6 +149,7 @@ Confirm it really came up rather than trusting the window:
 
 ```bash
 for _ in $(seq 1 60); do [ -f ~/.omnisci/desktop.lock ] && break; sleep 0.5; done
+[ -f ~/.omnisci/desktop.lock ] || { echo "the service never wrote a lock file" >&2; exit 1; }
 port=$(sed -n 's/.*"port"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' ~/.omnisci/desktop.lock)
 curl -fsS "http://127.0.0.1:$port/api/health"
 ```
@@ -153,7 +160,10 @@ Expected, on one line:
 {"ok":true,"version":"0.2.0","port":54321,"workspace":"/Users/<name>/OmniScientist"}
 ```
 
-If `desktop.lock` never appears, the service did not start. The logs are in
+The `pid` in the lock file is the background service, which is a child of the app
+process, so do not be surprised that it differs from the PID of the window.
+
+If the lock file never appears, the service did not start. The logs are in
 `~/.omnisci/logs/`; read the newest one and report what it says. Do not launch it a
 second time, the lock file exists precisely to stop a second service.
 
@@ -165,10 +175,9 @@ matplotlib, scipy, scikit-learn, sympy, imageio, soundfile) and
 Without tectonic a run still produces the `.tex`, says so, and stops there. Everything
 before that step works.
 
-The desktop edition checks for both on startup and offers to install them under its own
-data directory, touching nothing else on the machine. **Let it.** Do not install them
-yourself with Homebrew or pip. Just tell the person, in your report, that the workbench
-will ask on first use and that saying yes is the intended path.
+The desktop edition checks for both at first launch and installs what is missing under
+its own data directory automatically, touching nothing else on the machine. **Let it
+work.** Do not install them yourself with Homebrew or pip.
 
 For your report, record what is already there:
 
@@ -185,8 +194,8 @@ Say only this, with the placeholders filled in from what you actually observed:
 > Python `<version or missing>`, tectonic `<present or missing>`.
 >
 > The workbench is open in its own window. Drop a folder of raw data into the
-> workspace and tell it a research direction. If it asks to install Python or tectonic
-> on the first run, say yes: those two are what turn a finished analysis into a PDF.
+> workspace and tell it a research direction. On first use it sets up its own Python
+> environment and LaTeX compiler, so the first run takes a few extra minutes.
 
 If any step failed, say which one, paste the exact output, and stop. Do not report a
 partial install as a success.

@@ -53,8 +53,12 @@ New-Item -ItemType Directory -Force $work | Out-Null
 $setup = Join-Path $work 'OmniSci-Desktop-Windows-x64-setup.exe'
 Invoke-WebRequest -Uri "$base/OmniSci-Desktop-Windows-x64-setup.exe" -OutFile $setup -UseBasicParsing
 
-$sums = (Invoke-WebRequest -Uri "$base/SHA256SUMS" -UseBasicParsing).Content
-$line = $sums -split "`n" | Where-Object { $_ -match 'OmniSci-Desktop-Windows-x64-setup\.exe' } | Select-Object -First 1
+# SHA256SUMS goes through -OutFile too: GitHub serves it as octet-stream, and on
+# Windows PowerShell 5.1 Invoke-WebRequest's .Content for that type is a byte
+# array, not a string, so parsing it in memory silently matches nothing.
+$sumsFile = Join-Path $work 'SHA256SUMS'
+Invoke-WebRequest -Uri "$base/SHA256SUMS" -OutFile $sumsFile -UseBasicParsing
+$line = Get-Content $sumsFile | Where-Object { $_ -match 'OmniSci-Desktop-Windows-x64-setup\.exe' } | Select-Object -First 1
 if (-not $line) { throw 'SHA256SUMS has no entry for the installer' }
 $want = ($line -split '\s+')[0]
 $got = (Get-FileHash -Algorithm SHA256 $setup).Hash.ToLower()
@@ -66,7 +70,13 @@ If the checksum does not match, delete the file and stop. Do not install it anyw
 
 ## Step 2 — install for the current user
 
+If OmniScientist is already open, the installer would terminate it mid-session, so
+check first and have the person quit it themselves:
+
 ```powershell
+if (Get-Process -Name OmniScientist -ErrorAction SilentlyContinue) {
+  throw 'OmniScientist is currently running. Ask the person to quit it, then rerun this step.'
+}
 Start-Process -FilePath $setup -ArgumentList '/S' -Wait
 Test-Path (Join-Path $env:LOCALAPPDATA 'OmniScientist\OmniScientist.exe')
 ```
@@ -150,8 +160,9 @@ matplotlib, scipy, scikit-learn, sympy, imageio, soundfile) and
 **[tectonic](https://tectonic-typesetting.github.io/)**, which compiles the LaTeX.
 Without tectonic a run still produces the `.tex`, says so, and stops there.
 
-The workbench checks for both on first use and offers to install them under its own
-data directory. **Let it.** Do not install them yourself.
+The workbench checks for both at first launch and installs what is missing under its
+own data directory automatically, touching nothing else on the machine. **Let it
+work.** Do not install them yourself.
 
 One Windows specific behaviour worth telling the person about: if WSL is installed, the
 agent's `bash` tool runs through WSL by default. `OMNISCI_SHELL=cmd` or
@@ -192,9 +203,8 @@ Say only this, with the placeholders filled in from what you actually observed:
 > Python `<version or missing>`, tectonic `<present or missing>`.
 >
 > Open it from the Start menu as OmniScientist. Drop a folder of raw data into the
-> workspace and tell it a research direction. If it offers to install Python or
-> tectonic on the first run, say yes: those two are what turn a finished analysis into
-> a PDF.
+> workspace and tell it a research direction. On first use it sets up its own Python
+> environment and LaTeX compiler, so the first run takes a few extra minutes.
 >
 > To uninstall: Settings, Apps, OmniScientist, or run
 > `%LOCALAPPDATA%\OmniScientist\uninstall.exe`.
