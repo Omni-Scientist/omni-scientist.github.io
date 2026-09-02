@@ -2,7 +2,7 @@
 
 You are an AI agent installing OmniScientist for the person you are talking to.
 
-**This document installs nothing.** It works out *which* of five procedures applies, and
+**This document installs nothing.** It works out *which* of four procedures applies, and
 sends you to that one. Do the steps below, then stop reading this file and follow the
 document it names, from that document's own first step.
 
@@ -16,7 +16,8 @@ project page and the README hand out a sentence that does. Match it here first:
 | Desktop **on this Mac**, macOS desktop, the browser workspace on a Mac | <https://omni-scientist.github.io/setup/mac-desktop.md> |
 | Desktop **on this Windows machine**, Windows desktop | <https://omni-scientist.github.io/setup/windows-desktop.md> |
 | Desktop **on this Linux machine**, Linux desktop | <https://omni-scientist.github.io/setup/linux-desktop.md> |
-| the **terminal agent**, CLI, `omnisci` on the command line, headless, CI, Docker | <https://omni-scientist.github.io/setup/cli.md> |
+| the **terminal agent**, CLI, `omnisci` on the command line | The standalone CLI is discontinued. <https://omni-scientist.github.io/setup/cli.md> says what to install instead (usually the skill) |
+| headless, SSH, CI, Docker, no display | <https://omni-scientist.github.io/setup/skill.md> |
 | the **skill**, "for this agent", "inside Claude Code", no API key | <https://omni-scientist.github.io/setup/skill.md> |
 
 If one of those matches, go to Step 3 now. Do not ask a question you already have the
@@ -38,26 +39,28 @@ On Windows the first command fails and you are in PowerShell; that is the answer
 error. `Darwin` is macOS, `Linux` is Linux.
 
 **If that printed `no display`** (a server, a container, an SSH session, a CI runner),
-the desktop edition has no browser to open and is not an option. Go to
-<https://omni-scientist.github.io/setup/cli.md>.
+the desktop edition has no browser to open and is not an option. The standalone CLI is
+discontinued, so go to <https://omni-scientist.github.io/setup/skill.md>; it works
+headless and needs no API key. If they explicitly asked for the CLI,
+<https://omni-scientist.github.io/setup/cli.md> says how to answer.
 
 **Otherwise ask exactly one question**, in your own words, and give them enough to answer
 it:
 
 - a **browser workspace** they open from the Dock, Start menu, or application menu;
-- a **terminal agent**, one executable, which is also what runs in CI;
 - a **skill** inside the agent they are talking to right now, which needs **no API key at
-  all**, because you do the perceiving and the writing yourself.
+  all**, because you do the perceiving and the writing yourself, and which also covers
+  headless machines and CI.
 
 Then take the matching document: mac, Windows, or Linux desktop by what Step 2 printed,
-otherwise `cli.md` or `skill.md`.
+otherwise `skill.md`.
 
 Do not decide this for them because one answer is cheaper. The skill costs nothing to
 run and is the right answer surprisingly often, but somebody setting up a shared machine
 for a lab wants the desktop edition, and installing the wrong one wastes more of their
 time than the question does.
 
-The reference implementation in `engine/` is the fifth thing in the repository, but it is
+The reference implementation in `engine/` also lives in the repository, but it is
 a Python package for reproducing the technical report rather than an edition to install.
 If that is what they want, send them to
 <https://github.com/Omni-Scientist/OmniScientist/blob/main/docs/INSTALL.md#engine>
@@ -69,7 +72,7 @@ Read it and do what it says, in order, starting at its own Step 0. It repeats th
 platform check you may have just done, which is deliberate: each one is written to work
 whether or not anybody came through this file.
 
-Three things carry over into all five, so they are worth knowing now:
+Three things carry over into all four, so they are worth knowing now:
 
 - **Never invent, guess, or reuse an API key.** Ask the person and wait. Only the skill
   edition needs none.
