@@ -34,9 +34,10 @@ uname -s; [ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ] && echo "graphical session" 
 If it printed **`no display`**, this is a server, a container, or an SSH session
 without X or Wayland forwarding. The desktop edition is a native window and has
 nowhere to draw one. Stop here and use
-<https://omni-scientist.github.io/setup/cli.md>, which is the terminal and headless
-path and is what the person actually wants. Say so plainly rather than installing
-something that cannot start.
+<https://omni-scientist.github.io/setup/skill.md>, the headless path: it runs inside the
+agent they are talking to and needs no API key (the standalone CLI is discontinued;
+<https://omni-scientist.github.io/setup/cli.md> explains). Say so plainly rather than
+installing something that cannot start.
 
 ## Step 1 — read the machine
 
@@ -47,10 +48,10 @@ uname -m; . /etc/os-release 2>/dev/null && echo "$PRETTY_NAME"
 The desktop package is a `.deb` for **x86_64 on Debian-family systems** (Debian,
 Ubuntu, Mint and friends). Two cases to stop on:
 
-- `aarch64`: no ARM desktop build is published. Report it and use
-  <https://omni-scientist.github.io/setup/cli.md>, which does publish ARM.
+- `aarch64`: no ARM desktop build is published. Report it and offer the skill,
+  <https://omni-scientist.github.io/setup/skill.md>; the discontinued CLI's ARM builds are gone too.
 - A non-Debian distribution (Fedora, Arch, openSUSE): there is no rpm or AUR package.
-  Report it and use the terminal edition, same link as above.
+  Report it and offer the skill, same link as above.
 
 ## Step 2 — download and verify
 
@@ -197,7 +198,7 @@ latest release. Report it; do not substitute a different asset name.
 
 **`apt` reports unmet dependencies.** That normally means a non-Debian system or a
 very old release. Report the exact output and fall back to
-<https://omni-scientist.github.io/setup/cli.md>; do not force the install with
+the skill, <https://omni-scientist.github.io/setup/skill.md>; do not force the install with
 `dpkg -i`.
 
 **No application menu entry.** Most desktops pick the entry up immediately; some need

@@ -179,19 +179,11 @@ wsl --status 2>&1 | Select-Object -First 1
 
 ## Step 6 — if the desktop app will not run
 
-The terminal edition is the fallback and installs in one line:
-
-```powershell
-irm https://raw.githubusercontent.com/Omni-Scientist/OmniScientist/main/install.ps1 | iex
-```
-
-It puts `omnisci.exe` in `%LOCALAPPDATA%\OmniScientist\bin` and adds it to the user
-`PATH`, which takes effect in a new terminal. It reads the same
-`%USERPROFILE%\.omnisci\env` you wrote in step 3, so nothing there is wasted. Verify
-with `omnisci --help`.
-
-Use this only if the desktop app genuinely failed, and say in your report that you
-fell back and why.
+The standalone terminal edition is discontinued, so there is no CLI to fall back to.
+If the desktop app genuinely failed, report the failing step and its exact output,
+then offer the skill edition (<https://omni-scientist.github.io/setup/skill.md>) instead: it runs inside the agent the person is
+already talking to and needs no API key at all. Say in your report that you offered
+the fallback and why.
 
 ## Step 7 — report
 
