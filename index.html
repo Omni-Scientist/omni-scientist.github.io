@@ -243,7 +243,7 @@
   /* ---------- choosing where to install ---------- */
   /* Picking happens inside the sheet rather than on the slide, so there is no menu that
      has to open on top of something else, and each row has room to say what it is
-     instead of leaving "CLI" sitting next to "Windows desktop" explaining nothing. */
+     instead of leaving "Skill" sitting next to "Windows desktop" explaining nothing. */
   .opts { margin: 0 0 18px; padding: 0; list-style: none; display: grid; gap: 6px; }
   .opts li {
     display: flex; align-items: baseline; gap: 12px; text-align: left;
@@ -698,11 +698,11 @@
 
 
   /* ---------- downloads ---------- */
-  /* Five cards, one per edition, quiet until the pointer is over one. The card is the
+  /* Four cards, one per edition, quiet until the pointer is over one. The card is the
      button: a black chip sitting inside a bordered tile fought the black button on the
      title slide for the eye, and there is only one thing to press per platform anyway. */
   .dlpanel { max-width: 1240px; }
-  .dlgrid { margin-top: 40px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+  .dlgrid { margin-top: 40px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
   .dlcard {
     display: flex; flex-direction: column; align-items: center; gap: 10px;
     padding: 32px 16px 26px; border-radius: 15px; text-decoration: none;
@@ -733,7 +733,7 @@
   .dlfoot { margin-top: 24px; font-size: .87rem; color: var(--ink-2); }
   .dlfoot a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
   .dlfoot code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: .93em; }
-  @media (max-width: 1100px) { .dlgrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 1100px) { .dlgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 700px)  { .dlgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   /* three rows of full-size cards do not fit a phone; the filename is the first thing
      that can go, because on a phone nobody is checking it against a checksum */
@@ -879,9 +879,8 @@
   <section class="slide" data-name="Download">
     <div class="panel dlpanel">
       <h2>Download</h2>
-      <p class="note">The first three are the desktop workbench, unpack and open. The skill installs into
-        the agent you are already talking to and is the one edition that needs no API key at all. The CLI
-        is the same engine as a single executable, for a terminal, a server, or CI.</p>
+      <p class="note">The first three are the desktop workbench, pick your platform. The skill installs into
+        the agent you are already talking to and is the one edition that needs no API key at all.</p>
       <div class="dlgrid">
         <a class="dlcard" data-dl="windows" href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">
           <span class="dlic"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10.5 4.4v7.1H3V5.5Zm8.6-1.3L21 2.8v8.7h-9.4V4.2ZM3 12.5h7.5v7.1L3 18.5v-6Zm8.6 0H21v8.7l-9.4-1.3v-7.4Z"/></svg></span>
@@ -912,16 +911,9 @@
           <span class="dlmeta">no API key</span>
           <span class="dlname">runs inside your agent</span>
         </a>
-        <a class="dlcard" data-dl="cli" href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">
-          <span class="dlic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.1" y="4" width="19.8" height="16" rx="3.1"/><path d="m6.9 9.6 3 2.5-3 2.5M12.7 15h4.5"/></svg></span>
-          <b>CLI</b>
-          <span class="dlgo">Download<span class="a" aria-hidden="true">&#8595;</span></span>
-          <span class="dlmeta"></span>
-          <span class="dlname"></span>
-        </a>
       </div>
-      <p class="dlfoot">Straight from the latest release<span id="dl-tag"></span>. Other architectures, the
-        terminal agent for every platform and <code>SHA256SUMS</code> are on the
+      <p class="dlfoot">Straight from the latest release<span id="dl-tag"></span>. Other
+        architectures and <code>SHA256SUMS</code> are on the
         <a href="https://github.com/Omni-Scientist/OmniScientist/releases/latest" target="_blank" rel="noopener">release page</a>.</p>
     </div>
   </section>
@@ -1193,7 +1185,6 @@
       <li role="option" data-v="mac-desktop"><b>Mac desktop</b><span>browser workspace, menu bar app</span></li>
       <li role="option" data-v="windows-desktop"><b>Windows desktop</b><span>browser workspace, Start menu entry</span></li>
       <li role="option" data-v="linux-desktop"><b>Linux desktop</b><span>browser workspace, application menu entry</span></li>
-      <li role="option" data-v="cli"><b>CLI</b><span>one executable in your terminal, and in CI</span></li>
       <li role="option" data-v="skill"><b>Skill</b><span>inside the agent you already use, no API key</span></li>
     </ul>
     <pre class="sheet-code" id="sheet-code"></pre>
@@ -1665,7 +1656,7 @@
 })();
 
 /* ---------- the one-line install ----------
-   Five targets, five documents, one sentence each. The prompt is the whole product:
+   Four targets, four documents, one sentence each. The prompt is the whole product:
    whatever agent they already have reads the document and performs the install, so the
    only thing this page has to get exactly right is the URL it hands over. Nothing is
    copied until the copy button is pressed: the clipboard should hold what the person
@@ -1673,7 +1664,7 @@
 (function () {
   const BASE = 'https://omni-scientist.github.io/setup/';
   // One address, always. What the choice changes is the sentence after it, and the
-  // routing document reads that sentence to decide which of the five procedures to
+  // routing document reads that sentence to decide which of the four procedures to
   // follow. So there is a single URL to publish, quote, and keep alive, and no link
   // anywhere that is only correct for one kind of machine.
   const ENTRY = BASE + 'install.md';
@@ -1681,7 +1672,6 @@
     'mac-desktop':     'install and configure OmniScientist Desktop on this Mac',
     'windows-desktop': 'install and configure OmniScientist Desktop on this Windows machine',
     'linux-desktop':   'install and configure OmniScientist Desktop on this Linux machine',
-    'cli':             'install and configure the OmniScientist terminal agent here',
     'skill':           'install and configure the OmniScientist skill for this agent',
   };
   const line = k => `Read ${ENTRY} and ${ASK[k]}, following the steps.`;
@@ -1815,19 +1805,10 @@
   const cards = [...document.querySelectorAll('[data-dl]')];
   if (!cards.length) return;
 
-  const ua = navigator.userAgent;
-  const os = /Windows/i.test(ua) ? 'win' : /Linux|X11|CrOS/i.test(ua) ? 'linux' : 'mac';
-  const arm = /arm64|aarch64/i.test(ua);
-  // one executable per platform, so the CLI card has to know which machine is asking
-  const CLI = os === 'win'  ? 'omnisci-windows-x86_64.exe'
-            : os === 'mac'  ? 'omnisci-darwin-arm64'
-            : arm           ? 'omnisci-linux-arm64'
-                            : 'omnisci-linux-x86_64';
   const PICK = {
-    windows: n => /^OmniScientist-.*windows.*\.zip$/i.test(n),
-    mac:     n => /^OmniScientist-.*mac(os)?.*\.tar\.gz$/i.test(n),
-    linux:   n => /^OmniScientist-.*linux.*x86_64.*\.tar\.gz$/i.test(n),
-    cli:     n => n === CLI,
+    windows: n => /^OmniSci-Desktop-Windows.*\.exe$/i.test(n),
+    mac:     n => /^OmniSci-Desktop-macOS.*\.zip$/i.test(n),
+    linux:   n => /^OmniSci-Desktop-Linux.*\.deb$/i.test(n),
   };
   const size = b => b >= 1048576 ? (b / 1048576).toFixed(1).replace(/\.0$/, '') + ' MB'
                                  : Math.max(1, Math.round(b / 1024)) + ' KB';
