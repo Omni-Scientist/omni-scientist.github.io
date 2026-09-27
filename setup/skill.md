@@ -62,11 +62,9 @@ tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 base="https://github.com/Omni-Scientist/OmniScientist/releases/latest/download"
 
 curl -fsSL --retry 3 -o "$tmp/omnisci-skill.zip" "$base/omnisci-skill.zip"
-curl -fsSL --retry 3 -o "$tmp/omnisci-skill.zip.sha256" "$base/omnisci-skill.zip.sha256" || true
-if [ -s "$tmp/omnisci-skill.zip.sha256" ]; then
-  ( cd "$tmp" && { sha256sum -c omnisci-skill.zip.sha256 2>/dev/null \
-      || shasum -a 256 -c omnisci-skill.zip.sha256; } )
-fi
+curl -fsSL --retry 3 -o "$tmp/SHA256SUMS" "$base/SHA256SUMS"
+( cd "$tmp" && grep " omnisci-skill.zip\$" SHA256SUMS \
+    | if command -v sha256sum >/dev/null; then sha256sum -c; else shasum -a 256 -c; fi )
 
 unzip -oq "$tmp/omnisci-skill.zip" -d "$SKILLS_DIR/"
 ls "$SKILLS_DIR/omnisci"
